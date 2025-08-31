@@ -4,5 +4,5 @@
 
 @section('content')
 <h1>Edit Internship</h1>
-@include('internship.form', ['action' => '/internship/' . $internship->id, 'method' => 'PUT', 'internship' => $internship, 'applications' => $applications, 'students' => $students, 'institutions' => $institutions, 'periods' => $periods, 'statuses' => $statuses, 'applicationReadonly' => true])
+@include('internship.form', ['action' => '/internship/' . $internship->id, 'method' => 'PUT', 'internship' => $internship, 'applications' => $applications, 'periods' => $periods])
 @endsection

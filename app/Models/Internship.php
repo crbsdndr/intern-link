@@ -16,7 +16,7 @@ class Internship extends Model
         'period_id',
         'start_date',
         'end_date',
-        'status',
+        'notes',
     ];
 
     protected $casts = [

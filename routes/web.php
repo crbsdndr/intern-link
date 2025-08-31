@@ -5,10 +5,19 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SupervisorController;
 use App\Http\Controllers\InstitutionController;
+use App\Http\Controllers\ApplicationController;
 
 Route::view('/', 'home');
 Route::view('/dashboard', 'home');
-Route::view('/application', 'application');
+Route::prefix('application')->group(function () {
+    Route::get('/', [ApplicationController::class, 'index']);
+    Route::get('/add', [ApplicationController::class, 'create']);
+    Route::post('/', [ApplicationController::class, 'store']);
+    Route::get('{id}/see', [ApplicationController::class, 'show']);
+    Route::get('{id}/edit', [ApplicationController::class, 'edit']);
+    Route::put('{id}', [ApplicationController::class, 'update']);
+    Route::delete('{id}', [ApplicationController::class, 'destroy']);
+});
 Route::view('/internship', 'internship');
 Route::view('/monitor', 'monitor');
 

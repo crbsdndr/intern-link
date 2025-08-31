@@ -15,6 +15,7 @@ class Student extends Model
         'national_sn',
         'major',
         'batch',
+        'notes',
         'photo',
     ];
 

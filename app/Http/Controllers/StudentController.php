@@ -1,0 +1,122 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Student;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
+class StudentController extends Controller
+{
+    public function index()
+    {
+        $students = DB::table('student_details_view')
+            ->select('id', 'student_number', 'name', 'major', 'batch')
+            ->orderBy('student_number')
+            ->get();
+
+        return view('student.index', compact('students'));
+    }
+
+    public function show($id)
+    {
+        $student = DB::table('student_details_view')->where('id', $id)->first();
+        abort_if(!$student, 404);
+        return view('student.show', compact('student'));
+    }
+
+    public function create()
+    {
+        return view('student.create');
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|string',
+            'password' => 'required|string',
+            'student_number' => 'required|string|unique:students,student_number',
+            'national_sn' => 'required|string|unique:students,national_sn',
+            'major' => 'required|string',
+            'batch' => 'required|string',
+            'notes' => 'nullable|string',
+            'photo' => 'nullable|string',
+        ]);
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'password' => Hash::make($data['password']),
+            'role' => 'student',
+        ]);
+
+        Student::create([
+            'user_id' => $user->id,
+            'student_number' => $data['student_number'],
+            'national_sn' => $data['national_sn'],
+            'major' => $data['major'],
+            'batch' => $data['batch'],
+            'notes' => $data['notes'] ?? null,
+            'photo' => $data['photo'] ?? null,
+        ]);
+
+        return redirect('/student');
+    }
+
+    public function edit($id)
+    {
+        $student = DB::table('student_details_view')->where('id', $id)->first();
+        abort_if(!$student, 404);
+        return view('student.edit', compact('student'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $student = Student::findOrFail($id);
+        $user = $student->user;
+
+        $data = $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string',
+            'password' => 'nullable|string',
+            'student_number' => 'required|string|unique:students,student_number,' . $student->id,
+            'national_sn' => 'required|string|unique:students,national_sn,' . $student->id,
+            'major' => 'required|string',
+            'batch' => 'required|string',
+            'notes' => 'nullable|string',
+            'photo' => 'nullable|string',
+        ]);
+
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->phone = $data['phone'] ?? null;
+        if (!empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
+        $user->save();
+
+        $student->update([
+            'student_number' => $data['student_number'],
+            'national_sn' => $data['national_sn'],
+            'major' => $data['major'],
+            'batch' => $data['batch'],
+            'notes' => $data['notes'] ?? null,
+            'photo' => $data['photo'] ?? null,
+        ]);
+
+        return redirect('/student');
+    }
+
+    public function destroy($id)
+    {
+        $student = Student::findOrFail($id);
+        $student->user()->delete();
+        return redirect('/student');
+    }
+}

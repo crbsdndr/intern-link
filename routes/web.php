@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SupervisorController;
+use App\Http\Controllers\InstitutionController;
 
 Route::view('/', 'home');
 Route::view('/dashboard', 'home');
@@ -29,6 +30,16 @@ Route::prefix('supervisor')->group(function () {
     Route::get('{id}/edit', [SupervisorController::class, 'edit']);
     Route::put('{id}', [SupervisorController::class, 'update']);
     Route::delete('{id}', [SupervisorController::class, 'destroy']);
+});
+
+Route::prefix('institution')->group(function () {
+    Route::get('/', [InstitutionController::class, 'index']);
+    Route::get('/add', [InstitutionController::class, 'create']);
+    Route::post('/', [InstitutionController::class, 'store']);
+    Route::get('{id}/see', [InstitutionController::class, 'show']);
+    Route::get('{id}/edit', [InstitutionController::class, 'edit']);
+    Route::put('{id}', [InstitutionController::class, 'update']);
+    Route::delete('{id}', [InstitutionController::class, 'destroy']);
 });
 
 Route::get('auth/login', [AuthController::class, 'showLoginForm'])->name('login.show');

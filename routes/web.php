@@ -6,6 +6,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SupervisorController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\InternshipController;
 
 Route::view('/', 'home');
 Route::view('/dashboard', 'home');
@@ -18,7 +19,15 @@ Route::prefix('application')->group(function () {
     Route::put('{id}', [ApplicationController::class, 'update']);
     Route::delete('{id}', [ApplicationController::class, 'destroy']);
 });
-Route::view('/internship', 'internship');
+Route::prefix('internship')->group(function () {
+    Route::get('/', [InternshipController::class, 'index']);
+    Route::get('/add', [InternshipController::class, 'create']);
+    Route::post('/', [InternshipController::class, 'store']);
+    Route::get('{id}/see', [InternshipController::class, 'show']);
+    Route::get('{id}/edit', [InternshipController::class, 'edit']);
+    Route::put('{id}', [InternshipController::class, 'update']);
+    Route::delete('{id}', [InternshipController::class, 'destroy']);
+});
 Route::view('/monitor', 'monitor');
 
 Route::prefix('student')->group(function () {

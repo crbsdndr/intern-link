@@ -21,7 +21,7 @@
 <div class="mb-3">
     @foreach($filters as $param => $label)
         @php($q = $current)
-        @php(unset($q[$param]))
+        @php unset($q[$param]) @endphp
         <a href="{{ url()->current() . ($q ? '?' . http_build_query($q) : '') }}" class="badge bg-secondary text-decoration-none me-2">
             {{ $label }} <i class="bi bi-x ms-1"></i>
         </a>

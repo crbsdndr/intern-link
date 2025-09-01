@@ -20,7 +20,9 @@ return new class extends Migration
                    p.term AS period_term,
                    it.start_date,
                    it.end_date,
-                   it.status
+                   it.status,
+                   it.created_at,
+                   it.updated_at
             FROM internships it
             JOIN students s ON s.id = it.student_id
             JOIN users u ON u.id = s.user_id

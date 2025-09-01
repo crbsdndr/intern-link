@@ -6,6 +6,23 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Students</h1>
     <div class="d-flex align-items-center gap-2">
+        <form method="get" action="{{ url()->current() }}" id="student-search-form" class="position-relative">
+            <div class="input-group" style="min-width:280px;">
+                <input type="search" name="q" id="student-search-input" class="form-control" placeholder="Cari…" aria-label="Search" value="{{ request('q') }}">
+                <button class="btn btn-outline-secondary" type="submit" id="student-search-submit">
+                    <i class="bi bi-search"></i>
+                </button>
+                <button class="btn btn-outline-secondary" type="button" id="student-search-clear" @if(!request('q')) style="display:none;" @endif>
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div id="student-search-spinner" class="position-absolute top-50 end-0 translate-middle-y me-2 d-none">
+                <div class="spinner-border spinner-border-sm text-secondary"></div>
+            </div>
+            @foreach(request()->except('q','page') as $param => $value)
+                <input type="hidden" name="{{ $param }}" value="{{ $value }}">
+            @endforeach
+        </form>
         <button class="btn btn-outline-secondary position-relative" data-bs-toggle="offcanvas" data-bs-target="#studentFilter" title="Filter">
             <i class="bi bi-funnel"></i>
             @if(count($filters))
@@ -31,20 +48,18 @@
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>Student Number</th>
+            <th>ID</th>
             <th>Name</th>
             <th>Major</th>
-            <th>Batch</th>
             <th>Action</th>
         </tr>
     </thead>
     <tbody>
         @forelse($students as $student)
         <tr>
-            <td>{{ $student->student_number }}</td>
+            <td>{{ $student->id }}</td>
             <td>{{ $student->name }}</td>
             <td>{{ $student->major }}</td>
-            <td>{{ $student->batch }}</td>
             <td>
                 <a href="/student/{{ $student->id }}/see" class="btn btn-sm btn-secondary">View</a>
                 <a href="/student/{{ $student->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
@@ -56,10 +71,20 @@
             </td>
         </tr>
         @empty
-        <tr><td colspan="5">No students found.</td></tr>
+        <tr>
+            <td colspan="4" class="text-center">
+                @if(request('q'))
+                    Tidak ada hasil untuk '{{ request('q') }}'.
+                @else
+                    No students found.
+                @endif
+            </td>
+        </tr>
         @endforelse
     </tbody>
 </table>
+
+<p class="text-muted">Total: {{ $students->total() }} results</p>
 
 {{ $students->links() }}
 
@@ -118,6 +143,37 @@
 </div>
 
 <script>
+var studentSearchForm = document.getElementById('student-search-form');
+var studentSearchInput = document.getElementById('student-search-input');
+var studentSearchClear = document.getElementById('student-search-clear');
+var studentSearchSpinner = document.getElementById('student-search-spinner');
+var studentSearchTimer;
+
+function submitStudentSearch(){
+    studentSearchSpinner.classList.remove('d-none');
+    var params = new URLSearchParams(new FormData(studentSearchForm));
+    if(!studentSearchInput.value) { params.delete('q'); }
+    params.delete('page');
+    var query = params.toString();
+    window.location = studentSearchForm.getAttribute('action') + (query ? '?' + query : '');
+}
+
+studentSearchInput.addEventListener('input', function(){
+    studentSearchClear.style.display = this.value ? 'block' : 'none';
+    clearTimeout(studentSearchTimer);
+    studentSearchTimer = setTimeout(submitStudentSearch, 300);
+});
+
+studentSearchForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    submitStudentSearch();
+});
+
+studentSearchClear.addEventListener('click', function(){
+    studentSearchInput.value = '';
+    submitStudentSearch();
+});
+
 document.getElementById('student-filter-form').addEventListener('submit', function(){
     var batch = document.getElementById('filter-batch').value.trim();
     var batchHidden = document.getElementById('filter-batch-hidden');

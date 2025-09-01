@@ -6,6 +6,19 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Supervisors</h1>
     <div class="d-flex align-items-center gap-2">
+        <form method="get" action="{{ url()->current() }}" id="supervisor-search-form" class="position-relative">
+            <div class="input-group" style="min-width:280px;">
+                <input type="search" name="q" id="supervisor-search-input" class="form-control" placeholder="Cari…" aria-label="Search" value="{{ request('q') }}">
+                <button class="btn btn-outline-secondary" type="submit" id="supervisor-search-submit"><i class="bi bi-search"></i></button>
+                <button class="btn btn-outline-secondary" type="button" id="supervisor-search-clear" @if(!request('q')) style="display:none;" @endif><i class="bi bi-x"></i></button>
+            </div>
+            <div id="supervisor-search-spinner" class="position-absolute top-50 end-0 translate-middle-y me-2 d-none">
+                <div class="spinner-border spinner-border-sm text-secondary"></div>
+            </div>
+            @foreach(request()->except('q','page') as $param => $value)
+                <input type="hidden" name="{{ $param }}" value="{{ $value }}">
+            @endforeach
+        </form>
         <button class="btn btn-outline-secondary position-relative" data-bs-toggle="offcanvas" data-bs-target="#supervisorFilter" title="Filter">
             <i class="bi bi-funnel"></i>
             @if(count($filters))
@@ -31,7 +44,7 @@
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>Supervisor Number</th>
+            <th>ID</th>
             <th>Name</th>
             <th>Department</th>
             <th>Action</th>
@@ -40,7 +53,7 @@
     <tbody>
         @forelse($supervisors as $supervisor)
         <tr>
-            <td>{{ $supervisor->supervisor_number }}</td>
+            <td>{{ $supervisor->id }}</td>
             <td>{{ $supervisor->name }}</td>
             <td>{{ $supervisor->department }}</td>
             <td>
@@ -54,10 +67,20 @@
             </td>
         </tr>
         @empty
-        <tr><td colspan="4">No supervisors found.</td></tr>
+        <tr>
+            <td colspan="4" class="text-center">
+                @if(request('q'))
+                    Tidak ada hasil untuk '{{ request('q') }}'.
+                @else
+                    No supervisors found.
+                @endif
+            </td>
+        </tr>
         @endforelse
     </tbody>
 </table>
+
+<p class="text-muted">Total: {{ $supervisors->total() }} results</p>
 
 {{ $supervisors->links() }}
 
@@ -107,6 +130,37 @@
 </div>
 
 <script>
+var supervisorSearchForm = document.getElementById('supervisor-search-form');
+var supervisorSearchInput = document.getElementById('supervisor-search-input');
+var supervisorSearchClear = document.getElementById('supervisor-search-clear');
+var supervisorSearchSpinner = document.getElementById('supervisor-search-spinner');
+var supervisorSearchTimer;
+
+function submitSupervisorSearch(){
+    supervisorSearchSpinner.classList.remove('d-none');
+    var params = new URLSearchParams(new FormData(supervisorSearchForm));
+    if(!supervisorSearchInput.value) { params.delete('q'); }
+    params.delete('page');
+    var query = params.toString();
+    window.location = supervisorSearchForm.getAttribute('action') + (query ? '?' + query : '');
+}
+
+supervisorSearchInput.addEventListener('input', function(){
+    supervisorSearchClear.style.display = this.value ? 'block' : 'none';
+    clearTimeout(supervisorSearchTimer);
+    supervisorSearchTimer = setTimeout(submitSupervisorSearch, 300);
+});
+
+supervisorSearchForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    submitSupervisorSearch();
+});
+
+supervisorSearchClear.addEventListener('click', function(){
+    supervisorSearchInput.value = '';
+    submitSupervisorSearch();
+});
+
 document.getElementById('supervisor-filter-form').addEventListener('submit', function(){
     var cs = document.getElementById('created_at_start').value;
     var ce = document.getElementById('created_at_end').value;

@@ -11,10 +11,16 @@ use Illuminate\Support\Str;
 
 class StudentController extends Controller
 {
+    /**
+     * Columns searched and displayed. Adjust here if needed.
+     */
+    private const SEARCH_COLUMNS = ['name', 'major'];
+    private const DISPLAY_COLUMNS = ['id', 'name', 'major'];
+
     public function index(Request $request)
     {
         $query = DB::table('student_details_view')
-            ->select('id', 'student_number', 'name', 'major', 'batch', 'created_at', 'updated_at');
+            ->select(self::DISPLAY_COLUMNS);
 
         $filters = [];
 
@@ -59,9 +65,18 @@ class StudentController extends Controller
             }
         }
 
+        if ($q = trim($request->query('q', ''))) {
+            $qLower = strtolower($q);
+            $query->where(function ($sub) use ($qLower) {
+                foreach (self::SEARCH_COLUMNS as $col) {
+                    $sub->orWhereRaw('LOWER(' . $col . ') LIKE ?', ['%' . $qLower . '%']);
+                }
+            });
+        }
+
         $sort = $request->query('sort', 'created_at:desc');
         [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
-        $allowedSorts = ['student_number', 'name', 'major', 'batch', 'created_at', 'updated_at'];
+        $allowedSorts = array_merge(self::DISPLAY_COLUMNS, ['created_at', 'updated_at']);
         if (!in_array($sortField, $allowedSorts)) {
             $sortField = 'created_at';
         }

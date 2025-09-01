@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Internship;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class InternshipController extends Controller
 {
@@ -17,13 +18,54 @@ class InternshipController extends Controller
         return ['planned', 'ongoing', 'completed', 'terminated'];
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $internships = DB::table('internship_details_view')
-            ->select('id', 'student_name', 'institution_name', 'start_date', 'end_date')
-            ->orderBy('id')
-            ->get();
-        return view('internship.index', compact('internships'));
+        $query = DB::table('internship_details_view')
+            ->select('id', 'student_name', 'institution_name', 'start_date', 'end_date', 'status', 'created_at', 'updated_at');
+
+        $filters = [];
+
+        if ($statusParam = $request->query('status')) {
+            if (Str::startsWith($statusParam, 'in:')) {
+                $statuses = array_filter(explode(',', Str::after($statusParam, 'in:')));
+                if ($statuses) {
+                    $query->whereIn('status', $statuses);
+                    $filters['status'] = 'Status: ' . implode(', ', $statuses);
+                }
+            }
+        }
+
+        foreach (['start_date' => 'Start', 'end_date' => 'End', 'created_at' => 'Created', 'updated_at' => 'Updated'] as $param => $label) {
+            if ($range = $request->query($param)) {
+                if (Str::startsWith($range, 'range:')) {
+                    [$start, $end] = array_pad(explode(',', Str::after($range, 'range:')), 2, null);
+                    if ($start) {
+                        $query->whereDate($param, '>=', $start);
+                    }
+                    if ($end) {
+                        $query->whereDate($param, '<=', $end);
+                    }
+                    $filters[$param] = $label . ': ' . $start . ' - ' . $end;
+                }
+            }
+        }
+
+        $sort = $request->query('sort', 'start_date:desc');
+        [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
+        $allowedSorts = ['start_date', 'end_date', 'created_at', 'updated_at'];
+        if (!in_array($sortField, $allowedSorts)) {
+            $sortField = 'start_date';
+        }
+        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sortField, $sortDir)->orderByDesc('id');
+
+        $pageSize = min(max((int)$request->query('page_size', 25), 1), 200);
+        $internships = $query->paginate($pageSize)->withQueryString();
+
+        return view('internship.index', [
+            'internships' => $internships,
+            'filters' => $filters,
+        ]);
     }
 
     public function show($id)

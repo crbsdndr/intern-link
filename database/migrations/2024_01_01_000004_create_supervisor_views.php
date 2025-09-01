@@ -18,7 +18,9 @@ return new class extends Migration
                    s.supervisor_number,
                    s.department,
                    s.notes,
-                   s.photo
+                   s.photo,
+                   s.created_at,
+                   s.updated_at
             FROM supervisors s
             JOIN users u ON s.user_id = u.id;
         SQL);

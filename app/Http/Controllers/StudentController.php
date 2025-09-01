@@ -7,17 +7,74 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class StudentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $students = DB::table('student_details_view')
-            ->select('id', 'student_number', 'name', 'major', 'batch')
-            ->orderBy('student_number')
-            ->get();
+        $query = DB::table('student_details_view')
+            ->select('id', 'student_number', 'name', 'major', 'batch', 'created_at', 'updated_at');
 
-        return view('student.index', compact('students'));
+        $filters = [];
+
+        if ($major = $request->query('major~')) {
+            $query->where('major', 'like', '%' . $major . '%');
+            $filters['major~'] = 'Major: ' . $major;
+        }
+
+        if ($batchParam = $request->query('batch')) {
+            if (Str::startsWith($batchParam, 'in:')) {
+                $batches = array_filter(explode(',', Str::after($batchParam, 'in:')));
+                if ($batches) {
+                    $query->whereIn('batch', $batches);
+                    $filters['batch'] = 'Batch: ' . implode(', ', $batches);
+                }
+            }
+        }
+
+        if ($created = $request->query('created_at')) {
+            if (Str::startsWith($created, 'range:')) {
+                [$start, $end] = array_pad(explode(',', Str::after($created, 'range:')), 2, null);
+                if ($start) {
+                    $query->whereDate('created_at', '>=', $start);
+                }
+                if ($end) {
+                    $query->whereDate('created_at', '<=', $end);
+                }
+                $filters['created_at'] = 'Created: ' . $start . ' - ' . $end;
+            }
+        }
+
+        if ($updated = $request->query('updated_at')) {
+            if (Str::startsWith($updated, 'range:')) {
+                [$start, $end] = array_pad(explode(',', Str::after($updated, 'range:')), 2, null);
+                if ($start) {
+                    $query->whereDate('updated_at', '>=', $start);
+                }
+                if ($end) {
+                    $query->whereDate('updated_at', '<=', $end);
+                }
+                $filters['updated_at'] = 'Updated: ' . $start . ' - ' . $end;
+            }
+        }
+
+        $sort = $request->query('sort', 'created_at:desc');
+        [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
+        $allowedSorts = ['student_number', 'name', 'major', 'batch', 'created_at', 'updated_at'];
+        if (!in_array($sortField, $allowedSorts)) {
+            $sortField = 'created_at';
+        }
+        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sortField, $sortDir);
+
+        $pageSize = min(max((int)$request->query('page_size', 25), 1), 200);
+        $students = $query->paginate($pageSize)->withQueryString();
+
+        return view('student.index', [
+            'students' => $students,
+            'filters' => $filters,
+        ]);
     }
 
     public function show($id)

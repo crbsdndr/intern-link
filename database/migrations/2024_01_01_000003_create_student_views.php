@@ -20,7 +20,9 @@ return new class extends Migration
                    s.major,
                    s.batch,
                    s.notes,
-                   s.photo
+                   s.photo,
+                   s.created_at,
+                   s.updated_at
             FROM students s
             JOIN users u ON s.user_id = u.id;
         SQL);

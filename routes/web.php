@@ -7,6 +7,8 @@ use App\Http\Controllers\SupervisorController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\InternshipController;
+use App\Http\Controllers\MonitoringLogController;
+use App\Http\Controllers\MetaController;
 
 Route::view('/', 'home');
 Route::view('/dashboard', 'home');
@@ -28,7 +30,21 @@ Route::prefix('internship')->group(function () {
     Route::put('{id}', [InternshipController::class, 'update']);
     Route::delete('{id}', [InternshipController::class, 'destroy']);
 });
-Route::view('/monitor', 'monitor');
+
+Route::prefix('monitoring')->group(function () {
+    Route::get('/', [MonitoringLogController::class, 'index']);
+    Route::get('/add', [MonitoringLogController::class, 'create']);
+    Route::post('/', [MonitoringLogController::class, 'store']);
+    Route::get('{id}/see', [MonitoringLogController::class, 'show']);
+    Route::get('{id}/edit', [MonitoringLogController::class, 'edit']);
+    Route::put('{id}', [MonitoringLogController::class, 'update']);
+    Route::delete('{id}', [MonitoringLogController::class, 'destroy']);
+});
+
+Route::prefix('meta')->group(function () {
+    Route::get('/monitor-types', [MetaController::class, 'monitorTypes']);
+    Route::get('/supervisors', [MetaController::class, 'supervisors']);
+});
 
 Route::prefix('student')->group(function () {
     Route::get('/', [StudentController::class, 'index']);

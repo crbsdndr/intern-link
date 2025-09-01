@@ -17,17 +17,16 @@
 </div>
 
 @if(count($filters))
-@php($current = request()->query())
-<div class="mb-3">
-    @foreach($filters as $param => $label)
-        @php($q = $current)
-        @php unset($q[$param]) @endphp
-        <a href="{{ url()->current() . ($q ? '?' . http_build_query($q) : '') }}" class="badge bg-secondary text-decoration-none me-2">
-            {{ $label }} <i class="bi bi-x ms-1"></i>
-        </a>
-    @endforeach
-</div>
+    <div class="mb-3">
+        @foreach($filters as $param => $label)
+            @php($q = Arr::except(request()->query(), [$param]))
+            <a href="{{ url()->current() . ($q ? '?' . http_build_query($q) : '') }}" class="badge bg-secondary text-decoration-none me-2">
+                {{ $label }} <i class="bi bi-x ms-1"></i>
+            </a>
+        @endforeach
+    </div>
 @endif
+
 
 <table class="table table-bordered">
     <thead>

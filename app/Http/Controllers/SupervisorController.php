@@ -7,17 +7,64 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class SupervisorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $supervisors = DB::table('supervisor_details_view')
-            ->select('id', 'supervisor_number', 'name', 'department')
-            ->orderBy('supervisor_number')
-            ->get();
+        $query = DB::table('supervisor_details_view')
+            ->select('id', 'supervisor_number', 'name', 'department', 'created_at', 'updated_at');
 
-        return view('supervisor.index', compact('supervisors'));
+        $filters = [];
+
+        if ($dept = $request->query('department~')) {
+            $query->where('department', 'like', '%' . $dept . '%');
+            $filters['department~'] = 'Department: ' . $dept;
+        }
+
+        if ($created = $request->query('created_at')) {
+            if (Str::startsWith($created, 'range:')) {
+                [$start, $end] = array_pad(explode(',', Str::after($created, 'range:')), 2, null);
+                if ($start) {
+                    $query->whereDate('created_at', '>=', $start);
+                }
+                if ($end) {
+                    $query->whereDate('created_at', '<=', $end);
+                }
+                $filters['created_at'] = 'Created: ' . $start . ' - ' . $end;
+            }
+        }
+
+        if ($updated = $request->query('updated_at')) {
+            if (Str::startsWith($updated, 'range:')) {
+                [$start, $end] = array_pad(explode(',', Str::after($updated, 'range:')), 2, null);
+                if ($start) {
+                    $query->whereDate('updated_at', '>=', $start);
+                }
+                if ($end) {
+                    $query->whereDate('updated_at', '<=', $end);
+                }
+                $filters['updated_at'] = 'Updated: ' . $start . ' - ' . $end;
+            }
+        }
+
+        $sort = $request->query('sort', 'department:asc');
+        [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'asc');
+        $allowedSorts = ['supervisor_number', 'name', 'department', 'created_at', 'updated_at'];
+        if (!in_array($sortField, $allowedSorts)) {
+            $sortField = 'department';
+        }
+        $sortDir = $sortDir === 'desc' ? 'desc' : 'asc';
+        $query->orderBy($sortField, $sortDir);
+
+        $pageSize = min(max((int)$request->query('page_size', 25), 1), 200);
+        $supervisors = $query->paginate($pageSize)->withQueryString();
+
+        return view('supervisor.index', [
+            'supervisors' => $supervisors,
+            'filters' => $filters,
+        ]);
     }
 
     public function show($id)

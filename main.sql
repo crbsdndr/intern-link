@@ -376,7 +376,9 @@ SELECT s.id,
        s.major,
        s.batch,
        s.notes,
-       s.photo
+       s.photo,
+       s.created_at,
+       s.updated_at
 FROM students s
 JOIN users u ON s.user_id = u.id;
 
@@ -390,7 +392,9 @@ SELECT s.id,
        s.supervisor_number,
        s.department,
        s.notes,
-       s.photo
+       s.photo,
+       s.created_at,
+       s.updated_at
 FROM supervisors s
 JOIN users u ON s.user_id = u.id;
 

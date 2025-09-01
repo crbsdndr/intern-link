@@ -10,11 +10,12 @@
 <div class="d-flex">
     <nav class="bg-light border-end" style="min-width:200px;">
         <div class="list-group list-group-flush">
+            <a href="/" class="list-group-item list-group-item-action">Dashboard</a>
             <a href="/student" class="list-group-item list-group-item-action">Students</a>
             <a href="/supervisor" class="list-group-item list-group-item-action">Supervisors</a>
             <a href="/application" class="list-group-item list-group-item-action">Applications</a>
             <a href="/internship" class="list-group-item list-group-item-action">Internships</a>
-            <a href="/monitor" class="list-group-item list-group-item-action">Monitors</a>
+            <a href="/monitoring" class="list-group-item list-group-item-action">Monitorings</a>
         </div>
     </nav>
     <main class="p-4 flex-fill">

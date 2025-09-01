@@ -6,6 +6,7 @@ use App\Models\Application;
 use App\Models\Period;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ApplicationController extends Controller
 {
@@ -18,13 +19,54 @@ class ApplicationController extends Controller
         return ['draft','submitted','under_review','accepted','rejected','cancelled'];
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $applications = DB::table('application_details_view')
-            ->select('id', 'student_name', 'institution_name', 'period_year', 'period_term')
-            ->orderBy('id')
-            ->get();
-        return view('application.index', compact('applications'));
+        $query = DB::table('application_details_view')
+            ->select('id', 'student_name', 'institution_name', 'period_year', 'period_term', 'status', 'submitted_at', 'created_at', 'updated_at');
+
+        $filters = [];
+
+        if ($statusParam = $request->query('status')) {
+            if (Str::startsWith($statusParam, 'in:')) {
+                $statuses = array_filter(explode(',', Str::after($statusParam, 'in:')));
+                if ($statuses) {
+                    $query->whereIn('status', $statuses);
+                    $filters['status'] = 'Status: ' . implode(', ', $statuses);
+                }
+            }
+        }
+
+        foreach (['submitted_at' => 'Submitted', 'created_at' => 'Created', 'updated_at' => 'Updated'] as $param => $label) {
+            if ($range = $request->query($param)) {
+                if (Str::startsWith($range, 'range:')) {
+                    [$start, $end] = array_pad(explode(',', Str::after($range, 'range:')), 2, null);
+                    if ($start) {
+                        $query->whereDate($param, '>=', $start);
+                    }
+                    if ($end) {
+                        $query->whereDate($param, '<=', $end);
+                    }
+                    $filters[$param] = $label . ': ' . $start . ' - ' . $end;
+                }
+            }
+        }
+
+        $sort = $request->query('sort', 'submitted_at:desc');
+        [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
+        $allowedSorts = ['submitted_at', 'created_at', 'updated_at'];
+        if (!in_array($sortField, $allowedSorts)) {
+            $sortField = 'submitted_at';
+        }
+        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sortField, $sortDir)->orderByDesc('id');
+
+        $pageSize = min(max((int)$request->query('page_size', 25), 1), 200);
+        $applications = $query->paginate($pageSize)->withQueryString();
+
+        return view('application.index', [
+            'applications' => $applications,
+            'filters' => $filters,
+        ]);
     }
 
     public function show($id)

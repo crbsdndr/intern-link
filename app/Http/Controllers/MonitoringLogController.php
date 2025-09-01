@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MonitoringLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class MonitoringLogController extends Controller
 {
@@ -22,14 +23,46 @@ class MonitoringLogController extends Controller
         return DB::table('supervisor_details_view')->select('id','name')->orderBy('name')->get();
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $logs = DB::table('v_monitoring_log_summary')
-            ->select('monitoring_log_id as id','log_date','student_name','institution_name','supervisor_name','log_type','score','title','content')
-            ->orderByDesc('log_date')
-            ->orderByDesc('id')
-            ->get();
-        return view('monitoring.index', compact('logs'));
+        $query = DB::table('monitoring_logs as ml')
+            ->join('internship_details_view as it', 'it.id', '=', 'ml.internship_id')
+            ->leftJoin('supervisor_details_view as sv', 'sv.id', '=', 'ml.supervisor_id')
+            ->select('ml.id as id', 'ml.log_date', 'it.student_name', 'it.institution_name', 'sv.name as supervisor_name', 'ml.type as log_type', 'ml.score', 'ml.title', 'ml.content', 'ml.created_at', 'ml.updated_at');
+
+        $filters = [];
+
+        foreach (['log_date' => 'Date', 'created_at' => 'Created', 'updated_at' => 'Updated'] as $param => $label) {
+            if ($range = $request->query($param)) {
+                if (Str::startsWith($range, 'range:')) {
+                    [$start, $end] = array_pad(explode(',', Str::after($range, 'range:')), 2, null);
+                    if ($start) {
+                        $query->whereDate($param, '>=', $start);
+                    }
+                    if ($end) {
+                        $query->whereDate($param, '<=', $end);
+                    }
+                    $filters[$param] = $label . ': ' . $start . ' - ' . $end;
+                }
+            }
+        }
+
+        $sort = $request->query('sort', 'log_date:desc');
+        [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
+        $allowedSorts = ['log_date', 'created_at', 'updated_at'];
+        if (!in_array($sortField, $allowedSorts)) {
+            $sortField = 'log_date';
+        }
+        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sortField, $sortDir)->orderByDesc('id');
+
+        $pageSize = min(max((int)$request->query('page_size', 25), 1), 200);
+        $logs = $query->paginate($pageSize)->withQueryString();
+
+        return view('monitoring.index', [
+            'logs' => $logs,
+            'filters' => $filters,
+        ]);
     }
 
     public function show($id)

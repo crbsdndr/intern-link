@@ -19,6 +19,8 @@ return new class extends Migration
                    p.term AS period_term,
                    a.status,
                    a.submitted_at,
+                   a.created_at,
+                   a.updated_at,
                    a.decision_at,
                    a.rejection_reason,
                    a.notes

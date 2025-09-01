@@ -10,14 +10,17 @@ class InternshipSeeder extends Seeder
 {
     public function run(): void
     {
-        Internship::create([
-            'application_id' => 1,
-            'student_id' => 1,
-            'institution_id' => 1,
-            'period_id' => 1,
-            'start_date' => Carbon::now()->toDateString(),
-            'end_date' => Carbon::now()->addMonths(3)->toDateString(),
-            'status' => 'ongoing',
-        ]);
+        for ($i = 1; $i <= 10; $i++) {
+            $start = Carbon::now();
+            Internship::create([
+                'application_id' => $i,
+                'student_id' => $i,
+                'institution_id' => $i,
+                'period_id' => $i,
+                'start_date' => $start->toDateString(),
+                'end_date' => $start->copy()->addMonths(3)->toDateString(),
+                'status' => 'ongoing',
+            ]);
+        }
     }
 }

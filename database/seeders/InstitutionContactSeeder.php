@@ -4,18 +4,22 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\InstitutionContact;
+use Faker\Factory as Faker;
 
 class InstitutionContactSeeder extends Seeder
 {
     public function run(): void
     {
-        InstitutionContact::create([
-            'institution_id' => 1,
-            'name' => 'John Doe',
-            'email' => 'contact@techcorp.example',
-            'phone' => '021000000',
-            'position' => 'HR',
-            'is_primary' => true,
-        ]);
+        $faker = Faker::create();
+        for ($i = 1; $i <= 10; $i++) {
+            InstitutionContact::create([
+                'institution_id' => $i,
+                'name' => $faker->name,
+                'email' => $faker->unique()->safeEmail,
+                'phone' => $faker->phoneNumber,
+                'position' => $faker->jobTitle,
+                'is_primary' => true,
+            ]);
+        }
     }
 }

@@ -9,9 +9,11 @@ class PeriodSeeder extends Seeder
 {
     public function run(): void
     {
-        Period::create([
-            'year' => 2024,
-            'term' => 1,
-        ]);
+        for ($i = 1; $i <= 10; $i++) {
+            Period::create([
+                'year' => 2020 + $i,
+                'term' => ($i % 2) + 1,
+            ]);
+        }
     }
 }

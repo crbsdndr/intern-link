@@ -10,13 +10,16 @@ class ApplicationSeeder extends Seeder
 {
     public function run(): void
     {
-        Application::create([
-            'student_id' => 1,
-            'institution_id' => 1,
-            'period_id' => 1,
-            'status' => 'accepted',
-            'submitted_at' => Carbon::now(),
-            'decision_at' => Carbon::now(),
-        ]);
+        $now = Carbon::now();
+        for ($i = 1; $i <= 10; $i++) {
+            Application::create([
+                'student_id' => $i,
+                'institution_id' => $i,
+                'period_id' => $i,
+                'status' => 'accepted',
+                'submitted_at' => $now,
+                'decision_at' => $now,
+            ]);
+        }
     }
 }

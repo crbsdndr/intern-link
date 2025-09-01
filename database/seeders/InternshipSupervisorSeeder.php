@@ -9,10 +9,12 @@ class InternshipSupervisorSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('internship_supervisors')->insert([
-            'internship_id' => 1,
-            'supervisor_id' => 1,
-            'is_primary' => true,
-        ]);
+        for ($i = 1; $i <= 10; $i++) {
+            DB::table('internship_supervisors')->insert([
+                'internship_id' => $i,
+                'supervisor_id' => $i,
+                'is_primary' => true,
+            ]);
+        }
     }
 }

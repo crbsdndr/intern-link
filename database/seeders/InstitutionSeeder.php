@@ -4,17 +4,21 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Institution;
+use Faker\Factory as Faker;
 
 class InstitutionSeeder extends Seeder
 {
     public function run(): void
     {
-        Institution::create([
-            'name' => 'Tech Corp',
-            'address' => '123 Tech Street',
-            'city' => 'Jakarta',
-            'province' => 'DKI Jakarta',
-            'website' => 'https://techcorp.example',
-        ]);
+        $faker = Faker::create();
+        for ($i = 1; $i <= 10; $i++) {
+            Institution::create([
+                'name' => $faker->company . " {$i}",
+                'address' => $faker->streetAddress,
+                'city' => $faker->city,
+                'province' => $faker->state,
+                'website' => $faker->url,
+            ]);
+        }
     }
 }

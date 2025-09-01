@@ -3,9 +3,12 @@
 @section('title', 'Internships')
 
 @section('content')
-<div class="d-flex justify-content-between mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Internships</h1>
-    <a href="/internship/add" class="btn btn-primary">Add</a>
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-outline-secondary" title="Filter"><i class="bi bi-funnel"></i></button>
+        <a href="/internship/add" class="btn btn-primary">Add</a>
+    </div>
 </div>
 <table class="table table-bordered">
     <thead>

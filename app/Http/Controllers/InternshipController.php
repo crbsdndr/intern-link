@@ -72,8 +72,7 @@ class InternshipController extends Controller
         $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
         $query->orderBy($sortField, $sortDir)->orderByDesc('id');
 
-        $pageSize = min(max((int)$request->query('page_size', 25), 1), 200);
-        $internships = $query->paginate($pageSize)->withQueryString();
+        $internships = $query->paginate(10)->withQueryString();
 
         return view('internship.index', [
             'internships' => $internships,

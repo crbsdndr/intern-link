@@ -73,8 +73,7 @@ class SupervisorController extends Controller
         $sortDir = $sortDir === 'desc' ? 'desc' : 'asc';
         $query->orderBy($sortField, $sortDir);
 
-        $pageSize = min(max((int)$request->query('page_size', 25), 1), 200);
-        $supervisors = $query->paginate($pageSize)->withQueryString();
+        $supervisors = $query->paginate(10)->withQueryString();
 
         return view('supervisor.index', [
             'supervisors' => $supervisors,

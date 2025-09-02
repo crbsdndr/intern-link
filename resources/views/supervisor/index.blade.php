@@ -82,7 +82,21 @@
 
 <p class="text-muted">Total: {{ $supervisors->total() }} results</p>
 
-{{ $supervisors->links() }}
+<div class="d-flex justify-content-between align-items-center">
+    <span>(Page {{ $supervisors->currentPage() }} of {{ $supervisors->lastPage() }})</span>
+    <div class="d-flex gap-2">
+        @if ($supervisors->onFirstPage())
+            <span class="text-muted">Back</span>
+        @else
+            <a href="{{ $supervisors->previousPageUrl() }}" class="btn btn-outline-secondary">Back</a>
+        @endif
+        @if ($supervisors->hasMorePages())
+            <a href="{{ $supervisors->nextPageUrl() }}" class="btn btn-outline-secondary">Next</a>
+        @else
+            <span class="text-muted">Next</span>
+        @endif
+    </div>
+</div>
 
 <div class="offcanvas offcanvas-end" tabindex="-1" id="supervisorFilter">
     <div class="offcanvas-header">

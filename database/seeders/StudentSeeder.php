@@ -11,7 +11,7 @@ class StudentSeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create();
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 50; $i++) {
             Student::create([
                 'user_id' => $i,
                 'student_number' => 'S-' . str_pad($i, 4, '0', STR_PAD_LEFT),

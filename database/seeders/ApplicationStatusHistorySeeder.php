@@ -9,7 +9,7 @@ class ApplicationStatusHistorySeeder extends Seeder
 {
     public function run(): void
     {
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 50; $i++) {
             DB::table('application_status_history')->insert([
                 'application_id' => $i,
                 'from_status' => 'submitted',

@@ -11,9 +11,9 @@ class SupervisorSeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create();
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 50; $i++) {
             Supervisor::create([
-                'user_id' => 10 + $i,
+                'user_id' => 50 + $i,
                 'supervisor_number' => 'SP-' . str_pad($i, 4, '0', STR_PAD_LEFT),
                 'department' => $faker->randomElement(['Engineering', 'Business', 'Design']),
             ]);

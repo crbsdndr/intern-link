@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 50; $i++) {
             User::create([
                 'name' => $faker->name,
                 'email' => "student{$i}@example.com",
@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
             ]);
         }
 
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 50; $i++) {
             User::create([
                 'name' => $faker->name,
                 'email' => "supervisor{$i}@example.com",

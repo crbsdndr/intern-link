@@ -73,8 +73,7 @@ class ApplicationController extends Controller
         $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
         $query->orderBy($sortField, $sortDir)->orderByDesc('id');
 
-        $pageSize = min(max((int)$request->query('page_size', 25), 1), 200);
-        $applications = $query->paginate($pageSize)->withQueryString();
+        $applications = $query->paginate(10)->withQueryString();
 
         return view('application.index', [
             'applications' => $applications,

@@ -12,7 +12,7 @@
             <div class="input-group">
                 <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Cari…" id="monitoring-search-input" style="min-width:280px">
                 @foreach(request()->query() as $param => $value)
-                    @if($param !== 'q' && $param !== 'page')
+                    @if($param !== 'q' && $param !== 'page' && $param !== 'page_size')
                         <input type="hidden" name="{{ $param }}" value="{{ $value }}">
                     @endif
                 @endforeach
@@ -89,7 +89,23 @@
     </tbody>
 </table>
 
-{{ $logs->links() }}
+<p class="text-muted">Total: {{ $logs->total() }} results</p>
+
+<div class="d-flex justify-content-between align-items-center">
+    <span>(Page {{ $logs->currentPage() }} of {{ $logs->lastPage() }})</span>
+    <div class="d-flex gap-2">
+        @if ($logs->onFirstPage())
+            <span class="text-muted">Back</span>
+        @else
+            <a href="{{ $logs->previousPageUrl() }}" class="btn btn-outline-secondary">Back</a>
+        @endif
+        @if ($logs->hasMorePages())
+            <a href="{{ $logs->nextPageUrl() }}" class="btn btn-outline-secondary">Next</a>
+        @else
+            <span class="text-muted">Next</span>
+        @endif
+    </div>
+</div>
 
 <div class="offcanvas offcanvas-end" tabindex="-1" id="monitoringFilter">
     <div class="offcanvas-header">
@@ -100,7 +116,6 @@
         <form method="get" id="monitoring-filter-form">
             <input type="hidden" name="q" value="{{ request('q') }}">
             <input type="hidden" name="sort" value="{{ request('sort') }}">
-            <input type="hidden" name="page_size" value="{{ request('page_size') }}">
             @php($logRange = request('log_date'))
             @php($logStart = $logEnd = '')
             @if($logRange && str_starts_with($logRange, 'range:'))
@@ -148,7 +163,7 @@
     </div>
 </div>
 
-@php($retain = Arr::only(request()->query(), ['q','sort','page_size']))
+@php($retain = Arr::only(request()->query(), ['q','sort']))
 
 <script>
 document.getElementById('monitoring-filter-form').addEventListener('submit', function(){

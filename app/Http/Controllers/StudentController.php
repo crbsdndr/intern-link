@@ -83,8 +83,7 @@ class StudentController extends Controller
         $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
         $query->orderBy($sortField, $sortDir);
 
-        $pageSize = min(max((int)$request->query('page_size', 25), 1), 200);
-        $students = $query->paginate($pageSize)->withQueryString();
+        $students = $query->paginate(10)->withQueryString();
 
         return view('student.index', [
             'students' => $students,

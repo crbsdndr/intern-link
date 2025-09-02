@@ -73,8 +73,7 @@ class MonitoringLogController extends Controller
         $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
         $query->orderBy($sortField, $sortDir)->orderByDesc('id');
 
-        $pageSize = min(max((int)$request->query('page_size', 25), 1), 200);
-        $logs = $query->paginate($pageSize)->withQueryString();
+        $logs = $query->paginate(10)->withQueryString();
 
         return view('monitoring.index', [
             'logs' => $logs,

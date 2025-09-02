@@ -86,7 +86,21 @@
 
 <p class="text-muted">Total: {{ $students->total() }} results</p>
 
-{{ $students->links() }}
+<div class="d-flex justify-content-between align-items-center">
+    <span>(Page {{ $students->currentPage() }} of {{ $students->lastPage() }})</span>
+    <div class="d-flex gap-2">
+        @if ($students->onFirstPage())
+            <span class="text-muted">Back</span>
+        @else
+            <a href="{{ $students->previousPageUrl() }}" class="btn btn-outline-secondary">Back</a>
+        @endif
+        @if ($students->hasMorePages())
+            <a href="{{ $students->nextPageUrl() }}" class="btn btn-outline-secondary">Next</a>
+        @else
+            <span class="text-muted">Next</span>
+        @endif
+    </div>
+</div>
 
 <div class="offcanvas offcanvas-end" tabindex="-1" id="studentFilter">
     <div class="offcanvas-header">

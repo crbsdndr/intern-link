@@ -16,9 +16,7 @@ Route::post('/signup', [AuthController::class, 'signup'])->name('register.handle
 Route::post('/login', [AuthController::class, 'login'])->name('login.perform');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::view('/login', 'auth.login')->name('login');
-Route::view('/register', 'auth.register')->name('register');
-Route::get('/register/step2', [AuthController::class, 'showStep2'])->name('register.step2');
-Route::post('/register/step2', [AuthController::class, 'storeStep2'])->name('register.step2.post');
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 
 Route::middleware('auth.session')->group(function () {
     Route::view('/', 'home');

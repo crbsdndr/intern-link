@@ -11,93 +11,85 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     /**
-     * Display the second registration step for role selection.
+     * Show the registration form, handling both steps.
      */
-    public function showStep2(Request $request)
+    public function showRegister(Request $request)
     {
-        if (! $request->session()->has('register.step1')) {
-            return redirect()->route('register');
-        }
-
         $step1 = $request->session()->get('register.step1');
-        $data = $request->session()->get('register.step2', []);
 
-        return view('auth.register-step2', ['data' => $data, 'step1' => $step1]);
+        return view('auth.register', ['step1' => $step1]);
     }
 
     /**
-     * Store the role selection and related fields in session.
-     */
-    public function storeStep2(Request $request)
-    {
-        $step1 = $request->session()->get('register.step1');
-        if (! $step1) {
-            return redirect()->route('register');
-        }
-
-        $rules = ['role' => 'required|in:student,supervisor'];
-
-        if ($request->input('role') === 'student') {
-            $rules = array_merge($rules, [
-                'national_number' => 'required|string',
-                'national_student_number' => 'required|string',
-                'major' => 'required|string',
-                'batch' => 'required|numeric',
-                'photo' => 'required|image',
-            ]);
-        } elseif ($request->input('role') === 'supervisor') {
-            $rules = array_merge($rules, [
-                'supervisor_number' => 'required|string',
-                'department' => 'required|string',
-                'photo' => 'required|image',
-            ]);
-        }
-
-        $data = $request->validate($rules);
-
-        if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('photos');
-        }
-
-        $request->session()->put('register.step2', $data);
-
-        $userData = array_merge($step1, ['role' => $data['role']]);
-        $user = User::create($userData);
-
-        if ($data['role'] === 'student') {
-            Student::create([
-                'user_id' => $user->id,
-                'student_number' => $data['national_student_number'],
-                'national_sn' => $data['national_number'],
-                'major' => $data['major'],
-                'batch' => $data['batch'],
-                'photo' => $data['photo'],
-            ]);
-        } else {
-            Supervisor::create([
-                'user_id' => $user->id,
-                'supervisor_number' => $data['supervisor_number'],
-                'department' => $data['department'],
-                'photo' => $data['photo'],
-            ]);
-        }
-
-        $request->session()->forget(['register.step1', 'register.step2']);
-
-        session([
-            'user_id' => $user->id,
-            'role'    => $user->role,
-        ]);
-
-        $request->session()->regenerate();
-
-        return redirect()->intended('/dashboard');
-    }
-    /**
-     * Handle user registration.
+     * Handle user registration (both steps).
      */
     public function signup(Request $request)
     {
+        if ($request->has('cancel')) {
+            $request->session()->forget('register.step1');
+            return redirect()->route('login');
+        }
+
+        if ($request->session()->has('register.step1')) {
+            $step1 = $request->session()->get('register.step1');
+            $rules = [];
+
+            if ($step1['role'] === 'student') {
+                $rules = [
+                    'national_number' => 'required|string',
+                    'national_student_number' => 'required|string',
+                    'major' => 'required|string',
+                    'batch' => 'required|numeric',
+                    'photo' => 'required|image',
+                ];
+            } elseif ($step1['role'] === 'supervisor') {
+                $rules = [
+                    'supervisor_number' => 'required|string',
+                    'department' => 'required|string',
+                    'photo' => 'required|image',
+                ];
+            } else {
+                return redirect()->route('register');
+            }
+
+            $data = $request->validate($rules);
+
+            if ($request->hasFile('photo')) {
+                $data['photo'] = $request->file('photo')->store('photos');
+            }
+
+            $user = User::create($step1);
+
+            if ($step1['role'] === 'student') {
+                Student::create([
+                    'user_id' => $user->id,
+                    'student_number' => $data['national_student_number'],
+                    'national_sn' => $data['national_number'],
+                    'major' => $data['major'],
+                    'batch' => $data['batch'],
+                    'photo' => $data['photo'],
+                ]);
+            } else {
+                Supervisor::create([
+                    'user_id' => $user->id,
+                    'supervisor_number' => $data['supervisor_number'],
+                    'department' => $data['department'],
+                    'photo' => $data['photo'],
+                ]);
+            }
+
+            $request->session()->forget('register.step1');
+
+            session([
+                'user_id' => $user->id,
+                'role'    => $user->role,
+            ]);
+
+            $request->session()->regenerate();
+
+            return redirect()->intended('/dashboard');
+        }
+
         $data = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
@@ -110,7 +102,7 @@ class AuthController extends Controller
 
         if (in_array($data['role'], ['student', 'supervisor'])) {
             $request->session()->put('register.step1', $data);
-            return redirect()->route('register.step2');
+            return redirect()->route('register');
         }
 
         $user = User::create($data);

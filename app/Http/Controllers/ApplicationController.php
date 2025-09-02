@@ -51,6 +51,19 @@ class ApplicationController extends Controller
             }
         }
 
+        if ($search = $request->query('q')) {
+            $term = strtolower($search);
+            $driver = DB::getDriverName();
+            $yearCast = $driver === 'pgsql' ? 'period_year::text' : 'CAST(period_year AS CHAR)';
+            $termCast = $driver === 'pgsql' ? 'period_term::text' : 'CAST(period_term AS CHAR)';
+            $query->where(function ($q) use ($term, $yearCast, $termCast) {
+                $q->whereRaw('LOWER(student_name) LIKE ?', ["%{$term}%"])
+                    ->orWhereRaw('LOWER(institution_name) LIKE ?', ["%{$term}%"])
+                    ->orWhereRaw("LOWER($yearCast) LIKE ?", ["%{$term}%"])
+                    ->orWhereRaw("LOWER($termCast) LIKE ?", ["%{$term}%"]);
+            });
+        }
+
         $sort = $request->query('sort', 'submitted_at:desc');
         [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
         $allowedSorts = ['submitted_at', 'created_at', 'updated_at'];

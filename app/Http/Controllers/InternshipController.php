@@ -50,6 +50,19 @@ class InternshipController extends Controller
             }
         }
 
+        if ($search = $request->query('q')) {
+            $term = strtolower($search);
+            $driver = DB::getDriverName();
+            $startCast = $driver === 'pgsql' ? 'start_date::text' : 'CAST(start_date AS CHAR)';
+            $endCast = $driver === 'pgsql' ? 'end_date::text' : 'CAST(end_date AS CHAR)';
+            $query->where(function ($q) use ($term, $startCast, $endCast) {
+                $q->whereRaw('LOWER(student_name) LIKE ?', ["%{$term}%"])
+                    ->orWhereRaw('LOWER(institution_name) LIKE ?', ["%{$term}%"])
+                    ->orWhereRaw("LOWER($startCast) LIKE ?", ["%{$term}%"])
+                    ->orWhereRaw("LOWER($endCast) LIKE ?", ["%{$term}%"]);
+            });
+        }
+
         $sort = $request->query('sort', 'start_date:desc');
         [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
         $allowedSorts = ['start_date', 'end_date', 'created_at', 'updated_at'];

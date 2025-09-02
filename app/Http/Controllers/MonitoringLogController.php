@@ -47,6 +47,23 @@ class MonitoringLogController extends Controller
             }
         }
 
+        if ($search = $request->query('q')) {
+            $term = strtolower($search);
+            $driver = DB::getDriverName();
+            $dateCast = $driver === 'pgsql' ? 'ml.log_date::text' : 'CAST(ml.log_date AS CHAR)';
+            $scoreCast = $driver === 'pgsql' ? 'ml.score::text' : 'CAST(ml.score AS CHAR)';
+            $typeCast = $driver === 'pgsql' ? 'ml.type::text' : 'CAST(ml.type AS CHAR)';
+            $query->where(function ($q) use ($term, $dateCast, $scoreCast, $typeCast) {
+                $q->whereRaw('LOWER(ml.title) LIKE ?', ["%{$term}%"])
+                    ->orWhereRaw("LOWER($typeCast) LIKE ?", ["%{$term}%"])
+                    ->orWhereRaw('LOWER(it.student_name) LIKE ?', ["%{$term}%"])
+                    ->orWhereRaw('LOWER(it.institution_name) LIKE ?', ["%{$term}%"])
+                    ->orWhereRaw('LOWER(sv.name) LIKE ?', ["%{$term}%"])
+                    ->orWhereRaw("LOWER($dateCast) LIKE ?", ["%{$term}%"])
+                    ->orWhereRaw("LOWER($scoreCast) LIKE ?", ["%{$term}%"]);
+            });
+        }
+
         $sort = $request->query('sort', 'log_date:desc');
         [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
         $allowedSorts = ['log_date', 'created_at', 'updated_at'];

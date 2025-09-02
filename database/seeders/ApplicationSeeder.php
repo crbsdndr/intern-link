@@ -11,7 +11,7 @@ class ApplicationSeeder extends Seeder
     public function run(): void
     {
         $now = Carbon::now();
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 50; $i++) {
             Application::create([
                 'student_id' => $i,
                 'institution_id' => $i,

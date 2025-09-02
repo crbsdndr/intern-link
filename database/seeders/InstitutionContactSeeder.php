@@ -11,7 +11,7 @@ class InstitutionContactSeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create();
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 50; $i++) {
             InstitutionContact::create([
                 'institution_id' => $i,
                 'name' => $faker->name,

@@ -10,7 +10,7 @@ class InternshipSeeder extends Seeder
 {
     public function run(): void
     {
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 50; $i++) {
             $start = Carbon::now();
             Internship::create([
                 'application_id' => $i,

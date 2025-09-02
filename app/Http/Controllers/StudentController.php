@@ -19,6 +19,9 @@ class StudentController extends Controller
 
     public function index(Request $request)
     {
+        $loggedUserId = session('user_id');
+        $loggedUserRole = session('role');
+
         $query = DB::table('student_details_view')
             ->select(self::DISPLAY_COLUMNS);
 

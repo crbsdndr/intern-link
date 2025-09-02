@@ -16,7 +16,7 @@
         </ul>
     </div>
 @endif
-<form method="POST" action="{{ route('login.perform') }}">
+<form method="POST" action="{{ route('login') }}">
     @csrf
     <div>
         <label>Email</label>

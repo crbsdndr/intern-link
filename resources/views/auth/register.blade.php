@@ -13,16 +13,15 @@
         </ul>
     </div>
 @endif
-@if ($step === 1)
 <form method="POST" action="{{ route('register.handle') }}">
     @csrf
     <div>
         <label>Name</label>
-        <input type="text" name="name" value="{{ old('name', $data['name'] ?? '') }}" required>
+        <input type="text" name="name" value="{{ old('name') }}" required>
     </div>
     <div>
         <label>Email</label>
-        <input type="email" name="email" value="{{ old('email', $data['email'] ?? '') }}" required>
+        <input type="email" name="email" value="{{ old('email') }}" required>
     </div>
     <div>
         <label>Password</label>
@@ -30,46 +29,18 @@
     </div>
     <div>
         <label>Phone</label>
-        <input type="number" name="phone" value="{{ old('phone', $data['phone'] ?? '') }}" required>
+        <input type="number" name="phone" value="{{ old('phone') }}">
     </div>
     <div>
         <label>Role</label>
         <select name="role" required>
             <option value="">Select role</option>
             @foreach (['student','supervisor','admin','developer'] as $role)
-                <option value="{{ $role }}" {{ (old('role', $data['role'] ?? '') === $role) ? 'selected' : '' }}>{{ ucfirst($role) }}</option>
+                <option value="{{ $role }}" {{ old('role') === $role ? 'selected' : '' }}>{{ ucfirst($role) }}</option>
             @endforeach
         </select>
     </div>
-    <button type="submit">Next</button>
-</form>
-@else
-<form method="POST" action="{{ route('register.handle') }}">
-    @csrf
-    @if (($data['role'] ?? '') === 'student')
-    <div>
-        <label>Student Number</label>
-        <input type="number" name="student_number" value="{{ old('student_number') }}" required>
-    </div>
-    <div>
-        <label>National Student Number</label>
-        <input type="number" name="national_sn" value="{{ old('national_sn') }}" required>
-    </div>
-    <div>
-        <label>Major</label>
-        <input type="text" name="major" value="{{ old('major') }}" required>
-    </div>
-    <div>
-        <label>Batch</label>
-        <input type="number" name="batch" value="{{ old('batch') }}" required>
-    </div>
-    <div>
-        <label>Photo (link)</label>
-        <input type="text" name="photo" value="{{ old('photo') }}">
-    </div>
-    @endif
     <button type="submit">Sign Up</button>
 </form>
-@endif
 </body>
 </html>

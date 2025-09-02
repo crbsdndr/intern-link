@@ -52,9 +52,10 @@ class MonitoringLogController extends Controller
             $driver = DB::getDriverName();
             $dateCast = $driver === 'pgsql' ? 'ml.log_date::text' : 'CAST(ml.log_date AS CHAR)';
             $scoreCast = $driver === 'pgsql' ? 'ml.score::text' : 'CAST(ml.score AS CHAR)';
-            $query->where(function ($q) use ($term, $dateCast, $scoreCast) {
+            $typeCast = $driver === 'pgsql' ? 'ml.type::text' : 'CAST(ml.type AS CHAR)';
+            $query->where(function ($q) use ($term, $dateCast, $scoreCast, $typeCast) {
                 $q->whereRaw('LOWER(ml.title) LIKE ?', ["%{$term}%"])
-                    ->orWhereRaw('LOWER(ml.type) LIKE ?', ["%{$term}%"])
+                    ->orWhereRaw("LOWER($typeCast) LIKE ?", ["%{$term}%"])
                     ->orWhereRaw('LOWER(it.student_name) LIKE ?', ["%{$term}%"])
                     ->orWhereRaw('LOWER(it.institution_name) LIKE ?', ["%{$term}%"])
                     ->orWhereRaw('LOWER(sv.name) LIKE ?', ["%{$term}%"])

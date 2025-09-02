@@ -14,7 +14,7 @@
     </div>
 @endif
 @if ($step === 1)
-<form method="POST" action="{{ route('register.handle') }}">
+<form method="POST" action="{{ route('signup') }}">
     @csrf
     <div>
         <label>Name</label>
@@ -44,30 +44,31 @@
     <button type="submit">Next</button>
 </form>
 @else
-<form method="POST" action="{{ route('register.handle') }}">
+<form method="POST" action="{{ route('signup') }}">
     @csrf
     @if (($data['role'] ?? '') === 'student')
     <div>
         <label>Student Number</label>
-        <input type="number" name="student_number" value="{{ old('student_number') }}" required>
+        <input type="number" name="student_number" value="{{ old('student_number', $extra['student_number'] ?? '') }}" required>
     </div>
     <div>
         <label>National Student Number</label>
-        <input type="number" name="national_sn" value="{{ old('national_sn') }}" required>
+        <input type="number" name="national_sn" value="{{ old('national_sn', $extra['national_sn'] ?? '') }}" required>
     </div>
     <div>
         <label>Major</label>
-        <input type="text" name="major" value="{{ old('major') }}" required>
+        <input type="text" name="major" value="{{ old('major', $extra['major'] ?? '') }}" required>
     </div>
     <div>
         <label>Batch</label>
-        <input type="number" name="batch" value="{{ old('batch') }}" required>
+        <input type="number" name="batch" value="{{ old('batch', $extra['batch'] ?? '') }}" required>
     </div>
     <div>
         <label>Photo (link)</label>
-        <input type="text" name="photo" value="{{ old('photo') }}">
+        <input type="text" name="photo" value="{{ old('photo', $extra['photo'] ?? '') }}">
     </div>
     @endif
+    <button type="submit" name="back" value="1">Back</button>
     <button type="submit">Sign Up</button>
 </form>
 @endif

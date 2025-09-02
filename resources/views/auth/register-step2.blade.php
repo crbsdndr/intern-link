@@ -17,11 +17,18 @@
     @csrf
     <div>
         <label>Role</label>
-        <select name="role" id="role" required>
-            <option value="">Select role</option>
-            <option value="student" {{ old('role', $data['role'] ?? '') === 'student' ? 'selected' : '' }}>Student</option>
-            <option value="supervisor" {{ old('role', $data['role'] ?? '') === 'supervisor' ? 'selected' : '' }}>Supervisor</option>
-        </select>
+        <div>
+            <label>
+                <input type="radio" name="role" value="student" id="role-student" required
+                    {{ old('role', $data['role'] ?? $step1['role'] ?? '') === 'student' ? 'checked' : '' }}>
+                Student
+            </label>
+            <label>
+                <input type="radio" name="role" value="supervisor" id="role-supervisor" required
+                    {{ old('role', $data['role'] ?? $step1['role'] ?? '') === 'supervisor' ? 'checked' : '' }}>
+                Supervisor
+            </label>
+        </div>
     </div>
     <div id="student-fields" style="display:none;">
         <div>
@@ -63,7 +70,8 @@
 </form>
 <script>
 function toggleFields() {
-    var role = document.getElementById('role').value;
+    var checked = document.querySelector('input[name="role"]:checked');
+    var role = checked ? checked.value : '';
     var student = document.getElementById('student-fields');
     var supervisor = document.getElementById('supervisor-fields');
     student.style.display = role === 'student' ? 'block' : 'none';
@@ -72,7 +80,9 @@ function toggleFields() {
     supervisor.querySelectorAll('input').forEach(function(el){ el.disabled = role !== 'supervisor'; });
 }
 
-document.getElementById('role').addEventListener('change', toggleFields);
+document.querySelectorAll('input[name="role"]').forEach(function(el){
+    el.addEventListener('change', toggleFields);
+});
 toggleFields();
 </script>
 </body>

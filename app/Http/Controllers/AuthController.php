@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Student;
+use App\Models\Supervisor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,9 +15,14 @@ class AuthController extends Controller
      */
     public function showStep2(Request $request)
     {
+        if (! $request->session()->has('register.step1')) {
+            return redirect()->route('register');
+        }
+
+        $step1 = $request->session()->get('register.step1');
         $data = $request->session()->get('register.step2', []);
 
-        return view('auth.register-step2', ['data' => $data]);
+        return view('auth.register-step2', ['data' => $data, 'step1' => $step1]);
     }
 
     /**
@@ -23,6 +30,11 @@ class AuthController extends Controller
      */
     public function storeStep2(Request $request)
     {
+        $step1 = $request->session()->get('register.step1');
+        if (! $step1) {
+            return redirect()->route('register');
+        }
+
         $rules = ['role' => 'required|in:student,supervisor'];
 
         if ($request->input('role') === 'student') {
@@ -44,12 +56,42 @@ class AuthController extends Controller
         $data = $request->validate($rules);
 
         if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('tmp');
+            $data['photo'] = $request->file('photo')->store('photos');
         }
 
         $request->session()->put('register.step2', $data);
 
-        return redirect()->route('register.step3');
+        $userData = array_merge($step1, ['role' => $data['role']]);
+        $user = User::create($userData);
+
+        if ($data['role'] === 'student') {
+            Student::create([
+                'user_id' => $user->id,
+                'student_number' => $data['national_student_number'],
+                'national_sn' => $data['national_number'],
+                'major' => $data['major'],
+                'batch' => $data['batch'],
+                'photo' => $data['photo'],
+            ]);
+        } else {
+            Supervisor::create([
+                'user_id' => $user->id,
+                'supervisor_number' => $data['supervisor_number'],
+                'department' => $data['department'],
+                'photo' => $data['photo'],
+            ]);
+        }
+
+        $request->session()->forget(['register.step1', 'register.step2']);
+
+        session([
+            'user_id' => $user->id,
+            'role'    => $user->role,
+        ]);
+
+        $request->session()->regenerate();
+
+        return redirect()->intended('/dashboard');
     }
     /**
      * Handle user registration.
@@ -65,6 +107,12 @@ class AuthController extends Controller
         ]);
 
         $data['password'] = Hash::make($data['password']);
+
+        if (in_array($data['role'], ['student', 'supervisor'])) {
+            $request->session()->put('register.step1', $data);
+            return redirect()->route('register.step2');
+        }
+
         $user = User::create($data);
 
         session([
@@ -72,7 +120,9 @@ class AuthController extends Controller
             'role'    => $user->role,
         ]);
 
-        return response()->json(['message' => 'Signup successful']);
+        $request->session()->regenerate();
+
+        return redirect()->intended('/dashboard');
     }
 
     /**
@@ -88,7 +138,7 @@ class AuthController extends Controller
         $user = User::where('email', $credentials['email'])->first();
 
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
         }
 
         session([
@@ -98,7 +148,7 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return response()->json(['message' => 'Login successful']);
+        return redirect()->intended('/dashboard');
     }
 
     /**
@@ -109,6 +159,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->json(['message' => 'Logged out']);
+        return redirect()->route('login')->with('status', 'Logged out');
     }
 }

@@ -16,7 +16,7 @@ class EnsureAuthenticated
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Unauthenticated'], 401);
             }
-            return redirect('/login');
+            return redirect()->guest(route('login'));
         }
 
         return $next($request);

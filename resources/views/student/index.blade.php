@@ -48,7 +48,7 @@
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>ID</th>
+            <th>No</th>
             <th>Name</th>
             <th>Major</th>
             <th>Action</th>
@@ -57,7 +57,7 @@
     <tbody>
         @forelse($students as $student)
         <tr>
-            <td>{{ $student->id }}</td>
+            <td>{{ $students->total() - ($students->currentPage() - 1) * $students->perPage() - $loop->index }}</td>
             <td>{{ $student->name }}</td>
             <td>{{ $student->major }}</td>
             <td>

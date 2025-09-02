@@ -49,6 +49,7 @@
 <table class="table table-bordered">
     <thead>
         <tr>
+            <th>No</th>
             <th>Student Name</th>
             <th>Institution Name</th>
             <th>Start Date</th>
@@ -59,6 +60,7 @@
     <tbody>
         @forelse($internships as $internship)
         <tr>
+            <td>{{ $internships->total() - ($internships->currentPage() - 1) * $internships->perPage() - $loop->index }}</td>
             <td>{{ $internship->student_name }}</td>
             <td>{{ $internship->institution_name }}</td>
             <td>{{ $internship->start_date }}</td>
@@ -75,9 +77,9 @@
         </tr>
         @empty
         @if(request('q'))
-        <tr><td colspan="5">Tidak ada hasil untuk '{{ request('q') }}'.</td></tr>
+        <tr><td colspan="6">Tidak ada hasil untuk '{{ request('q') }}'.</td></tr>
         @else
-        <tr><td colspan="5">No internships found.</td></tr>
+        <tr><td colspan="6">No internships found.</td></tr>
         @endif
         @endforelse
     </tbody>

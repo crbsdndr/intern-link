@@ -44,7 +44,7 @@
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>ID</th>
+            <th>No</th>
             <th>Name</th>
             <th>Department</th>
             <th>Action</th>
@@ -53,7 +53,7 @@
     <tbody>
         @forelse($supervisors as $supervisor)
         <tr>
-            <td>{{ $supervisor->id }}</td>
+            <td>{{ $supervisors->total() - ($supervisors->currentPage() - 1) * $supervisors->perPage() - $loop->index }}</td>
             <td>{{ $supervisor->name }}</td>
             <td>{{ $supervisor->department }}</td>
             <td>

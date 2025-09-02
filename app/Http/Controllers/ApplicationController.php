@@ -64,11 +64,11 @@ class ApplicationController extends Controller
             });
         }
 
-        $sort = $request->query('sort', 'submitted_at:desc');
+        $sort = $request->query('sort', 'created_at:desc');
         [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
         $allowedSorts = ['submitted_at', 'created_at', 'updated_at'];
         if (!in_array($sortField, $allowedSorts)) {
-            $sortField = 'submitted_at';
+            $sortField = 'created_at';
         }
         $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
         $query->orderBy($sortField, $sortDir)->orderByDesc('id');

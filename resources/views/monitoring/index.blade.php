@@ -49,6 +49,7 @@
 <table class="table table-bordered">
     <thead>
         <tr>
+            <th>No</th>
             <th>Date</th>
             <th>Student</th>
             <th>Institution</th>
@@ -62,6 +63,7 @@
     <tbody>
         @forelse($logs as $log)
         <tr>
+            <td>{{ $logs->total() - ($logs->currentPage() - 1) * $logs->perPage() - $loop->index }}</td>
             <td>{{ $log->log_date }}</td>
             <td>{{ $log->student_name }}</td>
             <td>{{ $log->institution_name }}</td>
@@ -81,9 +83,9 @@
         </tr>
         @empty
         @if(request('q'))
-        <tr><td colspan="8">Tidak ada hasil untuk '{{ request('q') }}'.</td></tr>
+        <tr><td colspan="9">Tidak ada hasil untuk '{{ request('q') }}'.</td></tr>
         @else
-        <tr><td colspan="8">No monitoring logs found.</td></tr>
+        <tr><td colspan="9">No monitoring logs found.</td></tr>
         @endif
         @endforelse
     </tbody>

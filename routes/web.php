@@ -12,11 +12,11 @@ use App\Http\Controllers\MetaController;
 
 Route::view('/introduction/', 'introduction');
 
-Route::post('/signup', [AuthController::class, 'signup']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
-Route::view('/login', 'auth.login');
-Route::view('/register', 'auth.register');
+Route::post('/signup', [AuthController::class, 'signup'])->name('register.handle');
+Route::post('/login', [AuthController::class, 'login'])->name('login.perform');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::view('/login', 'auth.login')->name('login');
+Route::view('/register', 'auth.register')->name('register');
 
 Route::middleware('auth.session')->group(function () {
     Route::view('/', 'home');

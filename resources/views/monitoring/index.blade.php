@@ -8,6 +8,23 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Monitoring Logs</h1>
     <div class="d-flex align-items-center gap-2">
+        <form method="get" id="monitoring-search-form" class="d-flex">
+            <div class="input-group">
+                <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Cari…" id="monitoring-search-input" style="min-width:280px">
+                @foreach(request()->query() as $param => $value)
+                    @if($param !== 'q' && $param !== 'page')
+                        <input type="hidden" name="{{ $param }}" value="{{ $value }}">
+                    @endif
+                @endforeach
+                <button class="btn btn-outline-secondary" type="submit" id="monitoring-search-btn">
+                    <i class="bi bi-search"></i>
+                    <span class="spinner-border spinner-border-sm d-none" id="monitoring-search-spinner"></span>
+                </button>
+                @if(request('q'))
+                <button class="btn btn-outline-secondary" type="button" id="monitoring-search-clear"><i class="bi bi-x"></i></button>
+                @endif
+            </div>
+        </form>
         <button class="btn btn-outline-secondary position-relative" data-bs-toggle="offcanvas" data-bs-target="#monitoringFilter" title="Filter">
             <i class="bi bi-funnel"></i>
             @if(count($filters))
@@ -63,7 +80,11 @@
             </td>
         </tr>
         @empty
+        @if(request('q'))
+        <tr><td colspan="8">Tidak ada hasil untuk '{{ request('q') }}'.</td></tr>
+        @else
         <tr><td colspan="8">No monitoring logs found.</td></tr>
+        @endif
         @endforelse
     </tbody>
 </table>
@@ -77,6 +98,9 @@
     </div>
     <div class="offcanvas-body">
         <form method="get" id="monitoring-filter-form">
+            <input type="hidden" name="q" value="{{ request('q') }}">
+            <input type="hidden" name="sort" value="{{ request('sort') }}">
+            <input type="hidden" name="page_size" value="{{ request('page_size') }}">
             @php($logRange = request('log_date'))
             @php($logStart = $logEnd = '')
             @if($logRange && str_starts_with($logRange, 'range:'))
@@ -124,6 +148,8 @@
     </div>
 </div>
 
+@php($retain = Arr::only(request()->query(), ['q','sort','page_size']))
+
 <script>
 document.getElementById('monitoring-filter-form').addEventListener('submit', function(){
     var ls = document.getElementById('log_date_start').value;
@@ -155,7 +181,34 @@ document.getElementById('monitoring-filter-form').addEventListener('submit', fun
 });
 
 document.getElementById('monitoring-filter-reset').addEventListener('click', function(){
-    window.location = window.location.pathname;
+    window.location = window.location.pathname + '{{ $retain ? '?' . http_build_query($retain) : '' }}';
 });
+
+var msForm = document.getElementById('monitoring-search-form');
+if(msForm){
+    var msInput = document.getElementById('monitoring-search-input');
+    var msBtn = document.getElementById('monitoring-search-btn');
+    var msSpinner = document.getElementById('monitoring-search-spinner');
+    var debounceTimer;
+    msInput.addEventListener('input', function(){
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function(){
+            msForm.submit();
+        }, 300);
+    });
+    msForm.addEventListener('submit', function(){
+        msBtn.disabled = true;
+        if(msSpinner) msSpinner.classList.remove('d-none');
+    });
+    var msClear = document.getElementById('monitoring-search-clear');
+    if(msClear){
+        msClear.addEventListener('click', function(){
+            var params = new URLSearchParams(window.location.search);
+            params.delete('q');
+            params.delete('page');
+            window.location = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        });
+    }
+}
 </script>
 @endsection

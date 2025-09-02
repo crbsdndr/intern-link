@@ -8,6 +8,23 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Applications</h1>
     <div class="d-flex align-items-center gap-2">
+        <form method="get" id="application-search-form" class="d-flex">
+            <div class="input-group">
+                <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Cari…" id="application-search-input" style="min-width:280px">
+                @foreach(request()->query() as $param => $value)
+                    @if($param !== 'q' && $param !== 'page')
+                        <input type="hidden" name="{{ $param }}" value="{{ $value }}">
+                    @endif
+                @endforeach
+                <button class="btn btn-outline-secondary" type="submit" id="application-search-btn">
+                    <i class="bi bi-search"></i>
+                    <span class="spinner-border spinner-border-sm d-none" id="application-search-spinner"></span>
+                </button>
+                @if(request('q'))
+                <button class="btn btn-outline-secondary" type="button" id="application-search-clear"><i class="bi bi-x"></i></button>
+                @endif
+            </div>
+        </form>
         <button class="btn btn-outline-secondary position-relative" data-bs-toggle="offcanvas" data-bs-target="#applicationFilter" title="Filter">
             <i class="bi bi-funnel"></i>
             @if(count($filters))
@@ -57,7 +74,11 @@
             </td>
         </tr>
         @empty
+        @if(request('q'))
+        <tr><td colspan="5">Tidak ada hasil untuk '{{ request('q') }}'.</td></tr>
+        @else
         <tr><td colspan="5">No applications found.</td></tr>
+        @endif
         @endforelse
     </tbody>
 </table>
@@ -71,6 +92,9 @@
     </div>
     <div class="offcanvas-body">
         <form method="get" id="application-filter-form">
+            <input type="hidden" name="q" value="{{ request('q') }}">
+            <input type="hidden" name="sort" value="{{ request('sort') }}">
+            <input type="hidden" name="page_size" value="{{ request('page_size') }}">
             @php($statusValues = [])
             @if(request()->has('status') && str_starts_with(request('status'), 'in:'))
                 @php($statusValues = explode(',', substr(request('status'), 3)))
@@ -132,6 +156,8 @@
     </div>
 </div>
 
+@php($retain = Arr::only(request()->query(), ['q','sort','page_size']))
+
 <script>
 document.getElementById('application-filter-form').addEventListener('submit', function(){
     var statusChecked = Array.from(document.querySelectorAll('input[id^="status-"]:checked')).map(cb => cb.value);
@@ -171,7 +197,34 @@ document.getElementById('application-filter-form').addEventListener('submit', fu
 });
 
 document.getElementById('application-filter-reset').addEventListener('click', function(){
-    window.location = window.location.pathname;
+    window.location = window.location.pathname + '{{ $retain ? '?' . http_build_query($retain) : '' }}';
 });
+
+var asForm = document.getElementById('application-search-form');
+if(asForm){
+    var asInput = document.getElementById('application-search-input');
+    var asBtn = document.getElementById('application-search-btn');
+    var asSpinner = document.getElementById('application-search-spinner');
+    var debounceTimer;
+    asInput.addEventListener('input', function(){
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function(){
+            asForm.submit();
+        }, 300);
+    });
+    asForm.addEventListener('submit', function(){
+        asBtn.disabled = true;
+        if(asSpinner) asSpinner.classList.remove('d-none');
+    });
+    var asClear = document.getElementById('application-search-clear');
+    if(asClear){
+        asClear.addEventListener('click', function(){
+            var params = new URLSearchParams(window.location.search);
+            params.delete('q');
+            params.delete('page');
+            window.location = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        });
+    }
+}
 </script>
 @endsection

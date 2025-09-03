@@ -20,20 +20,6 @@ class MetaController extends Controller
 
     public function supervisors(Request $request)
     {
-        if (session('role') === 'student') {
-            $query = DB::table('supervisor_details_view as sv')
-                ->join('monitoring_logs as ml', 'sv.id', '=', 'ml.supervisor_id')
-                ->join('internships as it', 'ml.internship_id', '=', 'it.id')
-                ->where('it.student_id', $this->currentStudentId())
-                ->select('sv.id', 'sv.name')
-                ->distinct()
-                ->orderBy('sv.name');
-            if ($request->filled('internship_id')) {
-                $query->where('ml.internship_id', $request->internship_id);
-            }
-            return response()->json($query->get());
-        }
-
         $query = DB::table('supervisor_details_view')->select('id','name')->orderBy('name');
         if ($request->filled('internship_id')) {
             $query->join('internship_supervisors','supervisor_details_view.id','=','internship_supervisors.supervisor_id')

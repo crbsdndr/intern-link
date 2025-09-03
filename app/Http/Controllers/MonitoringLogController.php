@@ -29,9 +29,6 @@ class MonitoringLogController extends Controller
             ->join('internship_details_view as it', 'it.id', '=', 'ml.internship_id')
             ->leftJoin('supervisor_details_view as sv', 'sv.id', '=', 'ml.supervisor_id')
             ->select('ml.id as id', 'ml.log_date', 'it.student_name', 'it.institution_name', 'sv.name as supervisor_name', 'ml.type as log_type', 'ml.score', 'ml.title', 'ml.content', 'ml.created_at', 'ml.updated_at');
-        if (session('role') === 'student') {
-            $query->where('it.student_id', $this->currentStudentId());
-        }
 
         $filters = [];
 
@@ -88,19 +85,11 @@ class MonitoringLogController extends Controller
     {
         $log = DB::table('v_monitoring_log_detail')->where('monitoring_log_id', $id)->first();
         abort_if(!$log, 404);
-        if (session('role') === 'student') {
-            $studentId = $this->currentStudentId();
-            $owns = DB::table('internships')->where('id', $log->internship_id)->where('student_id', $studentId)->exists();
-            abort_unless($owns, 401);
-        }
         return view('monitoring.show', compact('log'));
     }
 
     public function create()
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $internships = DB::table('internship_details_view')
             ->select('id','student_name','institution_name')
             ->orderBy('student_name')
@@ -112,9 +101,6 @@ class MonitoringLogController extends Controller
 
     public function store(Request $request)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $types = $this->typeOptions();
         $data = $request->validate([
             'internship_id' => 'required|exists:internships,id',
@@ -131,9 +117,6 @@ class MonitoringLogController extends Controller
 
     public function edit($id)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $log = DB::table('v_monitoring_log_detail')->where('monitoring_log_id', $id)->first();
         abort_if(!$log, 404);
         $internships = collect([(object)[
@@ -148,9 +131,6 @@ class MonitoringLogController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $log = MonitoringLog::findOrFail($id);
         $types = $this->typeOptions();
         $data = $request->validate([
@@ -168,9 +148,6 @@ class MonitoringLogController extends Controller
 
     public function destroy($id)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $log = MonitoringLog::findOrFail($id);
         $log->delete();
         return redirect('/monitoring');

@@ -21,9 +21,6 @@ class StudentController extends Controller
     {
         $query = DB::table('student_details_view')
             ->select(self::DISPLAY_COLUMNS);
-        if (session('role') === 'student') {
-            $query->where('id', $this->currentStudentId());
-        }
 
         $filters = [];
 
@@ -98,25 +95,16 @@ class StudentController extends Controller
     {
         $student = DB::table('student_details_view')->where('id', $id)->first();
         abort_if(!$student, 404);
-        if (session('role') === 'student' && $student->id !== $this->currentStudentId()) {
-            abort(401);
-        }
         return view('student.show', compact('student'));
     }
 
     public function create()
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         return view('student.create');
     }
 
     public function store(Request $request)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $data = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
@@ -153,9 +141,6 @@ class StudentController extends Controller
 
     public function edit($id)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $student = DB::table('student_details_view')->where('id', $id)->first();
         abort_if(!$student, 404);
         return view('student.edit', compact('student'));
@@ -163,9 +148,6 @@ class StudentController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $student = Student::findOrFail($id);
         $user = $student->user;
 
@@ -204,9 +186,6 @@ class StudentController extends Controller
 
     public function destroy($id)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $student = Student::findOrFail($id);
         $student->user()->delete();
         return redirect('/student');

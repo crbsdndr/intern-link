@@ -22,9 +22,6 @@ class InternshipController extends Controller
     {
         $query = DB::table('internship_details_view')
             ->select('id', 'student_name', 'institution_name', 'start_date', 'end_date', 'status', 'created_at', 'updated_at');
-        if (session('role') === 'student') {
-            $query->where('student_id', $this->currentStudentId());
-        }
 
         $filters = [];
 
@@ -87,17 +84,11 @@ class InternshipController extends Controller
     {
         $internship = DB::table('internship_details_view')->where('id', $id)->first();
         abort_if(!$internship, 404);
-        if (session('role') === 'student' && $internship->student_id !== $this->currentStudentId()) {
-            abort(401);
-        }
         return view('internship.show', compact('internship'));
     }
 
     public function create()
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $applications = DB::table('application_details_view')
             ->select('id', 'student_name', 'institution_name')
             ->orderBy('id')
@@ -108,9 +99,6 @@ class InternshipController extends Controller
 
     public function store(Request $request)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $statuses = $this->statusOptions();
         $data = $request->validate([
             'application_id' => 'required|exists:applications,id',
@@ -134,9 +122,6 @@ class InternshipController extends Controller
 
     public function edit($id)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $internship = DB::table('internship_details_view')->where('id', $id)->first();
         abort_if(!$internship, 404);
         $applications = DB::table('application_details_view')
@@ -149,9 +134,6 @@ class InternshipController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $internship = Internship::findOrFail($id);
         $statuses = $this->statusOptions();
         $data = $request->validate([
@@ -176,9 +158,6 @@ class InternshipController extends Controller
 
     public function destroy($id)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $internship = Internship::findOrFail($id);
         $internship->delete();
         return redirect('/internship');

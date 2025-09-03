@@ -19,19 +19,13 @@ class SupervisorController extends Controller
 
     public function index(Request $request)
     {
-        $query = DB::table('supervisor_details_view as sv')
-            ->select('sv.id', 'sv.name', 'sv.department', 'sv.created_at', 'sv.updated_at');
-        if (session('role') === 'student') {
-            $query->join('monitoring_logs as ml', 'sv.id', '=', 'ml.supervisor_id')
-                ->join('internships as it', 'ml.internship_id', '=', 'it.id')
-                ->where('it.student_id', $this->currentStudentId())
-                ->distinct();
-        }
+        $query = DB::table('supervisor_details_view')
+            ->select(self::DISPLAY_COLUMNS);
 
         $filters = [];
 
         if ($dept = $request->query('department~')) {
-            $query->where('sv.department', 'like', '%' . $dept . '%');
+            $query->where('department', 'like', '%' . $dept . '%');
             $filters['department~'] = 'Department: ' . $dept;
         }
 
@@ -39,10 +33,10 @@ class SupervisorController extends Controller
             if (Str::startsWith($created, 'range:')) {
                 [$start, $end] = array_pad(explode(',', Str::after($created, 'range:')), 2, null);
                 if ($start) {
-                    $query->whereDate('sv.created_at', '>=', $start);
+                    $query->whereDate('created_at', '>=', $start);
                 }
                 if ($end) {
-                    $query->whereDate('sv.created_at', '<=', $end);
+                    $query->whereDate('created_at', '<=', $end);
                 }
                 $filters['created_at'] = 'Created: ' . $start . ' - ' . $end;
             }
@@ -52,10 +46,10 @@ class SupervisorController extends Controller
             if (Str::startsWith($updated, 'range:')) {
                 [$start, $end] = array_pad(explode(',', Str::after($updated, 'range:')), 2, null);
                 if ($start) {
-                    $query->whereDate('sv.updated_at', '>=', $start);
+                    $query->whereDate('updated_at', '>=', $start);
                 }
                 if ($end) {
-                    $query->whereDate('sv.updated_at', '<=', $end);
+                    $query->whereDate('updated_at', '<=', $end);
                 }
                 $filters['updated_at'] = 'Updated: ' . $start . ' - ' . $end;
             }
@@ -65,7 +59,7 @@ class SupervisorController extends Controller
             $qLower = strtolower($q);
             $query->where(function ($sub) use ($qLower) {
                 foreach (self::SEARCH_COLUMNS as $col) {
-                    $sub->orWhereRaw('LOWER(sv.' . $col . ') LIKE ?', ['%' . $qLower . '%']);
+                    $sub->orWhereRaw('LOWER(' . $col . ') LIKE ?', ['%' . $qLower . '%']);
                 }
             });
         }
@@ -77,7 +71,7 @@ class SupervisorController extends Controller
             $sortField = 'created_at';
         }
         $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
-        $query->orderBy('sv.' . $sortField, $sortDir);
+        $query->orderBy($sortField, $sortDir);
 
         $supervisors = $query->paginate(10)->withQueryString();
 
@@ -91,30 +85,16 @@ class SupervisorController extends Controller
     {
         $supervisor = DB::table('supervisor_details_view')->where('id', $id)->first();
         abort_if(!$supervisor, 404);
-        if (session('role') === 'student') {
-            $related = DB::table('monitoring_logs as ml')
-                ->join('internships as it', 'ml.internship_id', '=', 'it.id')
-                ->where('ml.supervisor_id', $id)
-                ->where('it.student_id', $this->currentStudentId())
-                ->exists();
-            abort_unless($related, 401);
-        }
         return view('supervisor.show', compact('supervisor'));
     }
 
     public function create()
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         return view('supervisor.create');
     }
 
     public function store(Request $request)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $data = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
@@ -147,9 +127,6 @@ class SupervisorController extends Controller
 
     public function edit($id)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $supervisor = DB::table('supervisor_details_view')->where('id', $id)->first();
         abort_if(!$supervisor, 404);
         return view('supervisor.edit', compact('supervisor'));
@@ -157,9 +134,6 @@ class SupervisorController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $supervisor = Supervisor::findOrFail($id);
         $user = $supervisor->user;
 
@@ -194,9 +168,6 @@ class SupervisorController extends Controller
 
     public function destroy($id)
     {
-        if (session('role') === 'student') {
-            abort(401);
-        }
         $supervisor = Supervisor::findOrFail($id);
         $supervisor->user()->delete();
         return redirect('/supervisor');

@@ -6,6 +6,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Supervisors</h1>
     @php($isStudent = session('role') === 'student')
+    @php($isSupervisor = session('role') === 'supervisor')
     <div class="d-flex align-items-center gap-2">
         <form method="get" action="{{ url()->current() }}" id="supervisor-search-form" class="position-relative">
             <div class="input-group" style="min-width:280px;">
@@ -26,7 +27,7 @@
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">{{ count($filters) }}</span>
             @endif
         </button>
-        @if($isStudent)
+        @if($isStudent || $isSupervisor)
             <button class="btn btn-primary" disabled>Add</button>
         @else
             <a href="/supervisor/add" class="btn btn-primary">Add</a>
@@ -63,7 +64,7 @@
             <td>{{ $supervisor->department }}</td>
             <td>
                 <a href="/supervisor/{{ $supervisor->id }}/see" class="btn btn-sm btn-secondary">View</a>
-                @if($isStudent)
+                @if($isStudent || ($isSupervisor && $supervisor->id !== $currentSupervisorId))
                     <button class="btn btn-sm btn-warning" disabled>Edit</button>
                     <button class="btn btn-sm btn-danger" disabled>Delete</button>
                 @else

@@ -46,6 +46,7 @@ class AuthController extends Controller
                     $extraInput = $request->only(['student_number', 'national_sn', 'major', 'batch', 'photo']);
                 } else {
                     $extraInput = $request->only(['supervisor_number', 'department', 'photo']);
+
                 }
                 session(['register.step' => 1, 'register.data' => $data, 'register.extra' => $extraInput]);
                 return redirect()->route('signup');
@@ -64,6 +65,7 @@ class AuthController extends Controller
                     'supervisor_number' => 'required|string|max:64|regex:/^[A-Za-z0-9_-]+$/',
                     'department' => 'required|in:' . implode(',', self::DEPARTMENTS),
                     'photo' => 'required|url',
+
                 ]);
             }
 
@@ -90,6 +92,7 @@ class AuthController extends Controller
                     'supervisor_number' => $validated['supervisor_number'],
                     'department' => $validated['department'],
                     'photo' => $validated['photo'],
+                    'photo' => $photoPath,
                 ]);
             }
 

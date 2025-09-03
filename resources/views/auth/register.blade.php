@@ -44,7 +44,7 @@
     <button type="submit">Next</button>
 </form>
 @else
-<form method="POST" action="{{ route('signup') }}">
+<form method="POST" action="{{ route('signup') }}" enctype="multipart/form-data">
     @csrf
     @if (($data['role'] ?? '') === 'student')
     <div>

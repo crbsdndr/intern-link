@@ -82,11 +82,8 @@
         </select>
     </div>
     <div>
-        <label>Photo</label>
-        <input type="file" name="photo" {{ empty($extra['photo']) ? 'required' : '' }}>
-        @if (!empty($extra['photo']))
-            <p>Photo uploaded.</p>
-        @endif
+        <label>Photo (link)</label>
+        <input type="text" name="photo" value="{{ old('photo', $extra['photo'] ?? '') }}" required>
     </div>
     @endif
     <button type="submit" name="back" value="1">Back</button>

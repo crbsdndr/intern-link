@@ -45,12 +45,8 @@ class AuthController extends Controller
                 if ($data['role'] === 'student') {
                     $extraInput = $request->only(['student_number', 'national_sn', 'major', 'batch', 'photo']);
                 } else {
-                    $extraInput = $request->only(['supervisor_number', 'department']);
-                    if ($request->hasFile('photo')) {
-                        $extraInput['photo'] = $request->file('photo')->store('photos', 'public');
-                    } else {
-                        $extraInput['photo'] = $extra['photo'] ?? null;
-                    }
+                    $extraInput = $request->only(['supervisor_number', 'department', 'photo']);
+
                 }
                 session(['register.step' => 1, 'register.data' => $data, 'register.extra' => $extraInput]);
                 return redirect()->route('signup');
@@ -62,14 +58,14 @@ class AuthController extends Controller
                     'national_sn' => 'required|numeric',
                     'major' => 'required|string',
                     'batch' => 'required|date_format:Y',
-                    'photo' => 'nullable|string',
+                    'photo' => 'nullable|url',
                 ]);
             } else {
-                $photoRule = empty($extra['photo']) ? 'required|image|mimes:jpeg,jpg,png,webp|max:2048' : 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048';
                 $validated = $request->validate([
                     'supervisor_number' => 'required|string|max:64|regex:/^[A-Za-z0-9_-]+$/',
                     'department' => 'required|in:' . implode(',', self::DEPARTMENTS),
-                    'photo' => $photoRule,
+                    'photo' => 'required|url',
+
                 ]);
             }
 
@@ -91,11 +87,11 @@ class AuthController extends Controller
                     'photo' => $validated['photo'] ?? null,
                 ]);
             } else {
-                $photoPath = $request->hasFile('photo') ? $request->file('photo')->store('photos', 'public') : ($extra['photo'] ?? null);
                 Supervisor::create([
                     'user_id' => $user->id,
                     'supervisor_number' => $validated['supervisor_number'],
                     'department' => $validated['department'],
+                    'photo' => $validated['photo'],
                     'photo' => $photoPath,
                 ]);
             }

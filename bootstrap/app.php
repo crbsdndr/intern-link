@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
             'admin.self' => \App\Http\Middleware\EnsureAdminSelf::class,
             'student.self' => \App\Http\Middleware\EnsureStudentSelf::class,
+            'developer.self' => \App\Http\Middleware\EnsureDeveloperSelf::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

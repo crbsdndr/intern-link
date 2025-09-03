@@ -8,9 +8,16 @@ use App\Models\InstitutionQuota;
 use App\Models\Period;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class InstitutionController extends Controller
 {
+    /**
+     * Columns searched and displayed. Adjust here if needed.
+     */
+    private const SEARCH_COLUMNS = ['name', 'city', 'province'];
+    private const DISPLAY_COLUMNS = ['id', 'name', 'city', 'province'];
+
     protected function loadRegions(): array
     {
         $cities = json_decode(file_get_contents(resource_path('data/cities.json')), true);
@@ -18,22 +25,84 @@ class InstitutionController extends Controller
         return [$cities, $provinces];
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $query = DB::table('institution_details_view')
-            ->select('id', 'name', 'city', 'province')
-            ->orderBy('name');
+        $query = DB::table('institution_details_view as iv')
+            ->join('institutions as i', 'i.id', '=', 'iv.id')
+            ->select('iv.id', 'iv.name', 'iv.city', 'iv.province', 'i.created_at', 'i.updated_at');
+
         if (session('role') === 'student') {
             $studentId = $this->currentStudentId();
-            $query->whereIn('id', function ($q) use ($studentId) {
+            $query->whereIn('iv.id', function ($q) use ($studentId) {
                 $q->select('institution_id')->from('applications')->where('student_id', $studentId)
                     ->union(
                         DB::table('internships')->select('institution_id')->where('student_id', $studentId)
                     );
             });
         }
-        $institutions = $query->get();
-        return view('institution.index', compact('institutions'));
+
+        $filters = [];
+
+        if ($city = $request->query('city~')) {
+            $query->where('iv.city', 'like', '%' . $city . '%');
+            $filters['city~'] = 'City: ' . $city;
+        }
+
+        if ($province = $request->query('province~')) {
+            $query->where('iv.province', 'like', '%' . $province . '%');
+            $filters['province~'] = 'Province: ' . $province;
+        }
+
+        if ($created = $request->query('created_at')) {
+            if (Str::startsWith($created, 'range:')) {
+                [$start, $end] = array_pad(explode(',', Str::after($created, 'range:')), 2, null);
+                if ($start) {
+                    $query->whereDate('i.created_at', '>=', $start);
+                }
+                if ($end) {
+                    $query->whereDate('i.created_at', '<=', $end);
+                }
+                $filters['created_at'] = 'Created: ' . $start . ' - ' . $end;
+            }
+        }
+
+        if ($updated = $request->query('updated_at')) {
+            if (Str::startsWith($updated, 'range:')) {
+                [$start, $end] = array_pad(explode(',', Str::after($updated, 'range:')), 2, null);
+                if ($start) {
+                    $query->whereDate('i.updated_at', '>=', $start);
+                }
+                if ($end) {
+                    $query->whereDate('i.updated_at', '<=', $end);
+                }
+                $filters['updated_at'] = 'Updated: ' . $start . ' - ' . $end;
+            }
+        }
+
+        if ($q = trim($request->query('q', ''))) {
+            $qLower = strtolower($q);
+            $query->where(function ($sub) use ($qLower) {
+                foreach (self::SEARCH_COLUMNS as $col) {
+                    $sub->orWhereRaw('LOWER(iv.' . $col . ') LIKE ?', ['%' . $qLower . '%']);
+                }
+            });
+        }
+
+        $sort = $request->query('sort', 'created_at:desc');
+        [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
+        $allowedSorts = array_merge(self::DISPLAY_COLUMNS, ['created_at', 'updated_at']);
+        if (!in_array($sortField, $allowedSorts)) {
+            $sortField = 'created_at';
+        }
+        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sortField, $sortDir);
+
+        $institutions = $query->paginate(10)->withQueryString();
+
+        return view('institution.index', [
+            'institutions' => $institutions,
+            'filters' => $filters,
+        ]);
     }
 
     public function show($id)

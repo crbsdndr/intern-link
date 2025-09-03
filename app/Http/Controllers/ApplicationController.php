@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Application;
-use App\Models\Period;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -23,6 +22,9 @@ class ApplicationController extends Controller
     {
         $query = DB::table('application_details_view')
             ->select('id', 'student_name', 'institution_name', 'period_year', 'period_term', 'status', 'submitted_at', 'created_at', 'updated_at');
+        if (session('role') === 'student') {
+            $query->where('student_id', $this->currentStudentId());
+        }
 
         $filters = [];
 
@@ -85,11 +87,17 @@ class ApplicationController extends Controller
     {
         $application = DB::table('application_details_view')->where('id', $id)->first();
         abort_if(!$application, 404);
+        if (session('role') === 'student' && $application->student_id !== $this->currentStudentId()) {
+            abort(401);
+        }
         return view('application.show', compact('application'));
     }
 
     public function create()
     {
+        if (session('role') === 'student') {
+            abort(401);
+        }
         $students = DB::table('student_details_view')->select('id','name')->orderBy('name')->get();
         $institutions = DB::table('institutions')->select('id','name')->orderBy('name')->get();
         $statuses = $this->statusOptions();
@@ -98,6 +106,9 @@ class ApplicationController extends Controller
 
     public function store(Request $request)
     {
+        if (session('role') === 'student') {
+            abort(401);
+        }
         $statuses = $this->statusOptions();
         $data = $request->validate([
             'student_id' => 'required|exists:students,id',
@@ -109,8 +120,18 @@ class ApplicationController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $period = Period::orderBy('year', 'desc')->orderBy('term', 'desc')->first();
-        $data['period_id'] = $period ? $period->id : null;
+        $periodId = DB::table('institution_quotas')
+            ->where('institution_id', $data['institution_id'])
+            ->orderByDesc('period_id')
+            ->value('period_id');
+
+        if (!$periodId) {
+            return back()->withErrors([
+                'institution_id' => 'Selected institution has no quota set',
+            ]);
+        }
+
+        $data['period_id'] = $periodId;
 
         Application::create($data);
         return redirect('/application');
@@ -118,6 +139,9 @@ class ApplicationController extends Controller
 
     public function edit($id)
     {
+        if (session('role') === 'student') {
+            abort(401);
+        }
         $application = DB::table('application_details_view')->where('id', $id)->first();
         abort_if(!$application, 404);
         $students = DB::table('student_details_view')->select('id','name')->orderBy('name')->get();
@@ -128,6 +152,9 @@ class ApplicationController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (session('role') === 'student') {
+            abort(401);
+        }
         $application = Application::findOrFail($id);
         $statuses = $this->statusOptions();
         $data = $request->validate([
@@ -140,12 +167,28 @@ class ApplicationController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        $periodId = DB::table('institution_quotas')
+            ->where('institution_id', $data['institution_id'])
+            ->orderByDesc('period_id')
+            ->value('period_id');
+
+        if (!$periodId) {
+            return back()->withErrors([
+                'institution_id' => 'Selected institution has no quota set',
+            ]);
+        }
+
+        $data['period_id'] = $periodId;
+
         $application->update($data);
         return redirect('/application');
     }
 
     public function destroy($id)
     {
+        if (session('role') === 'student') {
+            abort(401);
+        }
         $application = Application::findOrFail($id);
         $application->delete();
         return redirect('/application');

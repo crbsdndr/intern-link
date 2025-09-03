@@ -7,6 +7,7 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Internships</h1>
+    @php($isStudent = session('role') === 'student')
     <div class="d-flex align-items-center gap-2">
         <form method="get" id="internship-search-form" class="d-flex">
             <div class="input-group">
@@ -31,7 +32,11 @@
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">{{ count($filters) }}</span>
             @endif
         </button>
-        <a href="/internship/add" class="btn btn-primary">Add</a>
+        @if($isStudent)
+            <button class="btn btn-primary" disabled>Add</button>
+        @else
+            <a href="/internship/add" class="btn btn-primary">Add</a>
+        @endif
     </div>
 </div>
 
@@ -67,12 +72,17 @@
             <td>{{ $internship->end_date }}</td>
             <td>
                 <a href="/internship/{{ $internship->id }}/see" class="btn btn-sm btn-secondary">View</a>
-                <a href="/internship/{{ $internship->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
-                <form action="/internship/{{ $internship->id }}" method="POST" style="display:inline-block">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                </form>
+                @if($isStudent)
+                    <button class="btn btn-sm btn-warning" disabled>Edit</button>
+                    <button class="btn btn-sm btn-danger" disabled>Delete</button>
+                @else
+                    <a href="/internship/{{ $internship->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
+                    <form action="/internship/{{ $internship->id }}" method="POST" style="display:inline-block">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                @endif
             </td>
         </tr>
         @empty

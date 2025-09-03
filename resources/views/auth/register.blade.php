@@ -36,7 +36,7 @@
         <label>Role</label>
         <select name="role" required>
             <option value="">Select role</option>
-            @foreach (['student','supervisor','admin','developer'] as $role)
+            @foreach (['student','supervisor'] as $role)
                 <option value="{{ $role }}" {{ (old('role', $data['role'] ?? '') === $role) ? 'selected' : '' }}>{{ ucfirst($role) }}</option>
             @endforeach
         </select>
@@ -44,7 +44,7 @@
     <button type="submit">Next</button>
 </form>
 @else
-<form method="POST" action="{{ route('signup') }}">
+<form method="POST" action="{{ route('signup') }}" enctype="multipart/form-data">
     @csrf
     @if (($data['role'] ?? '') === 'student')
     <div>
@@ -67,8 +67,21 @@
         <label>Photo (link)</label>
         <input type="text" name="photo" value="{{ old('photo', $extra['photo'] ?? '') }}">
     </div>
+    @elseif (($data['role'] ?? '') === 'supervisor')
+    <div>
+        <label>Supervisor Number</label>
+        <input type="text" name="supervisor_number" value="{{ old('supervisor_number', $extra['supervisor_number'] ?? '') }}" required>
+    </div>
+    <div>
+        <label>Department</label>
+        <input type="text" name="department" value="{{ old('department', $extra['department'] ?? '') }}" required>
+    </div>
+    <div>
+        <label>Photo (link)</label>
+        <input type="text" name="photo" value="{{ old('photo', $extra['photo'] ?? '') }}" required>
+    </div>
     @endif
-    <button type="submit" name="back" value="1">Back</button>
+    <button type="submit" name="back" value="1" formnovalidate>Back</button>
     <button type="submit">Sign Up</button>
 </form>
 @endif

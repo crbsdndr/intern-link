@@ -13,10 +13,14 @@ class AdminUserController extends Controller
 
     public function index(Request $request)
     {
-        if (session('role') !== 'admin') {
+        if (!in_array(session('role'), ['admin', 'developer'])) {
             abort(401);
         }
-        $query = User::query()->select(self::DISPLAY_COLUMNS)->where('id', session('user_id'));
+        if (session('role') === 'admin') {
+            $query = User::query()->select(self::DISPLAY_COLUMNS)->where('id', session('user_id'));
+        } else { // developer
+            $query = User::query()->select(self::DISPLAY_COLUMNS)->where('role', 'admin');
+        }
         if ($q = trim($request->query('q', ''))) {
             $qLower = strtolower($q);
             $query->where(function ($sub) use ($qLower) {
@@ -31,42 +35,76 @@ class AdminUserController extends Controller
 
     public function create()
     {
-        abort(401);
+        if (session('role') !== 'developer') {
+            abort(401);
+        }
+        return view('admin.create');
     }
 
     public function store(Request $request)
     {
-        abort(401);
+        if (session('role') !== 'developer') {
+            abort(401);
+        }
+        $data = $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|string',
+            'password' => 'required|string',
+        ]);
+        User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'password' => Hash::make($data['password']),
+            'role' => 'admin',
+        ]);
+        return redirect('/admin');
     }
 
     public function show($id)
     {
-        if (session('role') !== 'admin' || (int)$id !== (int)session('user_id')) {
+        if (session('role') === 'admin') {
+            if ((int)$id !== (int)session('user_id')) {
+                abort(401);
+            }
+            $admin = User::select(self::DISPLAY_COLUMNS)->findOrFail($id);
+        } elseif (session('role') === 'developer') {
+            $admin = User::select(self::DISPLAY_COLUMNS)->where('role', 'admin')->findOrFail($id);
+        } else {
             abort(401);
         }
-        $admin = User::select(self::DISPLAY_COLUMNS)->findOrFail($id);
         return view('admin.show', compact('admin'));
     }
 
     public function edit($id)
     {
-        if (session('role') !== 'admin' || (int)$id !== (int)session('user_id')) {
+        if (session('role') === 'admin') {
+            if ((int)$id !== (int)session('user_id')) {
+                abort(401);
+            }
+            $admin = User::findOrFail($id);
+        } elseif (session('role') === 'developer') {
+            $admin = User::where('role', 'admin')->findOrFail($id);
+        } else {
             abort(401);
         }
-        $admin = User::findOrFail($id);
         return view('admin.edit', compact('admin'));
     }
 
     public function update(Request $request, $id)
     {
-        if (session('role') !== 'admin' || (int)$id !== (int)session('user_id')) {
+        if (session('role') === 'admin') {
+            if ((int)$id !== (int)session('user_id')) {
+                abort(401);
+            }
+            $admin = User::findOrFail($id);
+        } elseif (session('role') === 'developer') {
+            $admin = User::where('role', 'admin')->findOrFail($id);
+        } else {
             abort(401);
         }
-        $admin = User::findOrFail($id);
         if ($request->has('role')) {
-            if ($request->input('role') === 'admin') {
-                return back()->withErrors(['role' => 'Role cannot be set to admin.'])->withInput();
-            }
             return back()->withErrors(['role' => 'Role modification is not allowed.'])->withInput();
         }
         $data = $request->validate([
@@ -87,15 +125,24 @@ class AdminUserController extends Controller
 
     public function destroy($id)
     {
-        if (session('role') !== 'admin' || (int)$id !== (int)session('user_id')) {
+        if (session('role') === 'admin') {
+            if ((int)$id !== (int)session('user_id')) {
+                abort(401);
+            }
+        } elseif (session('role') === 'developer') {
+            // allow
+        } else {
             abort(401);
         }
         if (User::where('role', 'admin')->count() <= 1) {
             return back()->withErrors(['error' => 'Cannot delete the last admin account.']);
         }
-        User::findOrFail($id)->delete();
-        session()->invalidate();
-        session()->regenerateToken();
-        return redirect('/login');
+        User::where('role', 'admin')->findOrFail($id)->delete();
+        if (session('role') === 'admin') {
+            session()->invalidate();
+            session()->regenerateToken();
+            return redirect('/login');
+        }
+        return redirect('/admin');
     }
 }

@@ -16,7 +16,11 @@
                 <div class="spinner-border spinner-border-sm text-secondary"></div>
             </div>
         </form>
+        @if(session('role') === 'developer')
+        <a class="btn btn-primary" href="/admin/add">Add</a>
+        @else
         <button class="btn btn-primary" disabled>Add</button>
+        @endif
     </div>
 </div>
 

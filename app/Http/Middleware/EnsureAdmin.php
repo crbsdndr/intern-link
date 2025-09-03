@@ -10,7 +10,7 @@ class EnsureAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (session('role') !== 'admin') {
+        if (!in_array(session('role'), ['admin', 'developer'])) {
             abort(401);
         }
         return $next($request);

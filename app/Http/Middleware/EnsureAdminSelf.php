@@ -15,6 +15,8 @@ class EnsureAdminSelf
             if ($routeId !== (int) session('user_id')) {
                 abort(401);
             }
+        } elseif (session('role') === 'developer') {
+            // Developers can manage any admin account
         } else {
             abort(401);
         }

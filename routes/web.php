@@ -68,7 +68,7 @@ Route::middleware('auth.session')->group(function () {
 
     Route::prefix('supervisor')->group(function () {
         Route::get('/', [SupervisorController::class, 'index']);
-        Route::middleware('role:admin')->group(function () {
+        Route::middleware('role:admin,developer')->group(function () {
             Route::get('/add', [SupervisorController::class, 'create']);
             Route::post('/', [SupervisorController::class, 'store']);
         });

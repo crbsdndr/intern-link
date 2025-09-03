@@ -63,7 +63,7 @@ Route::middleware('auth.session')->group(function () {
         Route::post('/', [StudentController::class, 'store']);
         Route::middleware('student.self')->group(function () {
             Route::get('{id}/see', [StudentController::class, 'show']);
-            Route::get('{id}/edit', [StudentController::class, 'edit']);
+            Route::get('{id}/edit', [StudentController::class, 'edit'])->name('student.edit');
             Route::put('{id}', [StudentController::class, 'update']);
             Route::delete('{id}', [StudentController::class, 'destroy']);
         });
@@ -77,7 +77,7 @@ Route::middleware('auth.session')->group(function () {
         });
         Route::middleware('supervisor.self')->group(function () {
             Route::get('{id}/see', [SupervisorController::class, 'show']);
-            Route::get('{id}/edit', [SupervisorController::class, 'edit']);
+            Route::get('{id}/edit', [SupervisorController::class, 'edit'])->name('supervisor.edit');
             Route::put('{id}', [SupervisorController::class, 'update']);
             Route::delete('{id}', [SupervisorController::class, 'destroy']);
         });
@@ -89,7 +89,7 @@ Route::middleware('auth.session')->group(function () {
         Route::post('/', [DeveloperController::class, 'store']);
         Route::middleware('developer.self')->group(function () {
             Route::get('{id}/see', [DeveloperController::class, 'show']);
-            Route::get('{id}/edit', [DeveloperController::class, 'edit']);
+            Route::get('{id}/edit', [DeveloperController::class, 'edit'])->name('developer.edit');
             Route::put('{id}', [DeveloperController::class, 'update']);
             Route::delete('{id}', [DeveloperController::class, 'destroy']);
         });
@@ -101,7 +101,7 @@ Route::middleware('auth.session')->group(function () {
         Route::post('/', [AdminUserController::class, 'store']);
         Route::middleware('admin.self')->group(function () {
             Route::get('{id}/see', [AdminUserController::class, 'show']);
-            Route::get('{id}/edit', [AdminUserController::class, 'edit']);
+            Route::get('{id}/edit', [AdminUserController::class, 'edit'])->name('admin.edit');
             Route::put('{id}', [AdminUserController::class, 'update']);
             Route::delete('{id}', [AdminUserController::class, 'destroy']);
         });

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SupervisorController;
+use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\ApplicationController;
@@ -79,6 +80,18 @@ Route::middleware('auth.session')->group(function () {
             Route::get('{id}/edit', [SupervisorController::class, 'edit']);
             Route::put('{id}', [SupervisorController::class, 'update']);
             Route::delete('{id}', [SupervisorController::class, 'destroy']);
+        });
+    });
+
+    Route::prefix('developer')->group(function () {
+        Route::get('/', [DeveloperController::class, 'index']);
+        Route::get('/add', [DeveloperController::class, 'create']);
+        Route::post('/', [DeveloperController::class, 'store']);
+        Route::middleware('developer.self')->group(function () {
+            Route::get('{id}/see', [DeveloperController::class, 'show']);
+            Route::get('{id}/edit', [DeveloperController::class, 'edit']);
+            Route::put('{id}', [DeveloperController::class, 'update']);
+            Route::delete('{id}', [DeveloperController::class, 'destroy']);
         });
     });
 

@@ -7,7 +7,6 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Monitoring Logs</h1>
-    @php($isStudent = session('role') === 'student')
     <div class="d-flex align-items-center gap-2">
         <form method="get" id="monitoring-search-form" class="d-flex">
             <div class="input-group">
@@ -32,11 +31,7 @@
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">{{ count($filters) }}</span>
             @endif
         </button>
-        @if($isStudent)
-            <button class="btn btn-primary" disabled>Add</button>
-        @else
-            <a href="/monitoring/add" class="btn btn-primary">Add</a>
-        @endif
+        <a href="/monitoring/add" class="btn btn-primary">Add</a>
     </div>
 </div>
 
@@ -78,17 +73,12 @@
             <td>{{ $log->title ?? Str::limit($log->content, 20) }}</td>
             <td>
                 <a href="/monitoring/{{ $log->id }}/see" class="btn btn-sm btn-secondary">View</a>
-                @if($isStudent)
-                    <button class="btn btn-sm btn-warning" disabled>Edit</button>
-                    <button class="btn btn-sm btn-danger" disabled>Delete</button>
-                @else
-                    <a href="/monitoring/{{ $log->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="/monitoring/{{ $log->id }}" method="POST" style="display:inline-block" onsubmit="return confirm('Delete this log?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                    </form>
-                @endif
+                <a href="/monitoring/{{ $log->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
+                <form action="/monitoring/{{ $log->id }}" method="POST" style="display:inline-block" onsubmit="return confirm('Delete this log?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
             </td>
         </tr>
         @empty

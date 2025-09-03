@@ -5,7 +5,6 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Supervisors</h1>
-    @php($isStudent = session('role') === 'student')
     <div class="d-flex align-items-center gap-2">
         <form method="get" action="{{ url()->current() }}" id="supervisor-search-form" class="position-relative">
             <div class="input-group" style="min-width:280px;">
@@ -26,11 +25,7 @@
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">{{ count($filters) }}</span>
             @endif
         </button>
-        @if($isStudent)
-            <button class="btn btn-primary" disabled>Add</button>
-        @else
-            <a href="/supervisor/add" class="btn btn-primary">Add</a>
-        @endif
+        <a href="/supervisor/add" class="btn btn-primary">Add</a>
     </div>
 </div>
 
@@ -63,17 +58,12 @@
             <td>{{ $supervisor->department }}</td>
             <td>
                 <a href="/supervisor/{{ $supervisor->id }}/see" class="btn btn-sm btn-secondary">View</a>
-                @if($isStudent)
-                    <button class="btn btn-sm btn-warning" disabled>Edit</button>
-                    <button class="btn btn-sm btn-danger" disabled>Delete</button>
-                @else
-                    <a href="/supervisor/{{ $supervisor->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="/supervisor/{{ $supervisor->id }}" method="POST" style="display:inline-block">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                    </form>
-                @endif
+                <a href="/supervisor/{{ $supervisor->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
+                <form action="/supervisor/{{ $supervisor->id }}" method="POST" style="display:inline-block">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
             </td>
         </tr>
         @empty

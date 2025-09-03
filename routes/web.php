@@ -19,8 +19,7 @@ Route::match(['get', 'post'], '/signup', [AuthController::class, 'signup'])->nam
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth.session')->group(function () {
-    Route::view('/', 'home');
-    Route::view('/dashboard', 'home');
+    Route::view('/', 'dashboard');
 
     Route::prefix('application')->group(function () {
         Route::get('/', [ApplicationController::class, 'index']);

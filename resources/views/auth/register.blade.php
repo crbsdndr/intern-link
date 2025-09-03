@@ -41,6 +41,7 @@
             @endforeach
         </select>
     </div>
+    <p>Already have an account? <a href="{{ route('login') }}">Login</a></p>
     <button type="submit">Next</button>
 </form>
 @else

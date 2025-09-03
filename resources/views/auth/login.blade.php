@@ -26,6 +26,7 @@
         <label>Password</label>
         <input type="password" name="password" required>
     </div>
+    <p>New to Internish? <a href="{{ route('signup') }}">Create an account</a></p>
     <button type="submit">Login</button>
 </form>
 </body>

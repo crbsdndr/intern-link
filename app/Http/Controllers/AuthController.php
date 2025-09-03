@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    private const DEPARTMENTS = ['Engineering', 'Business', 'Design'];
-
     public function signup(Request $request)
     {
         $step = session('register.step', 1);
@@ -63,7 +61,7 @@ class AuthController extends Controller
             } else {
                 $validated = $request->validate([
                     'supervisor_number' => 'required|string|max:64|regex:/^[A-Za-z0-9_-]+$/',
-                    'department' => 'required|in:' . implode(',', self::DEPARTMENTS),
+                    'department' => 'required|string',
                     'photo' => 'required|url',
 
                 ]);
@@ -92,7 +90,6 @@ class AuthController extends Controller
                     'supervisor_number' => $validated['supervisor_number'],
                     'department' => $validated['department'],
                     'photo' => $validated['photo'],
-                    'photo' => $photoPath,
                 ]);
             }
 
@@ -105,7 +102,7 @@ class AuthController extends Controller
             return redirect('/');
         }
 
-        return view('auth.register', ['step' => $step, 'data' => $data, 'extra' => $extra, 'departments' => self::DEPARTMENTS]);
+        return view('auth.register', ['step' => $step, 'data' => $data, 'extra' => $extra]);
     }
 
     public function login(Request $request)

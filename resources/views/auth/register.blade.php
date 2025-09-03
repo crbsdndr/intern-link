@@ -74,19 +74,14 @@
     </div>
     <div>
         <label>Department</label>
-        <select name="department" required>
-            <option value="">Select department</option>
-            @foreach ($departments as $dept)
-                <option value="{{ $dept }}" {{ (old('department', $extra['department'] ?? '') === $dept) ? 'selected' : '' }}>{{ $dept }}</option>
-            @endforeach
-        </select>
+        <input type="text" name="department" value="{{ old('department', $extra['department'] ?? '') }}" required>
     </div>
     <div>
         <label>Photo (link)</label>
         <input type="text" name="photo" value="{{ old('photo', $extra['photo'] ?? '') }}" required>
     </div>
     @endif
-    <button type="submit" name="back" value="1">Back</button>
+    <button type="submit" name="back" value="1" formnovalidate>Back</button>
     <button type="submit">Sign Up</button>
 </form>
 @endif

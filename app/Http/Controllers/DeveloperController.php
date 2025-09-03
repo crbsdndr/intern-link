@@ -18,16 +18,10 @@ class DeveloperController extends Controller
 
     public function index(Request $request)
     {
-        if (!in_array(session('role'), ['admin', 'developer'])) {
-            abort(401);
-        }
-
         $query = DB::table('users')
             ->select('id', 'name', 'email', 'role', 'created_at', 'updated_at')
-            ->where('role', 'developer');
-        if (session('role') === 'developer') {
-            $query->where('id', session('user_id'));
-        }
+            ->where('role', 'developer')
+            ->where('id', session('user_id'));
 
         $filters = [];
 
@@ -85,67 +79,28 @@ class DeveloperController extends Controller
 
     public function show($id)
     {
-        if (!in_array(session('role'), ['admin', 'developer'])) {
-            abort(401);
-        }
         $developer = User::where('role', 'developer')->findOrFail($id);
-        if (session('role') === 'developer' && $developer->id !== session('user_id')) {
-            abort(401);
-        }
         return view('developer.show', compact('developer'));
     }
 
     public function create()
     {
-        if (session('role') !== 'admin') {
-            abort(401);
-        }
-        return view('developer.create');
+        abort(401, 'Akses ditolak.');
     }
 
     public function store(Request $request)
     {
-        if (session('role') !== 'admin') {
-            abort(401);
-        }
-        $data = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string',
-            'password' => 'required|string',
-        ]);
-
-        User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'] ?? null,
-            'password' => Hash::make($data['password']),
-            'role' => 'developer',
-        ]);
-
-        return redirect('/developer')->with('status', 'Developer created.');
+        abort(401, 'Akses ditolak.');
     }
 
     public function edit($id)
     {
-        if (!in_array(session('role'), ['admin', 'developer'])) {
-            abort(401);
-        }
-        if (session('role') === 'developer' && (int) $id !== session('user_id')) {
-            abort(401);
-        }
         $developer = User::where('role', 'developer')->findOrFail($id);
         return view('developer.edit', compact('developer'));
     }
 
     public function update(Request $request, $id)
     {
-        if (!in_array(session('role'), ['admin', 'developer'])) {
-            abort(401);
-        }
-        if (session('role') === 'developer' && (int) $id !== session('user_id')) {
-            abort(401);
-        }
         $developer = User::where('role', 'developer')->findOrFail($id);
 
         $data = $request->validate([
@@ -163,17 +118,11 @@ class DeveloperController extends Controller
         }
         $developer->save();
 
-        $message = session('role') === 'developer' ? 'Profil berhasil diperbarui.' : 'Developer updated.';
-        return redirect('/developer')->with('status', $message);
+        return redirect('/developer')->with('status', 'Profil berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
-        if (session('role') !== 'admin') {
-            abort(401);
-        }
-        $developer = User::where('role', 'developer')->findOrFail($id);
-        $developer->delete();
-        return redirect('/developer')->with('status', 'Developer deleted.');
+        abort(401, 'Akses ditolak.');
     }
 }

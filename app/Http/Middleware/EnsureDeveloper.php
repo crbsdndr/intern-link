@@ -6,15 +6,12 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureDeveloperSelf
+class EnsureDeveloper
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (session('role') === 'developer') {
-            $routeId = (int) $request->route('id');
-            if ($routeId !== (int) session('user_id')) {
-                abort(401, 'Akses ditolak.');
-            }
+        if (session('role') !== 'developer') {
+            abort(401, 'Akses ditolak.');
         }
         return $next($request);
     }

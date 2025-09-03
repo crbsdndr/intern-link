@@ -11,7 +11,7 @@
     <tr><th>Role</th><td>{{ $developer->role }}</td></tr>
 </table>
 <a href="/developer" class="btn btn-secondary">Back</a>
-@if(session('role') === 'admin' || session('user_id') == $developer->id)
+@if(session('user_id') == $developer->id)
     <a href="/developer/{{ $developer->id }}/edit" class="btn btn-primary">Edit</a>
 @endif
 @endsection

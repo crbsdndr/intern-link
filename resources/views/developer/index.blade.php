@@ -16,11 +16,7 @@
                 <div class="spinner-border spinner-border-sm text-secondary"></div>
             </div>
         </form>
-        @if(session('role') === 'admin')
-            <a href="/developer/add" class="btn btn-primary">Add</a>
-        @else
-            <button class="btn btn-primary" disabled>Add</button>
-        @endif
+        <button class="btn btn-primary" disabled>Add</button>
     </div>
 </div>
 
@@ -41,20 +37,12 @@
             <td>{{ $developer->email }}</td>
             <td>
                 <a href="/developer/{{ $developer->id }}/see" class="btn btn-sm btn-secondary">View</a>
-                @if(session('role') === 'admin' || session('user_id') == $developer->id)
+                @if(session('user_id') == $developer->id)
                     <a href="/developer/{{ $developer->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
                 @else
                     <button class="btn btn-sm btn-warning" disabled>Edit</button>
                 @endif
-                @if(session('role') === 'admin')
-                    <form action="/developer/{{ $developer->id }}" method="POST" style="display:inline-block">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                    </form>
-                @else
-                    <button class="btn btn-sm btn-danger" disabled>Delete</button>
-                @endif
+                <button class="btn btn-sm btn-danger" disabled>Delete</button>
             </td>
         </tr>
         @empty

@@ -83,7 +83,7 @@ Route::middleware('auth.session')->group(function () {
         });
     });
 
-    Route::prefix('developer')->group(function () {
+    Route::prefix('developer')->middleware('developer')->group(function () {
         Route::get('/', [DeveloperController::class, 'index']);
         Route::get('/add', [DeveloperController::class, 'create']);
         Route::post('/', [DeveloperController::class, 'store']);

@@ -64,11 +64,11 @@ class MonitoringLogController extends Controller
             });
         }
 
-        $sort = $request->query('sort', 'log_date:desc');
+        $sort = $request->query('sort', 'created_at:desc');
         [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
         $allowedSorts = ['log_date', 'created_at', 'updated_at'];
         if (!in_array($sortField, $allowedSorts)) {
-            $sortField = 'log_date';
+            $sortField = 'created_at';
         }
         $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
         $query->orderBy($sortField, $sortDir)->orderByDesc('id');

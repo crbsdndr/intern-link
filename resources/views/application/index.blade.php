@@ -49,6 +49,7 @@
 <table class="table table-bordered">
     <thead>
         <tr>
+            <th>No</th>
             <th>Student Name</th>
             <th>Institution Name</th>
             <th>Year</th>
@@ -59,6 +60,7 @@
     <tbody>
         @forelse($applications as $application)
         <tr>
+            <td>{{ $applications->total() - ($applications->currentPage() - 1) * $applications->perPage() - $loop->index }}</td>
             <td>{{ $application->student_name }}</td>
             <td>{{ $application->institution_name }}</td>
             <td>{{ $application->period_year }}</td>
@@ -75,9 +77,9 @@
         </tr>
         @empty
         @if(request('q'))
-        <tr><td colspan="5">Tidak ada hasil untuk '{{ request('q') }}'.</td></tr>
+        <tr><td colspan="6">Tidak ada hasil untuk '{{ request('q') }}'.</td></tr>
         @else
-        <tr><td colspan="5">No applications found.</td></tr>
+        <tr><td colspan="6">No applications found.</td></tr>
         @endif
         @endforelse
     </tbody>

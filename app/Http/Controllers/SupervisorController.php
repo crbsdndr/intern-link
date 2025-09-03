@@ -64,13 +64,13 @@ class SupervisorController extends Controller
             });
         }
 
-        $sort = $request->query('sort', 'department:asc');
-        [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'asc');
+        $sort = $request->query('sort', 'created_at:desc');
+        [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
         $allowedSorts = array_merge(self::DISPLAY_COLUMNS, ['created_at', 'updated_at']);
         if (!in_array($sortField, $allowedSorts)) {
-            $sortField = 'department';
+            $sortField = 'created_at';
         }
-        $sortDir = $sortDir === 'desc' ? 'desc' : 'asc';
+        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
         $query->orderBy($sortField, $sortDir);
 
         $supervisors = $query->paginate(10)->withQueryString();

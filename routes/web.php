@@ -67,12 +67,16 @@ Route::middleware('auth.session')->group(function () {
 
     Route::prefix('supervisor')->group(function () {
         Route::get('/', [SupervisorController::class, 'index']);
-        Route::get('/add', [SupervisorController::class, 'create']);
-        Route::post('/', [SupervisorController::class, 'store']);
-        Route::get('{id}/see', [SupervisorController::class, 'show']);
-        Route::get('{id}/edit', [SupervisorController::class, 'edit']);
-        Route::put('{id}', [SupervisorController::class, 'update']);
-        Route::delete('{id}', [SupervisorController::class, 'destroy']);
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/add', [SupervisorController::class, 'create']);
+            Route::post('/', [SupervisorController::class, 'store']);
+        });
+        Route::middleware('supervisor.self')->group(function () {
+            Route::get('{id}/see', [SupervisorController::class, 'show']);
+            Route::get('{id}/edit', [SupervisorController::class, 'edit']);
+            Route::put('{id}', [SupervisorController::class, 'update']);
+            Route::delete('{id}', [SupervisorController::class, 'destroy']);
+        });
     });
 
     Route::prefix('institution')->group(function () {

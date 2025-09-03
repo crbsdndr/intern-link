@@ -26,6 +26,8 @@ class SupervisorController extends Controller
                 ->join('internships as it', 'ml.internship_id', '=', 'it.id')
                 ->where('it.student_id', $this->currentStudentId())
                 ->distinct();
+        } elseif (session('role') === 'supervisor') {
+            $query->where('sv.id', $this->currentSupervisorId());
         }
 
         $filters = [];
@@ -84,6 +86,7 @@ class SupervisorController extends Controller
         return view('supervisor.index', [
             'supervisors' => $supervisors,
             'filters' => $filters,
+            'currentSupervisorId' => $this->currentSupervisorId(),
         ]);
     }
 
@@ -98,13 +101,15 @@ class SupervisorController extends Controller
                 ->where('it.student_id', $this->currentStudentId())
                 ->exists();
             abort_unless($related, 401);
+        } elseif (session('role') === 'supervisor' && $id != $this->currentSupervisorId()) {
+            abort(401);
         }
         return view('supervisor.show', compact('supervisor'));
     }
 
     public function create()
     {
-        if (session('role') === 'student') {
+        if (session('role') !== 'admin') {
             abort(401);
         }
         return view('supervisor.create');
@@ -112,7 +117,7 @@ class SupervisorController extends Controller
 
     public function store(Request $request)
     {
-        if (session('role') === 'student') {
+        if (session('role') !== 'admin') {
             abort(401);
         }
         $data = $request->validate([
@@ -150,6 +155,9 @@ class SupervisorController extends Controller
         if (session('role') === 'student') {
             abort(401);
         }
+        if (session('role') === 'supervisor' && $id != $this->currentSupervisorId()) {
+            abort(401);
+        }
         $supervisor = DB::table('supervisor_details_view')->where('id', $id)->first();
         abort_if(!$supervisor, 404);
         return view('supervisor.edit', compact('supervisor'));
@@ -158,6 +166,9 @@ class SupervisorController extends Controller
     public function update(Request $request, $id)
     {
         if (session('role') === 'student') {
+            abort(401);
+        }
+        if (session('role') === 'supervisor' && $id != $this->currentSupervisorId()) {
             abort(401);
         }
         $supervisor = Supervisor::findOrFail($id);
@@ -195,6 +206,9 @@ class SupervisorController extends Controller
     public function destroy($id)
     {
         if (session('role') === 'student') {
+            abort(401);
+        }
+        if (session('role') === 'supervisor' && $id != $this->currentSupervisorId()) {
             abort(401);
         }
         $supervisor = Supervisor::findOrFail($id);

@@ -13,5 +13,13 @@ abstract class Controller
         }
         return DB::table('students')->where('user_id', session('user_id'))->value('id');
     }
+
+    protected function currentSupervisorId(): ?int
+    {
+        if (session('role') !== 'supervisor') {
+            return null;
+        }
+        return DB::table('supervisors')->where('user_id', session('user_id'))->value('id');
+    }
 }
 

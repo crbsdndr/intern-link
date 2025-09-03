@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.session' => \App\Http\Middleware\EnsureAuthenticated::class,
             'role' => \App\Http\Middleware\EnsureRole::class,
             'supervisor.self' => \App\Http\Middleware\EnsureSupervisorSelf::class,
+            'admin' => \App\Http\Middleware\EnsureAdmin::class,
+            'admin.self' => \App\Http\Middleware\EnsureAdminSelf::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -23,30 +23,33 @@
         $settingsUrl = route('developer.edit', ['id' => $userId]);
     }
 @endphp
-<header class="navbar navbar-light bg-light border-bottom px-3 d-flex align-items-center">
-    <button class="btn btn-outline-secondary me-3" id="sidebarToggle" aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="true">
-        <i class="bi bi-list"></i>
-    </button>
-    <div class="dropdown ms-auto">
-        <button class="btn btn-light dropdown-toggle d-flex align-items-center" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+<header class="flex items-center bg-gray-100 border-b px-3">
+    <button class="border rounded px-2 py-1 text-gray-600 mr-3" id="sidebarToggle" aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="true">☰</button>
+    <div class="relative ml-auto">
+        <button class="flex items-center px-2 py-1 border rounded" id="profileDropdown" aria-expanded="false">
             @if($photo)
-                <img src="{{ $photo }}" alt="Foto profil" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+                <img src="{{ $photo }}" alt="Foto profil" class="rounded-full mr-2" style="width:32px;height:32px;object-fit:cover;">
             @else
-                <i class="bi bi-person-circle fs-4 me-2"></i>
+                <span class="text-2xl mr-2">👤</span>
             @endif
             <span>{{ $name }}</span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+        <ul class="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg hidden" id="profileMenu">
             @if($settingsUrl)
-            <li><a class="dropdown-item" href="{{ $settingsUrl }}">Pengaturan</a></li>
-            <li><hr class="dropdown-divider"></li>
+            <li><a class="block px-4 py-2 hover:bg-gray-100" href="{{ $settingsUrl }}">Pengaturan</a></li>
+            <li><hr class="my-1"></li>
             @endif
             <li>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="dropdown-item">Logout</button>
+                    <button type="submit" class="w-full text-left px-4 py-2 hover:bg-gray-100">Logout</button>
                 </form>
             </li>
         </ul>
     </div>
 </header>
+<script>
+document.getElementById('profileDropdown').addEventListener('click', function(){
+    document.getElementById('profileMenu').classList.toggle('hidden');
+});
+</script>

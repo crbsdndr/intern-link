@@ -109,7 +109,7 @@ class SupervisorController extends Controller
 
     public function create()
     {
-        if (session('role') !== 'admin') {
+        if (!in_array(session('role'), ['admin', 'developer'])) {
             abort(401);
         }
         return view('supervisor.create');
@@ -117,7 +117,7 @@ class SupervisorController extends Controller
 
     public function store(Request $request)
     {
-        if (session('role') !== 'admin') {
+        if (!in_array(session('role'), ['admin', 'developer'])) {
             abort(401);
         }
         $data = $request->validate([

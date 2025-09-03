@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Student;
+use App\Models\Supervisor;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    private const DEPARTMENTS = ['Engineering', 'Business', 'Design'];
+
     public function signup(Request $request)
     {
         $step = session('register.step', 1);
@@ -22,7 +25,7 @@ class AuthController extends Controller
                     'email' => 'required|email|unique:users,email',
                     'password' => 'required|min:8',
                     'phone' => 'required|numeric',
-                    'role' => 'required|in:student,supervisor,admin,developer',
+                    'role' => 'required|in:student,supervisor',
                 ]);
 
                 session([
@@ -39,7 +42,11 @@ class AuthController extends Controller
             }
 
             if ($request->has('back')) {
-                $extraInput = $request->only(['student_number', 'national_sn', 'major', 'batch', 'photo']);
+                if ($data['role'] === 'student') {
+                    $extraInput = $request->only(['student_number', 'national_sn', 'major', 'batch', 'photo']);
+                } else {
+                    $extraInput = $request->only(['supervisor_number', 'department', 'photo']);
+                }
                 session(['register.step' => 1, 'register.data' => $data, 'register.extra' => $extraInput]);
                 return redirect()->route('signup');
             }
@@ -50,10 +57,14 @@ class AuthController extends Controller
                     'national_sn' => 'required|numeric',
                     'major' => 'required|string',
                     'batch' => 'required|date_format:Y',
-                    'photo' => 'nullable|string',
+                    'photo' => 'nullable|url',
                 ]);
             } else {
-                $validated = [];
+                $validated = $request->validate([
+                    'supervisor_number' => 'required|string|max:64|regex:/^[A-Za-z0-9_-]+$/',
+                    'department' => 'required|in:' . implode(',', self::DEPARTMENTS),
+                    'photo' => 'required|url',
+                ]);
             }
 
             $user = User::create([
@@ -73,6 +84,13 @@ class AuthController extends Controller
                     'batch' => $validated['batch'],
                     'photo' => $validated['photo'] ?? null,
                 ]);
+            } else {
+                Supervisor::create([
+                    'user_id' => $user->id,
+                    'supervisor_number' => $validated['supervisor_number'],
+                    'department' => $validated['department'],
+                    'photo' => $validated['photo'],
+                ]);
             }
 
             session()->forget('register');
@@ -84,7 +102,7 @@ class AuthController extends Controller
             return redirect('/');
         }
 
-        return view('auth.register', ['step' => $step, 'data' => $data, 'extra' => $extra]);
+        return view('auth.register', ['step' => $step, 'data' => $data, 'extra' => $extra, 'departments' => self::DEPARTMENTS]);
     }
 
     public function login(Request $request)

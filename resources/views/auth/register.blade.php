@@ -36,7 +36,7 @@
         <label>Role</label>
         <select name="role" required>
             <option value="">Select role</option>
-            @foreach (['student','supervisor','admin','developer'] as $role)
+            @foreach (['student','supervisor'] as $role)
                 <option value="{{ $role }}" {{ (old('role', $data['role'] ?? '') === $role) ? 'selected' : '' }}>{{ ucfirst($role) }}</option>
             @endforeach
         </select>
@@ -66,6 +66,24 @@
     <div>
         <label>Photo (link)</label>
         <input type="text" name="photo" value="{{ old('photo', $extra['photo'] ?? '') }}">
+    </div>
+    @elseif (($data['role'] ?? '') === 'supervisor')
+    <div>
+        <label>Supervisor Number</label>
+        <input type="text" name="supervisor_number" value="{{ old('supervisor_number', $extra['supervisor_number'] ?? '') }}" required>
+    </div>
+    <div>
+        <label>Department</label>
+        <select name="department" required>
+            <option value="">Select department</option>
+            @foreach ($departments as $dept)
+                <option value="{{ $dept }}" {{ (old('department', $extra['department'] ?? '') === $dept) ? 'selected' : '' }}>{{ $dept }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div>
+        <label>Photo (link)</label>
+        <input type="text" name="photo" value="{{ old('photo', $extra['photo'] ?? '') }}" required>
     </div>
     @endif
     <button type="submit" name="back" value="1">Back</button>

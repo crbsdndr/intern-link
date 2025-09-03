@@ -68,8 +68,12 @@
             <td>
                 <a href="/student/{{ $student->id }}/see" class="btn btn-sm btn-secondary">View</a>
                 @if($isStudent)
-                    <button class="btn btn-sm btn-warning" disabled>Edit</button>
-                    <button class="btn btn-sm btn-danger" disabled>Delete</button>
+                    <a href="/student/{{ $student->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
+                    <form action="/student/{{ $student->id }}" method="POST" style="display:inline-block">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
                 @else
                     <a href="/student/{{ $student->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
                     <form action="/student/{{ $student->id }}" method="POST" style="display:inline-block">

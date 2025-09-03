@@ -27,5 +27,23 @@
         </ul>
     </div>
 </div>
-<a href="/student" class="btn btn-secondary mt-3">Back</a>
+@php($isStudent = session('role') === 'student')
+<div class="mt-3">
+    <a href="/student" class="btn btn-secondary">Back</a>
+    @if($isStudent)
+        <a href="/student/{{ $student->id }}/edit" class="btn btn-warning">Edit</a>
+        <form action="/student/{{ $student->id }}" method="POST" style="display:inline-block">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+    @else
+        <a href="/student/{{ $student->id }}/edit" class="btn btn-warning">Edit</a>
+        <form action="/student/{{ $student->id }}" method="POST" style="display:inline-block">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+    @endif
+</div>
 @endsection

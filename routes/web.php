@@ -60,10 +60,12 @@ Route::middleware('auth.session')->group(function () {
         Route::get('/', [StudentController::class, 'index']);
         Route::get('/add', [StudentController::class, 'create']);
         Route::post('/', [StudentController::class, 'store']);
-        Route::get('{id}/see', [StudentController::class, 'show']);
-        Route::get('{id}/edit', [StudentController::class, 'edit']);
-        Route::put('{id}', [StudentController::class, 'update']);
-        Route::delete('{id}', [StudentController::class, 'destroy']);
+        Route::middleware('student.self')->group(function () {
+            Route::get('{id}/see', [StudentController::class, 'show']);
+            Route::get('{id}/edit', [StudentController::class, 'edit']);
+            Route::put('{id}', [StudentController::class, 'update']);
+            Route::delete('{id}', [StudentController::class, 'destroy']);
+        });
     });
 
     Route::prefix('supervisor')->group(function () {

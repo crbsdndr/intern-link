@@ -7,8 +7,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
+@include('layouts.partials.header')
 <div class="d-flex">
-    <nav class="bg-light border-end" style="min-width:200px;">
+    <nav id="sidebar" class="bg-light border-end" style="min-width:200px;">
         <div class="list-group list-group-flush">
             <a href="/" class="list-group-item list-group-item-action">Dashboard</a>
             <a href="/student" class="list-group-item list-group-item-action">Students</a>
@@ -23,8 +24,8 @@
             @if(in_array(session('role'), ['admin','developer']))
             <a href="/admin" class="list-group-item list-group-item-action">Admin</a>
             @endif
-        </div>
-    </nav>
+    </div>
+</nav>
     <main class="p-4 flex-fill">
         @if (session('status'))
             <div class="alert alert-info">{{ session('status') }}</div>
@@ -33,5 +34,13 @@
     </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.getElementById('sidebarToggle').addEventListener('click', function(){
+    var sidebar = document.getElementById('sidebar');
+    var expanded = this.getAttribute('aria-expanded') === 'true';
+    sidebar.classList.toggle('d-none');
+    this.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+});
+</script>
 </body>
 </html>

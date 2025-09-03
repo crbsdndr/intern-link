@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SupervisorController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\InternshipController;
@@ -76,6 +77,18 @@ Route::middleware('auth.session')->group(function () {
             Route::get('{id}/edit', [SupervisorController::class, 'edit']);
             Route::put('{id}', [SupervisorController::class, 'update']);
             Route::delete('{id}', [SupervisorController::class, 'destroy']);
+        });
+    });
+
+    Route::prefix('admin')->middleware('admin')->group(function () {
+        Route::get('/', [AdminUserController::class, 'index']);
+        Route::get('/add', [AdminUserController::class, 'create']);
+        Route::post('/', [AdminUserController::class, 'store']);
+        Route::middleware('admin.self')->group(function () {
+            Route::get('{id}/see', [AdminUserController::class, 'show']);
+            Route::get('{id}/edit', [AdminUserController::class, 'edit']);
+            Route::put('{id}', [AdminUserController::class, 'update']);
+            Route::delete('{id}', [AdminUserController::class, 'destroy']);
         });
     });
 

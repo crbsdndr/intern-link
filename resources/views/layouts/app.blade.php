@@ -17,6 +17,9 @@
             <a href="/application" class="list-group-item list-group-item-action">Applications</a>
             <a href="/internship" class="list-group-item list-group-item-action">Internships</a>
             <a href="/monitoring" class="list-group-item list-group-item-action">Monitorings</a>
+            @if(in_array(session('role'), ['admin','developer']))
+            <a href="/admin" class="list-group-item list-group-item-action">Admin</a>
+            @endif
         </div>
     </nav>
     <main class="p-4 flex-fill">

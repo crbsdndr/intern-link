@@ -20,10 +20,19 @@ class InstitutionController extends Controller
 
     public function index()
     {
-        $institutions = DB::table('institution_details_view')
+        $query = DB::table('institution_details_view')
             ->select('id', 'name', 'city', 'province')
-            ->orderBy('name')
-            ->get();
+            ->orderBy('name');
+        if (session('role') === 'student') {
+            $studentId = $this->currentStudentId();
+            $query->whereIn('id', function ($q) use ($studentId) {
+                $q->select('institution_id')->from('applications')->where('student_id', $studentId)
+                    ->union(
+                        DB::table('internships')->select('institution_id')->where('student_id', $studentId)
+                    );
+            });
+        }
+        $institutions = $query->get();
         return view('institution.index', compact('institutions'));
     }
 
@@ -31,17 +40,31 @@ class InstitutionController extends Controller
     {
         $institution = DB::table('institution_details_view')->where('id', $id)->first();
         abort_if(!$institution, 404);
+        if (session('role') === 'student') {
+            $studentId = $this->currentStudentId();
+            $related = DB::table('applications')->where('student_id', $studentId)->where('institution_id', $id)->exists() ||
+                DB::table('internships')->where('student_id', $studentId)->where('institution_id', $id)->exists();
+            if (!$related) {
+                abort(401);
+            }
+        }
         return view('institution.show', compact('institution'));
     }
 
     public function create()
     {
+        if (session('role') === 'student') {
+            abort(401);
+        }
         [$cities, $provinces] = $this->loadRegions();
         return view('institution.create', compact('cities', 'provinces'));
     }
 
     public function store(Request $request)
     {
+        if (session('role') === 'student') {
+            abort(401);
+        }
         $data = $request->validate([
             'name' => 'required|string|unique:institutions,name',
             'address' => 'nullable|string',
@@ -99,6 +122,9 @@ class InstitutionController extends Controller
 
     public function edit($id)
     {
+        if (session('role') === 'student') {
+            abort(401);
+        }
         $inst = Institution::findOrFail($id);
         $contact = $inst->contacts()->orderByDesc('is_primary')->first();
         $quota = $inst->quotas()->with('period')->orderByDesc('period_id')->first();
@@ -120,6 +146,9 @@ class InstitutionController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (session('role') === 'student') {
+            abort(401);
+        }
         $institution = Institution::findOrFail($id);
         $data = $request->validate([
             'name' => 'required|string|unique:institutions,name,' . $institution->id,
@@ -191,6 +220,9 @@ class InstitutionController extends Controller
 
     public function destroy($id)
     {
+        if (session('role') === 'student') {
+            abort(401);
+        }
         $institution = Institution::findOrFail($id);
         $institution->delete();
         return redirect('/institution');

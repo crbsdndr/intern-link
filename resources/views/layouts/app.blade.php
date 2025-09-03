@@ -13,7 +13,7 @@
             <a href="/" class="list-group-item list-group-item-action">Dashboard</a>
             <a href="/student" class="list-group-item list-group-item-action">Students</a>
             <a href="/supervisor" class="list-group-item list-group-item-action">Supervisors</a>
-            @if(in_array(session('role'), ['admin','developer']))
+            @if(session('role') === 'developer')
             <a href="/developer" class="list-group-item list-group-item-action">Developers</a>
             @endif
             <a href="/institution" class="list-group-item list-group-item-action">Institutions</a>

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Application;
-use App\Models\Period;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -121,8 +120,18 @@ class ApplicationController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $period = Period::orderBy('year', 'desc')->orderBy('term', 'desc')->first();
-        $data['period_id'] = $period ? $period->id : null;
+        $periodId = DB::table('institution_quotas')
+            ->where('institution_id', $data['institution_id'])
+            ->orderByDesc('period_id')
+            ->value('period_id');
+
+        if (!$periodId) {
+            return back()->withErrors([
+                'institution_id' => 'Selected institution has no quota set',
+            ]);
+        }
+
+        $data['period_id'] = $periodId;
 
         Application::create($data);
         return redirect('/application');
@@ -157,6 +166,19 @@ class ApplicationController extends Controller
             'rejection_reason' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
+
+        $periodId = DB::table('institution_quotas')
+            ->where('institution_id', $data['institution_id'])
+            ->orderByDesc('period_id')
+            ->value('period_id');
+
+        if (!$periodId) {
+            return back()->withErrors([
+                'institution_id' => 'Selected institution has no quota set',
+            ]);
+        }
+
+        $data['period_id'] = $periodId;
 
         $application->update($data);
         return redirect('/application');

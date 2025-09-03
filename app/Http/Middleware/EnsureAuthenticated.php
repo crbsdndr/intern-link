@@ -14,6 +14,13 @@ class EnsureAuthenticated
             return redirect('/login');
         }
 
+        $exists = \Illuminate\Support\Facades\DB::table('users')->where('id', session('user_id'))->exists();
+        if (!$exists) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect('/login')->with('status', 'Akun Anda tidak ditemukan. Kemungkinan telah dihapus.');
+        }
+
         return $next($request);
     }
 }

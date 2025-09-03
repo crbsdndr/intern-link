@@ -23,6 +23,9 @@
         </div>
     </nav>
     <main class="p-4 flex-fill">
+        @if (session('status'))
+            <div class="alert alert-info">{{ session('status') }}</div>
+        @endif
         @yield('content')
     </main>
 </div>

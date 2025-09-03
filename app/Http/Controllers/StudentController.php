@@ -153,7 +153,7 @@ class StudentController extends Controller
 
     public function edit($id)
     {
-        if (session('role') === 'student') {
+        if (session('role') === 'student' && (int) $id !== $this->currentStudentId()) {
             abort(401);
         }
         $student = DB::table('student_details_view')->where('id', $id)->first();
@@ -163,10 +163,10 @@ class StudentController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (session('role') === 'student') {
+        $student = Student::findOrFail($id);
+        if (session('role') === 'student' && $student->user_id !== session('user_id')) {
             abort(401);
         }
-        $student = Student::findOrFail($id);
         $user = $student->user;
 
         $data = $request->validate([
@@ -199,16 +199,28 @@ class StudentController extends Controller
             'photo' => $data['photo'] ?? null,
         ]);
 
-        return redirect('/student');
+        $message = session('role') === 'student'
+            ? 'Profil berhasil diperbarui.'
+            : 'Student updated.';
+
+        return redirect('/student')->with('status', $message);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        if (session('role') === 'student') {
+        $student = Student::findOrFail($id);
+        if (session('role') === 'student' && $student->user_id !== session('user_id')) {
             abort(401);
         }
-        $student = Student::findOrFail($id);
+
         $student->user()->delete();
-        return redirect('/student');
+
+        if (session('user_id') === $student->user_id) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect('/login')->with('status', 'Akun Anda telah dihapus. Anda telah keluar.');
+        }
+
+        return redirect('/student')->with('status', 'Student deleted.');
     }
 }

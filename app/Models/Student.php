@@ -14,9 +14,14 @@ class Student extends Model
         'student_number',
         'national_sn',
         'major',
+        'class',
         'batch',
         'notes',
         'photo',
+    ];
+
+    protected $casts = [
+        'class' => 'string',
     ];
 
     public function user()

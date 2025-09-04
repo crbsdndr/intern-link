@@ -18,6 +18,7 @@ class InstitutionSeeder extends Seeder
                 'city' => $faker->city,
                 'province' => $faker->state,
                 'website' => $faker->url,
+                'industry' => $faker->randomElement(['Technology','Manufacturing','Healthcare','Finance','Education']),
             ]);
         }
     }

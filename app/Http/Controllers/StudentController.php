@@ -14,8 +14,8 @@ class StudentController extends Controller
     /**
      * Columns searched and displayed. Adjust here if needed.
      */
-    private const SEARCH_COLUMNS = ['name', 'major'];
-    private const DISPLAY_COLUMNS = ['id', 'name', 'major'];
+    private const SEARCH_COLUMNS = ['name', 'major', 'class'];
+    private const DISPLAY_COLUMNS = ['id', 'name', 'major', 'class'];
 
     public function index(Request $request)
     {
@@ -125,6 +125,7 @@ class StudentController extends Controller
             'student_number' => 'required|string|unique:students,student_number',
             'national_sn' => 'required|string|unique:students,national_sn',
             'major' => 'required|string',
+            'class' => 'required|string|max:100',
             'batch' => 'required|string',
             'notes' => 'nullable|string',
             'photo' => 'nullable|string',
@@ -143,6 +144,7 @@ class StudentController extends Controller
             'student_number' => $data['student_number'],
             'national_sn' => $data['national_sn'],
             'major' => $data['major'],
+            'class' => $data['class'],
             'batch' => $data['batch'],
             'notes' => $data['notes'] ?? null,
             'photo' => $data['photo'] ?? null,
@@ -177,6 +179,7 @@ class StudentController extends Controller
             'student_number' => 'required|string|unique:students,student_number,' . $student->id,
             'national_sn' => 'required|string|unique:students,national_sn,' . $student->id,
             'major' => 'required|string',
+            'class' => 'required|string|max:100',
             'batch' => 'required|string',
             'notes' => 'nullable|string',
             'photo' => 'nullable|string',
@@ -194,6 +197,7 @@ class StudentController extends Controller
             'student_number' => $data['student_number'],
             'national_sn' => $data['national_sn'],
             'major' => $data['major'],
+            'class' => $data['class'],
             'batch' => $data['batch'],
             'notes' => $data['notes'] ?? null,
             'photo' => $data['photo'] ?? null,

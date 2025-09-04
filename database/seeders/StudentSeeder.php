@@ -17,6 +17,7 @@ class StudentSeeder extends Seeder
                 'student_number' => 'S-' . str_pad($i, 4, '0', STR_PAD_LEFT),
                 'national_sn' => 'NSN-' . str_pad($i, 4, '0', STR_PAD_LEFT),
                 'major' => $faker->randomElement(['Computer Science', 'Information Systems', 'Engineering']),
+                'class' => $faker->bothify('XI-?? #'),
                 'batch' => (string)(2020 + $i),
             ]);
         }

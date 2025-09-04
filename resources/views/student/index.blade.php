@@ -56,6 +56,7 @@
             <th>No</th>
             <th>Name</th>
             <th>Major</th>
+            <th>Class</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -65,6 +66,7 @@
             <td>{{ $students->total() - ($students->currentPage() - 1) * $students->perPage() - $loop->index }}</td>
             <td>{{ $student->name }}</td>
             <td>{{ $student->major }}</td>
+            <td>{{ $student->class }}</td>
             <td>
                 <a href="/student/{{ $student->id }}/see" class="btn btn-sm btn-secondary">View</a>
                 @if($isStudent)

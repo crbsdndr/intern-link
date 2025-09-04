@@ -53,6 +53,7 @@
             <th>Name</th>
             <th>City</th>
             <th>Province</th>
+            <th>Industry</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -63,6 +64,7 @@
             <td>{{ $institution->name }}</td>
             <td>{{ $institution->city }}</td>
             <td>{{ $institution->province }}</td>
+            <td>{{ $institution->industry }}</td>
             <td>
                 <a href="/institution/{{ $institution->id }}/see" class="btn btn-sm btn-secondary">View</a>
                 @if($isStudent)

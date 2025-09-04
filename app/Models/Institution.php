@@ -15,6 +15,7 @@ class Institution extends Model
         'city',
         'province',
         'website',
+        'industry',
         'notes',
         'photo',
     ];

@@ -15,7 +15,7 @@
     </div>
     <div class="mb-3">
         <label class="form-label">City</label>
-        <select name="city" class="form-control">
+        <select name="city" class="form-control searchable">
             <option value="">-- Select City --</option>
             @foreach($cities as $city)
                 <option value="{{ $city }}" {{ old('city', optional($institution)->city) == $city ? 'selected' : '' }}>{{ $city }}</option>
@@ -24,7 +24,7 @@
     </div>
     <div class="mb-3">
         <label class="form-label">Province</label>
-        <select name="province" class="form-control">
+        <select name="province" class="form-control searchable">
             <option value="">-- Select Province --</option>
             @foreach($provinces as $province)
                 <option value="{{ $province }}" {{ old('province', optional($institution)->province) == $province ? 'selected' : '' }}>{{ $province }}</option>

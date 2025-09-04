@@ -23,28 +23,29 @@
         $settingsUrl = route('developer.edit', ['id' => $userId]);
     }
 @endphp
-<header class="navbar navbar-light bg-light border-bottom px-3 d-flex align-items-center">
-    <button class="btn btn-outline-secondary me-3" id="sidebarToggle" aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="true">
-        <i class="bi bi-list"></i>
+<header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b px-3 flex items-center">
+    <button class="p-2 rounded-lg border md:hidden" id="sidebarToggle" aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="true">
+        <span class="sr-only">Toggle menu</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
-    <div class="dropdown ms-auto">
-        <button class="btn btn-light dropdown-toggle d-flex align-items-center" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    <div class="ml-auto relative" x-data="{open:false}">
+        <button @click="open=!open" :aria-expanded="open.toString()" class="flex items-center gap-2 rounded-lg border px-3 py-2">
             @if($photo)
-                <img src="{{ $photo }}" alt="Foto profil" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+                <img src="{{ $photo }}" alt="Foto profil" class="rounded-full w-8 h-8 object-cover">
             @else
-                <i class="bi bi-person-circle fs-4 me-2"></i>
+                <span class="inline-block w-8 h-8 rounded-full bg-gray-200"></span>
             @endif
             <span>{{ $name }}</span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+        <ul x-show="open" @click.outside="open=false" class="absolute right-0 mt-2 w-40 rounded-lg border bg-white shadow-md py-1">
             @if($settingsUrl)
-            <li><a class="dropdown-item" href="{{ $settingsUrl }}">Pengaturan</a></li>
-            <li><hr class="dropdown-divider"></li>
+            <li><a class="block px-4 py-2 hover:bg-gray-50" href="{{ $settingsUrl }}">Pengaturan</a></li>
+            <li><hr class="my-1"></li>
             @endif
             <li>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="dropdown-item">Logout</button>
+                    <button type="submit" class="block w-full text-left px-4 py-2 hover:bg-gray-50">Logout</button>
                 </form>
             </li>
         </ul>

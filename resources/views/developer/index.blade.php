@@ -3,51 +3,52 @@
 @section('title', 'Developers')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Developers</h1>
-    <div class="d-flex align-items-center gap-2">
-        <form method="get" action="{{ url()->current() }}" id="developer-search-form" class="position-relative">
-            <div class="input-group" style="min-width:280px;">
-                <input type="search" name="q" id="developer-search-input" class="form-control" placeholder="Cari…" aria-label="Search" value="{{ request('q') }}">
-                <button class="btn btn-outline-secondary" type="submit" id="developer-search-submit"><i class="bi bi-search"></i></button>
-                <button class="btn btn-outline-secondary" type="button" id="developer-search-clear" @if(!request('q')) style="display:none;" @endif><i class="bi bi-x"></i></button>
-            </div>
-            <div id="developer-search-spinner" class="position-absolute top-50 end-0 translate-middle-y me-2 d-none">
-                <div class="spinner-border spinner-border-sm text-secondary"></div>
+<div class="flex justify-between items-center mb-4">
+    <h1 class="text-xl font-semibold">Developers</h1>
+    <div class="flex items-center gap-2">
+        <form method="get" action="{{ url()->current() }}" id="developer-search-form" class="relative">
+            <input type="search" name="q" id="developer-search-input" class="block w-64 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Cari…" aria-label="Search" value="{{ request('q') }}">
+            <button class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500" id="developer-search-submit" type="submit">
+                🔍
+            </button>
+            <button class="hidden absolute right-8 top-1/2 -translate-y-1/2 text-gray-500" type="button" id="developer-search-clear">✖</button>
+            <div id="developer-search-spinner" class="hidden absolute right-2 top-1/2 -translate-y-1/2">
+                <svg class="h-4 w-4 animate-spin text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
             </div>
         </form>
-        <button class="btn btn-primary" disabled>Add</button>
+        <x-button variant="primary" disabled>Add</x-button>
     </div>
 </div>
 
-<table class="table table-bordered">
-    <thead>
+<div class="overflow-x-auto">
+<table class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-gray-50">
         <tr>
-            <th>No</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Action</th>
+            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">No</th>
+            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Name</th>
+            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Email</th>
+            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Action</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="divide-y divide-gray-200">
         @forelse($developers as $developer)
-        <tr>
-            <td>{{ $developers->total() - ($developers->currentPage() - 1) * $developers->perPage() - $loop->index }}</td>
-            <td>{{ $developer->name }}</td>
-            <td>{{ $developer->email }}</td>
-            <td>
-                <a href="/developer/{{ $developer->id }}/see" class="btn btn-sm btn-secondary">View</a>
+        <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2">{{ $developers->total() - ($developers->currentPage() - 1) * $developers->perPage() - $loop->index }}</td>
+            <td class="px-4 py-2">{{ $developer->name }}</td>
+            <td class="px-4 py-2">{{ $developer->email }}</td>
+            <td class="px-4 py-2 space-x-2">
+                <x-button href="/developer/{{ $developer->id }}/see" variant="secondary" size="sm">View</x-button>
                 @if(session('user_id') == $developer->id)
-                    <a href="/developer/{{ $developer->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
+                    <x-button href="/developer/{{ $developer->id }}/edit" variant="warning" size="sm">Edit</x-button>
                 @else
-                    <button class="btn btn-sm btn-warning" disabled>Edit</button>
+                    <x-button variant="warning" size="sm" disabled>Edit</x-button>
                 @endif
-                <button class="btn btn-sm btn-danger" disabled>Delete</button>
+                <x-button variant="danger" size="sm" disabled>Delete</x-button>
             </td>
         </tr>
         @empty
         <tr>
-            <td colspan="4" class="text-center">
+            <td colspan="4" class="px-4 py-2 text-center">
                 @if(request('q'))
                     Tidak ada hasil untuk '{{ request('q') }}'.
                 @else
@@ -58,23 +59,13 @@
         @endforelse
     </tbody>
 </table>
+</div>
 
-<p class="text-muted">Showing {{ $developers->count() }} out of {{ $developers->total() }} developers</p>
+<p class="mt-2 text-sm text-gray-600">Showing {{ $developers->count() }} out of {{ $developers->total() }} developers</p>
 
-<div class="d-flex justify-content-between align-items-center">
-    <span>(Page {{ $developers->currentPage() }} of {{ $developers->lastPage() }})</span>
-    <div class="d-flex gap-2">
-        @if ($developers->onFirstPage())
-            <span class="text-muted">Back</span>
-        @else
-            <a href="{{ $developers->previousPageUrl() }}" class="btn btn-outline-secondary">Back</a>
-        @endif
-        @if ($developers->hasMorePages())
-            <a href="{{ $developers->nextPageUrl() }}" class="btn btn-outline-secondary">Next</a>
-        @else
-            <span class="text-muted">Next</span>
-        @endif
-    </div>
+<div class="mt-4 flex justify-between items-center">
+    <span class="text-sm">(Page {{ $developers->currentPage() }} of {{ $developers->lastPage() }})</span>
+    <x-pagination :paginator="$developers" />
 </div>
 
 <script>
@@ -85,7 +76,7 @@ var developerSearchSpinner = document.getElementById('developer-search-spinner')
 var developerSearchTimer;
 
 function submitDeveloperSearch(){
-    developerSearchSpinner.classList.remove('d-none');
+    developerSearchSpinner.classList.remove('hidden');
     var params = new URLSearchParams(new FormData(developerSearchForm));
     if(!developerSearchInput.value) { params.delete('q'); }
     params.delete('page');
@@ -94,7 +85,7 @@ function submitDeveloperSearch(){
 }
 
 developerSearchInput.addEventListener('input', function(){
-    developerSearchClear.style.display = this.value ? 'block' : 'none';
+    developerSearchClear.classList.toggle('hidden', !this.value);
     clearTimeout(developerSearchTimer);
     developerSearchTimer = setTimeout(submitDeveloperSearch, 300);
 });

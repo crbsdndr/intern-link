@@ -3,42 +3,41 @@
 <head>
     <meta charset="utf-8">
     <title>@yield('title', 'Internish')</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body>
+<body class="min-h-screen bg-gray-50">
 @include('layouts.partials.header')
-<div class="d-flex">
-    <nav id="sidebar" class="bg-light border-end" style="min-width:200px;">
-        <div class="list-group list-group-flush">
-            <a href="/" class="list-group-item list-group-item-action">Dashboard</a>
-            <a href="/student" class="list-group-item list-group-item-action">Students</a>
-            <a href="/supervisor" class="list-group-item list-group-item-action">Supervisors</a>
+<div class="flex">
+    <nav id="sidebar" class="hidden md:block w-64 bg-white border-r">
+        <div class="p-4 space-y-1">
+            <a href="/" class="block rounded px-3 py-2 hover:bg-gray-100">Dashboard</a>
+            <a href="/student" class="block rounded px-3 py-2 hover:bg-gray-100">Students</a>
+            <a href="/supervisor" class="block rounded px-3 py-2 hover:bg-gray-100">Supervisors</a>
             @if(session('role') === 'developer')
-            <a href="/developer" class="list-group-item list-group-item-action">Developers</a>
+            <a href="/developer" class="block rounded px-3 py-2 hover:bg-gray-100">Developers</a>
             @endif
-            <a href="/institution" class="list-group-item list-group-item-action">Institutions</a>
-            <a href="/application" class="list-group-item list-group-item-action">Applications</a>
-            <a href="/internship" class="list-group-item list-group-item-action">Internships</a>
-            <a href="/monitoring" class="list-group-item list-group-item-action">Monitorings</a>
+            <a href="/institution" class="block rounded px-3 py-2 hover:bg-gray-100">Institutions</a>
+            <a href="/application" class="block rounded px-3 py-2 hover:bg-gray-100">Applications</a>
+            <a href="/internship" class="block rounded px-3 py-2 hover:bg-gray-100">Internships</a>
+            <a href="/monitoring" class="block rounded px-3 py-2 hover:bg-gray-100">Monitorings</a>
             @if(in_array(session('role'), ['admin','developer']))
-            <a href="/admin" class="list-group-item list-group-item-action">Admin</a>
+            <a href="/admin" class="block rounded px-3 py-2 hover:bg-gray-100">Admin</a>
             @endif
     </div>
 </nav>
-    <main class="p-4 flex-fill">
+    <main class="p-4 flex-1">
         @if (session('status'))
-            <div class="alert alert-info">{{ session('status') }}</div>
+            <x-alert type="info">{{ session('status') }}</x-alert>
         @endif
         @yield('content')
     </main>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-document.getElementById('sidebarToggle').addEventListener('click', function(){
+document.getElementById('sidebarToggle')?.addEventListener('click', function(){
     var sidebar = document.getElementById('sidebar');
     var expanded = this.getAttribute('aria-expanded') === 'true';
-    sidebar.classList.toggle('d-none');
+    sidebar.classList.toggle('hidden');
     this.setAttribute('aria-expanded', expanded ? 'false' : 'true');
 });
 </script>

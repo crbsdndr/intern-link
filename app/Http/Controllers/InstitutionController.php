@@ -6,6 +6,7 @@ use App\Models\Institution;
 use App\Models\InstitutionContact;
 use App\Models\InstitutionQuota;
 use App\Models\Period;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -126,7 +127,8 @@ class InstitutionController extends Controller
             abort(401);
         }
         [$cities, $provinces] = $this->loadRegions();
-        return view('institution.create', compact('cities', 'provinces'));
+        $students = Student::with('user')->get();
+        return view('institution.create', compact('cities', 'provinces', 'students'));
     }
 
     public function store(Request $request)
@@ -199,6 +201,10 @@ class InstitutionController extends Controller
         $inst = Institution::findOrFail($id);
         $contact = $inst->contacts()->orderByDesc('is_primary')->first();
         $quota = $inst->quotas()->with('period')->orderByDesc('period_id')->first();
+        $studentId = DB::table('internships')->where('institution_id', $id)->value('student_id');
+        if (!$studentId) {
+            $studentId = DB::table('applications')->where('institution_id', $id)->value('student_id');
+        }
         $institution = (object) array_merge($inst->toArray(), [
             'contact_name' => $contact->name ?? null,
             'contact_email' => $contact->email ?? null,
@@ -210,9 +216,11 @@ class InstitutionController extends Controller
             'quota' => $quota->quota ?? null,
             'used' => $quota->used ?? null,
             'notes' => $quota->notes ?? null,
+            'student_id' => $studentId,
         ]);
         [$cities, $provinces] = $this->loadRegions();
-        return view('institution.edit', compact('institution', 'cities', 'provinces'));
+        $students = Student::with('user')->get();
+        return view('institution.edit', compact('institution', 'cities', 'provinces', 'students'));
     }
 
     public function update(Request $request, $id)

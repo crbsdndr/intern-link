@@ -36,6 +36,17 @@
         <input type="text" name="industry" class="form-control" value="{{ old('industry', optional($institution)->industry) }}">
     </div>
     <div class="mb-3">
+        <label class="form-label">Student Name</label>
+        <select name="student_id" class="form-control">
+            <option value="">-- Select Student --</option>
+            @foreach($students as $student)
+                <option value="{{ $student->id }}" {{ old('student_id', optional($institution)->student_id) == $student->id ? 'selected' : '' }}>
+                    {{ $student->user->name }}{{ $student->student_number ? ' (' . $student->student_number . ')' : '' }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+    <div class="mb-3">
         <label class="form-label">Website</label>
         <textarea name="website" class="form-control">{{ old('website', optional($institution)->website) }}</textarea>
     </div>

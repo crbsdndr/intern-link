@@ -34,7 +34,7 @@
     </div>
     <div>
         <label>Role</label>
-        <select name="role" required>
+        <select name="role" class="no-search" required>
             <option value="">Select role</option>
             @foreach (['student','supervisor'] as $role)
                 <option value="{{ $role }}" {{ (old('role', $data['role'] ?? '') === $role) ? 'selected' : '' }}>{{ ucfirst($role) }}</option>

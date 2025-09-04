@@ -146,6 +146,7 @@ CREATE TABLE students (
     student_number VARCHAR(50) NOT NULL UNIQUE,
     national_sn VARCHAR(50) NOT NULL UNIQUE,
     major VARCHAR(100) NOT NULL,
+    class VARCHAR(100) NOT NULL,
     batch VARCHAR(9) NOT NULL,
     notes TEXT,
     photo TEXT,
@@ -157,6 +158,7 @@ CREATE TRIGGER trg_students_updated_at BEFORE UPDATE ON students
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER trg_students_role BEFORE INSERT OR UPDATE OF user_id ON students
     FOR EACH ROW EXECUTE FUNCTION enforce_role_student();
+CREATE INDEX idx_students_class ON students (class);
 
 CREATE TABLE supervisors (
     id BIGSERIAL PRIMARY KEY,
@@ -181,6 +183,7 @@ CREATE TABLE institutions (
     city VARCHAR(100),
     province VARCHAR(100),
     website TEXT,
+    industry VARCHAR(100) NOT NULL,
     notes TEXT,
     photo VARCHAR(255),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -188,6 +191,7 @@ CREATE TABLE institutions (
 );
 CREATE TRIGGER trg_institutions_updated_at BEFORE UPDATE ON institutions
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+CREATE INDEX idx_institutions_industry ON institutions (industry);
 
 CREATE TABLE institution_contacts (
     id BIGSERIAL PRIMARY KEY,
@@ -374,6 +378,7 @@ SELECT s.id,
        s.student_number,
        s.national_sn,
        s.major,
+       s.class,
        s.batch,
        s.notes,
        s.photo,
@@ -416,6 +421,7 @@ SELECT i.id,
        i.city,
        i.province,
        i.website,
+       i.industry,
        i.notes,
        i.photo,
        pc.name AS contact_name,

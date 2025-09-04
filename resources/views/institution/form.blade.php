@@ -32,6 +32,10 @@
         </select>
     </div>
     <div class="mb-3">
+        <label class="form-label">Industry</label>
+        <input type="text" name="industry" class="form-control" value="{{ old('industry', optional($institution)->industry) }}">
+    </div>
+    <div class="mb-3">
         <label class="form-label">Website</label>
         <textarea name="website" class="form-control">{{ old('website', optional($institution)->website) }}</textarea>
     </div>

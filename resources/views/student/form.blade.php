@@ -38,6 +38,10 @@
         <input type="text" name="batch" class="form-control" value="{{ old('batch', optional($student)->batch) }}">
     </div>
     <div class="mb-3">
+        <label class="form-label">Class</label>
+        <input type="text" name="class" class="form-control" value="{{ old('class', optional($student)->class) }}">
+    </div>
+    <div class="mb-3">
         <label class="form-label">Notes</label>
         <textarea name="notes" class="form-control">{{ old('notes', optional($student)->notes) }}</textarea>
     </div>

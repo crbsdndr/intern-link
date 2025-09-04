@@ -19,6 +19,7 @@
             <li>City: {{ $institution->city }}</li>
             <li>Province: {{ $institution->province }}</li>
             <li>Website: {{ $institution->website }}</li>
+            <li>Industry: {{ $institution->industry }}</li>
             <li>Contact Name: {{ $institution->contact_name }}</li>
             <li>Contact Email: {{ $institution->contact_email }}</li>
             <li>Contact Phone: {{ $institution->contact_phone }}</li>

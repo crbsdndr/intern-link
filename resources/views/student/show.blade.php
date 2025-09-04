@@ -22,6 +22,7 @@
             <li>Student Number: {{ $student->student_number }}</li>
             <li>National Student Number: {{ $student->national_sn }}</li>
             <li>Major: {{ $student->major }}</li>
+            <li>Class: {{ $student->class }}</li>
             <li>Batch: {{ $student->batch }}</li>
             <li>Notes: {{ $student->notes }}</li>
         </ul>

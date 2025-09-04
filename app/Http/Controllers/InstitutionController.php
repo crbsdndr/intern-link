@@ -15,8 +15,8 @@ class InstitutionController extends Controller
     /**
      * Columns searched and displayed. Adjust here if needed.
      */
-    private const SEARCH_COLUMNS = ['name', 'city', 'province'];
-    private const DISPLAY_COLUMNS = ['id', 'name', 'city', 'province'];
+    private const SEARCH_COLUMNS = ['name', 'city', 'province', 'industry'];
+    private const DISPLAY_COLUMNS = ['id', 'name', 'city', 'province', 'industry'];
 
     protected function loadRegions(): array
     {
@@ -29,7 +29,7 @@ class InstitutionController extends Controller
     {
         $query = DB::table('institution_details_view as iv')
             ->join('institutions as i', 'i.id', '=', 'iv.id')
-            ->select('iv.id', 'iv.name', 'iv.city', 'iv.province', 'i.created_at', 'i.updated_at');
+            ->select('iv.id', 'iv.name', 'iv.city', 'iv.province', 'iv.industry', 'i.created_at', 'i.updated_at');
 
         if (session('role') === 'student') {
             $studentId = $this->currentStudentId();
@@ -140,6 +140,7 @@ class InstitutionController extends Controller
             'city' => 'required|string',
             'province' => 'required|string',
             'website' => 'nullable|string',
+            'industry' => 'required|string|max:100',
             'photo' => 'nullable|string',
             'contact_name' => 'required|string',
             'contact_email' => 'nullable|email',
@@ -160,6 +161,7 @@ class InstitutionController extends Controller
                 'city' => $data['city'],
                 'province' => $data['province'],
                 'website' => $data['website'] ?? null,
+                'industry' => $data['industry'],
                 'photo' => $data['photo'] ?? null,
             ]);
 
@@ -225,6 +227,7 @@ class InstitutionController extends Controller
             'city' => 'required|string',
             'province' => 'required|string',
             'website' => 'nullable|string',
+            'industry' => 'required|string|max:100',
             'photo' => 'nullable|string',
             'contact_name' => 'required|string',
             'contact_email' => 'nullable|email',
@@ -245,6 +248,7 @@ class InstitutionController extends Controller
                 'city' => $data['city'],
                 'province' => $data['province'],
                 'website' => $data['website'] ?? null,
+                'industry' => $data['industry'],
                 'photo' => $data['photo'] ?? null,
             ]);
 

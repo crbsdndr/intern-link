@@ -8,7 +8,7 @@
 
     <div class="mb-3">
         <label class="form-label">Internship</label>
-        <select name="internship_id" class="form-select" {{ $readonly ? 'disabled' : '' }}>
+        <select name="internship_id" class="form-select tom-select" {{ $readonly ? 'disabled' : '' }}>
             @foreach($internships as $internship)
                 <option value="{{ $internship->id }}" {{ old('internship_id', optional($log)->internship_id) == $internship->id ? 'selected' : '' }}>{{ $internship->student_name }} – {{ $internship->institution_name }}</option>
             @endforeach
@@ -25,7 +25,7 @@
 
     <div class="mb-3">
         <label class="form-label">Supervisor</label>
-        <select name="supervisor_id" class="form-select">
+        <select name="supervisor_id" class="form-select tom-select">
             <option value="">—</option>
             @foreach($supervisors as $supervisor)
                 <option value="{{ $supervisor->id }}" {{ old('supervisor_id', optional($log)->supervisor_id) == $supervisor->id ? 'selected' : '' }}>{{ $supervisor->name }}</option>
@@ -35,7 +35,7 @@
 
     <div class="mb-3">
         <label class="form-label">Tipe</label>
-        <select name="type" class="form-select">
+        <select name="type" class="form-select tom-select">
             @foreach($types as $type)
                 <option value="{{ $type }}" {{ old('type', optional($log)->log_type ?? optional($log)->type) == $type ? 'selected' : '' }}>{{ $type }}</option>
             @endforeach

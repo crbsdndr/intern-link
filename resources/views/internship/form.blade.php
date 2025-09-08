@@ -8,7 +8,7 @@
 
     <div class="mb-3">
         <label class="form-label">Application</label>
-        <select name="application_id" class="form-select" {{ $readonly ? 'disabled' : '' }}>
+        <select name="application_id" class="form-select tom-select" {{ $readonly ? 'disabled' : '' }}>
             @foreach($applications as $application)
                 <option value="{{ $application->id }}" {{ old('application_id', optional($internship)->application_id) == $application->id ? 'selected' : '' }}>{{ $application->student_name }} – {{ $application->institution_name }}</option>
             @endforeach

@@ -111,7 +111,8 @@ class ApplicationController extends Controller
         }
         $statuses = $this->statusOptions();
         $data = $request->validate([
-            'student_id' => 'required|exists:students,id',
+            'student_ids' => 'required|array|min:1',
+            'student_ids.*' => 'distinct|exists:students,id',
             'institution_id' => 'required|exists:institutions,id',
             'status' => 'required|in:' . implode(',', $statuses),
             'submitted_at' => 'required|date',
@@ -131,10 +132,22 @@ class ApplicationController extends Controller
             ]);
         }
 
-        $data['period_id'] = $periodId;
+        DB::transaction(function () use ($data, $periodId) {
+            foreach ($data['student_ids'] as $studentId) {
+                Application::create([
+                    'student_id' => $studentId,
+                    'institution_id' => $data['institution_id'],
+                    'period_id' => $periodId,
+                    'status' => $data['status'],
+                    'submitted_at' => $data['submitted_at'],
+                    'decision_at' => $data['decision_at'] ?? null,
+                    'rejection_reason' => $data['rejection_reason'] ?? null,
+                    'notes' => $data['notes'] ?? null,
+                ]);
+            }
+        });
 
-        Application::create($data);
-        return redirect('/application');
+        return redirect('/application')->with('status', 'Applications created');
     }
 
     public function edit($id)
@@ -165,7 +178,10 @@ class ApplicationController extends Controller
             'decision_at' => 'nullable|date',
             'rejection_reason' => 'nullable|string',
             'notes' => 'nullable|string',
+            'apply_to_all' => 'nullable|boolean',
         ]);
+
+        $applyToAll = $request->boolean('apply_to_all');
 
         $periodId = DB::table('institution_quotas')
             ->where('institution_id', $data['institution_id'])
@@ -180,8 +196,19 @@ class ApplicationController extends Controller
 
         $data['period_id'] = $periodId;
 
-        $application->update($data);
-        return redirect('/application');
+        DB::transaction(function () use ($application, $data, $applyToAll) {
+            $application->update($data);
+
+            if ($applyToAll) {
+                $updateData = $data;
+                unset($updateData['student_id'], $updateData['apply_to_all']);
+                Application::where('institution_id', $data['institution_id'])
+                    ->where('id', '!=', $application->id)
+                    ->update($updateData);
+            }
+        });
+
+        return redirect('/application')->with('status', $applyToAll ? 'All applications for this institution have been updated' : 'Application updated');
     }
 
     public function destroy($id)

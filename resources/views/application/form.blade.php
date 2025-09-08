@@ -8,7 +8,7 @@
 
     <div class="mb-3">
         <label class="form-label">Student Name</label>
-        <select name="student_id" class="form-select">
+        <select name="student_id" class="form-select tom-select">
             @foreach($students as $student)
                 <option value="{{ $student->id }}" {{ old('student_id', optional($application)->student_id) == $student->id ? 'selected' : '' }}>{{ $student->name }}</option>
             @endforeach
@@ -17,7 +17,7 @@
 
     <div class="mb-3">
         <label class="form-label">Institution Name</label>
-        <select name="institution_id" class="form-select">
+        <select name="institution_id" class="form-select tom-select">
             @foreach($institutions as $institution)
                 <option value="{{ $institution->id }}" {{ old('institution_id', optional($application)->institution_id) == $institution->id ? 'selected' : '' }}>{{ $institution->name }}</option>
             @endforeach
@@ -26,7 +26,7 @@
 
     <div class="mb-3">
         <label class="form-label">Status</label>
-        <select name="status" class="form-select">
+        <select name="status" class="form-select tom-select">
             @foreach($statuses as $status)
                 <option value="{{ $status }}" {{ old('status', optional($application)->status) == $status ? 'selected' : '' }}>{{ $status }}</option>
             @endforeach

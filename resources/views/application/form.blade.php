@@ -6,6 +6,29 @@
 
     @include('components.form-errors')
 
+    @if($multi ?? false)
+    <div id="students-wrapper">
+        <div class="mb-3 student-item">
+            <label class="form-label">Student Name</label>
+            <select name="student_ids[]" class="form-select tom-select">
+                @foreach($students as $student)
+                    <option value="{{ $student->id }}">{{ $student->name }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+    <button type="button" id="add-student" class="btn btn-secondary mb-3">+</button>
+    <template id="student-template">
+        <div class="mb-3 student-item">
+            <label class="form-label">Student Name</label>
+            <select name="student_ids[]" class="form-select tom-select">
+                @foreach($students as $student)
+                    <option value="{{ $student->id }}">{{ $student->name }}</option>
+                @endforeach
+            </select>
+        </div>
+    </template>
+    @else
     <div class="mb-3">
         <label class="form-label">Student Name</label>
         <select name="student_id" class="form-select tom-select">
@@ -14,6 +37,7 @@
             @endforeach
         </select>
     </div>
+    @endif
 
     <div class="mb-3">
         <label class="form-label">Institution Name</label>
@@ -53,6 +77,24 @@
         <textarea name="notes" class="form-control">{{ old('notes', optional($application)->notes) }}</textarea>
     </div>
 
+    @if($applyAll ?? false)
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="apply_to_all" name="apply_to_all" value="1" {{ old('apply_to_all') ? 'checked' : '' }}>
+        <label class="form-check-label" for="apply_to_all">Terapkan perubahan ke semua aplikasi untuk institusi ini</label>
+    </div>
+    @endif
+
     <a href="/application" class="btn btn-secondary">Back</a>
     <button type="submit" class="btn btn-primary">Save</button>
 </form>
+
+@if($multi ?? false)
+<script>
+document.getElementById('add-student').addEventListener('click', function(){
+    const tpl = document.getElementById('student-template');
+    const clone = tpl.content.cloneNode(true);
+    document.getElementById('students-wrapper').appendChild(clone);
+    window.initTomSelect();
+});
+</script>
+@endif

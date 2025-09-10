@@ -126,6 +126,9 @@
     }
 
     function createRow(value){
+        if (value === null || value === undefined) {
+            return;
+        }
         const row = document.createElement('div');
         row.className = 'd-flex mb-2 app-row';
         const sel = document.createElement('select');
@@ -142,10 +145,8 @@
         container.appendChild(row);
         window.initTomSelect();
         refreshOptions();
-        if (value) {
-            sel.tomselect.setValue(value, true);
-            refreshOptions();
-        }
+        sel.tomselect.setValue(value, true);
+        refreshOptions();
     }
 
     if (lockedFirst) {
@@ -172,7 +173,16 @@
     });
 
     addBtn.addEventListener('click', () => {
-        createRow(null);
+        refreshOptions();
+        const baseApp = apps.find(a => a.id === parseInt(firstSelect.value));
+        const baseInst = baseApp ? baseApp.institution_id : null;
+        const ids = getSelectedIds();
+        const remaining = apps.filter(a => a.institution_id === baseInst && !ids.includes(a.id));
+        if (remaining.length === 0) {
+            alert('No eligible applications available');
+            return;
+        }
+        createRow(remaining[0].id);
     });
 
     takeAll.addEventListener('change', () => {

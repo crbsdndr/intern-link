@@ -6,26 +6,55 @@
 
     @include('components.form-errors')
 
-    @if($multi ?? false)
+    @php $mode = $mode ?? null; @endphp
+
+    @if($mode === 'create')
     <div id="students-wrapper">
-        <div class="mb-3 student-item">
-            <label class="form-label">Student Name</label>
-            <select name="student_ids[]" class="form-select tom-select">
-                @foreach($students as $student)
-                    <option value="{{ $student->id }}">{{ $student->name }}</option>
-                @endforeach
-            </select>
+        <div class="mb-3 student-item d-flex align-items-start">
+            <div class="flex-grow-1">
+                <label class="form-label">Student Name</label>
+                <select name="student_ids[]" class="form-select tom-select">
+                    @foreach($students as $student)
+                        <option value="{{ $student->id }}">{{ $student->name }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
     </div>
     <button type="button" id="add-student" class="btn btn-secondary mb-3">+</button>
     <template id="student-template">
+        <div class="mb-3 student-item d-flex align-items-start">
+            <div class="flex-grow-1">
+                <label class="form-label">Student Name</label>
+                <select name="student_ids[]" class="form-select tom-select">
+                    @foreach($students as $student)
+                        <option value="{{ $student->id }}">{{ $student->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <button type="button" class="btn btn-danger ms-2 remove-student">-</button>
+        </div>
+    </template>
+    @elseif($mode === 'edit')
+    <div id="students-wrapper">
         <div class="mb-3 student-item">
             <label class="form-label">Student Name</label>
-            <select name="student_ids[]" class="form-select tom-select">
-                @foreach($students as $student)
-                    <option value="{{ $student->id }}">{{ $student->name }}</option>
-                @endforeach
-            </select>
+            <input type="hidden" name="student_ids[]" value="{{ $application->student_id }}">
+            <input type="text" class="form-control" value="{{ $application->student_name }}" readonly>
+        </div>
+    </div>
+    <button type="button" id="add-student" class="btn btn-secondary mb-3">+</button>
+    <template id="student-template">
+        <div class="mb-3 student-item d-flex align-items-start">
+            <div class="flex-grow-1">
+                <label class="form-label">Student Name</label>
+                <select name="student_ids[]" class="form-select tom-select">
+                    @foreach($students as $student)
+                        <option value="{{ $student->id }}">{{ $student->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <button type="button" class="btn btn-danger ms-2 remove-student">-</button>
         </div>
     </template>
     @else
@@ -77,24 +106,24 @@
         <textarea name="notes" class="form-control">{{ old('notes', optional($application)->notes) }}</textarea>
     </div>
 
-    @if($applyAll ?? false)
-    <div class="mb-3 form-check">
-        <input type="checkbox" class="form-check-input" id="apply_to_all" name="apply_to_all" value="1" {{ old('apply_to_all') ? 'checked' : '' }}>
-        <label class="form-check-label" for="apply_to_all">Terapkan perubahan ke semua aplikasi untuk institusi ini</label>
-    </div>
-    @endif
-
     <a href="/application" class="btn btn-secondary">Back</a>
     <button type="submit" class="btn btn-primary">Save</button>
 </form>
 
-@if($multi ?? false)
+@if($mode === 'create' || $mode === 'edit')
 <script>
+const wrapper = document.getElementById('students-wrapper');
 document.getElementById('add-student').addEventListener('click', function(){
     const tpl = document.getElementById('student-template');
     const clone = tpl.content.cloneNode(true);
-    document.getElementById('students-wrapper').appendChild(clone);
+    wrapper.appendChild(clone);
     window.initTomSelect();
+});
+wrapper.addEventListener('click', function(e){
+    if(e.target.classList.contains('remove-student')){
+        e.target.closest('.student-item').remove();
+    }
 });
 </script>
 @endif
+

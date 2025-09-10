@@ -10,7 +10,7 @@
         <label class="form-label">Applications</label>
         <div id="application-rows">
             <div class="d-flex mb-2 app-row">
-                <select class="form-select first-application"></select>
+                <select class="form-select tom-select first-application"></select>
                 <button type="button" class="btn btn-danger ms-2 remove-row d-none">-</button>
             </div>
         </div>
@@ -60,7 +60,9 @@
     }
 
     function getSelectedIds(){
-        return Array.from(container.querySelectorAll('select')).map(s => parseInt(s.value));
+        return Array.from(container.querySelectorAll('select'))
+            .map(s => parseInt(s.value))
+            .filter(id => !isNaN(id));
     }
 
     function refreshOptions(){
@@ -70,8 +72,7 @@
         const baseInst = baseApp ? baseApp.institution_id : null;
 
         container.querySelectorAll('select').forEach((sel, idx) => {
-            const current = parseInt(sel.value);
-            sel.innerHTML = '';
+            const current = sel.value ? parseInt(sel.value) : null;
             const opts = apps.filter(a => {
                 if (idx === 0) {
                     return true;
@@ -81,17 +82,24 @@
                 if (selectedSet.has(a.id) && a.id !== current) return false;
                 return true;
             });
-            opts.forEach(app => {
-                const opt = document.createElement('option');
-                opt.value = app.id;
-                opt.text = optionLabel(app);
-                sel.appendChild(opt);
-            });
-            if (current) sel.value = current;
+            const ts = sel.tomselect;
+            if (ts) {
+                ts.clearOptions();
+                ts.addOptions(opts.map(app => ({ value: app.id, text: optionLabel(app) })));
+                ts.refreshOptions(false);
+                if (current && opts.find(a => a.id === current)) {
+                    ts.setValue(current, false);
+                } else {
+                    ts.clear(true);
+                }
+            }
         });
 
         const disableFirst = container.children.length > 1 || takeAll.checked || lockedFirst;
         firstSelect.disabled = disableFirst;
+        if (firstSelect.tomselect) {
+            disableFirst ? firstSelect.tomselect.disable() : firstSelect.tomselect.enable();
+        }
         if (disableFirst) {
             if (!firstHidden) {
                 firstHidden = document.createElement('input');
@@ -122,7 +130,7 @@
         row.className = 'd-flex mb-2 app-row';
         const sel = document.createElement('select');
         sel.name = 'application_ids[]';
-        sel.className = 'form-select';
+        sel.className = 'form-select tom-select';
         sel.addEventListener('change', () => { refreshOptions(); });
         row.appendChild(sel);
         const btn = document.createElement('button');
@@ -132,9 +140,12 @@
         btn.addEventListener('click', () => { row.remove(); refreshOptions(); });
         row.appendChild(btn);
         container.appendChild(row);
+        window.initTomSelect();
         refreshOptions();
-        if (value) sel.value = value;
-        refreshOptions();
+        if (value) {
+            sel.tomselect.setValue(value);
+            refreshOptions();
+        }
     }
 
     if (lockedFirst) {
@@ -149,11 +160,12 @@
     firstSelect.addEventListener('change', () => { refreshOptions(); });
 
     window.addEventListener('load', () => {
+        window.initTomSelect();
         refreshOptions();
         if (selectedInitial[0]) {
-            firstSelect.value = selectedInitial[0];
+            firstSelect.tomselect.setValue(selectedInitial[0]);
+            refreshOptions();
         }
-        refreshOptions();
         for (let i = 1; i < selectedInitial.length; i++) {
             createRow(selectedInitial[i]);
         }

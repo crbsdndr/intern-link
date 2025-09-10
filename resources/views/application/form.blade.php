@@ -107,10 +107,6 @@ const allStudents = @json($students->map(fn($s) => ['id' => $s->id, 'name' => $s
 let applyAll = null;
 
 function updateOptions() {
-    if (applyAll && applyAll.checked) {
-        if (addBtn) addBtn.disabled = true;
-        return;
-    }
     const selects = wrapper.querySelectorAll('select[name="student_ids[]"]');
     const selected = Array.from(selects).map(s => s.value);
     selects.forEach((select) => {
@@ -132,7 +128,7 @@ function updateOptions() {
     window.initTomSelect();
     const remaining = allStudents.filter(st => !selected.includes(String(st.id)));
     if (addBtn) {
-        addBtn.disabled = remaining.length === 0;
+        addBtn.disabled = remaining.length === 0 || (applyAll && applyAll.checked);
     }
 }
 
@@ -170,13 +166,17 @@ applyAll = document.getElementById('apply-all');
 if (applyAll) {
     applyAll.addEventListener('change', function(){
         if (this.checked) {
-            wrapper.querySelectorAll('.student-item').forEach((el, idx) => { if (idx > 0) el.remove(); });
-            wrapper.querySelectorAll('.remove-student').forEach(btn => btn.disabled = true);
-            if (addBtn) addBtn.disabled = true;
-        } else {
-            wrapper.querySelectorAll('.remove-student').forEach(btn => btn.disabled = false);
-            updateOptions();
+            const currentSelected = Array.from(wrapper.querySelectorAll('select[name="student_ids[]"]')).map(s => s.value);
+            const remaining = allStudents.filter(st => !currentSelected.includes(String(st.id)));
+            remaining.forEach(st => {
+                const tpl = document.getElementById('student-template');
+                const clone = tpl.content.cloneNode(true);
+                const sel = clone.querySelector('select[name="student_ids[]"]');
+                sel.value = st.id;
+                wrapper.appendChild(clone);
+            });
         }
+        updateOptions();
     });
 }
 @endif

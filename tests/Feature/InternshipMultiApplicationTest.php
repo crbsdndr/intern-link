@@ -100,6 +100,52 @@ class InternshipMultiApplicationTest extends TestCase
         $this->assertDatabaseHas('internships', ['application_id' => $app2, 'student_id' => $student2]);
     }
 
+    public function test_cannot_create_internship_if_application_already_has_one(): void
+    {
+        $student1 = \DB::table('students')->insertGetId(['name' => 'Alice']);
+        $student2 = \DB::table('students')->insertGetId(['name' => 'Bob']);
+        $institution = \DB::table('institutions')->insertGetId(['name' => 'Inst']);
+        $period = \DB::table('periods')->insertGetId(['year' => 2024, 'term' => '1']);
+
+        $app1 = \DB::table('applications')->insertGetId([
+            'student_id' => $student1,
+            'institution_id' => $institution,
+            'period_id' => $period,
+            'status' => 'accepted',
+            'submitted_at' => '2024-01-01',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $app2 = \DB::table('applications')->insertGetId([
+            'student_id' => $student2,
+            'institution_id' => $institution,
+            'period_id' => $period,
+            'status' => 'accepted',
+            'submitted_at' => '2024-01-01',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Internship::create([
+            'application_id' => $app1,
+            'student_id' => $student1,
+            'institution_id' => $institution,
+            'period_id' => $period,
+            'start_date' => '2024-02-01',
+            'end_date' => '2024-03-01',
+            'status' => 'planned',
+        ]);
+
+        $this->withoutMiddleware()->withSession(['role' => 'admin'])->post('/internship', [
+            'application_ids' => [$app1, $app2],
+            'start_date' => '2024-04-01',
+            'end_date' => '2024-05-01',
+            'status' => 'planned',
+        ])->assertSessionHasErrors('application_ids');
+
+        $this->assertDatabaseCount('internships', 1);
+    }
+
     public function test_mass_update_creates_and_updates_internships(): void
     {
         $student1 = \DB::table('students')->insertGetId(['name' => 'Alice']);

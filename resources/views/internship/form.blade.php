@@ -78,12 +78,14 @@
 <script>
 const wrapper = document.getElementById('applications-wrapper');
 const addBtn = document.getElementById('add-application');
-const allApps = @json($allApplications->map(fn($a) => [
-    'id' => $a->id,
-    'student_name' => $a->student_name,
-    'institution_name' => $a->institution_name,
-    'institution_id' => $a->institution_id,
-])->values());
+const allApps = @json($allApplications->map(function ($a) {
+    return [
+        'id' => $a->id,
+        'student_name' => $a->student_name,
+        'institution_name' => $a->institution_name,
+        'institution_id' => $a->institution_id,
+    ];
+})->values());
 let applyAll = document.getElementById('apply-all');
 const applyAllWrapper = document.getElementById('apply-all-wrapper');
 

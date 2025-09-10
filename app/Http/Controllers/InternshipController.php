@@ -98,10 +98,12 @@ class InternshipController extends Controller
         if (session('role') === 'student') {
             abort(401);
         }
-        $applications = DB::table('application_details_view')
-            ->select('id', 'student_name', 'institution_name', 'institution_id')
-            ->where('status', 'accepted')
-            ->orderBy('id')
+        $applications = DB::table('application_details_view as adv')
+            ->leftJoin('internships', 'internships.application_id', '=', 'adv.id')
+            ->select('adv.id', 'adv.student_name', 'adv.institution_name', 'adv.institution_id')
+            ->where('adv.status', 'accepted')
+            ->whereNull('internships.id')
+            ->orderBy('adv.id')
             ->get();
         $statuses = $this->statusOptions();
         return view('internship.create', compact('applications', 'statuses'));
@@ -145,6 +147,16 @@ class InternshipController extends Controller
                     'application_ids' => 'Applications must be from the same institution',
                 ]);
             }
+        }
+
+        $existing = DB::table('internships')
+            ->whereIn('application_id', $data['application_ids'])
+            ->pluck('application_id')
+            ->all();
+        if (!empty($existing)) {
+            return back()->withErrors([
+                'application_ids' => 'Applications already have internships',
+            ]);
         }
 
         DB::transaction(function () use ($apps, $data) {

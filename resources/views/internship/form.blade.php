@@ -88,7 +88,7 @@
                 ts.addOptions(opts.map(app => ({ value: app.id, text: optionLabel(app) })));
                 ts.refreshOptions(false);
                 if (current && opts.find(a => a.id === current)) {
-                    ts.setValue(current, false);
+                    ts.setValue(current, true);
                 } else {
                     ts.clear(true);
                 }
@@ -143,7 +143,7 @@
         window.initTomSelect();
         refreshOptions();
         if (value) {
-            sel.tomselect.setValue(value);
+            sel.tomselect.setValue(value, true);
             refreshOptions();
         }
     }
@@ -163,7 +163,7 @@
         window.initTomSelect();
         refreshOptions();
         if (selectedInitial[0]) {
-            firstSelect.tomselect.setValue(selectedInitial[0]);
+            firstSelect.tomselect.setValue(selectedInitial[0], true);
             refreshOptions();
         }
         for (let i = 1; i < selectedInitial.length; i++) {

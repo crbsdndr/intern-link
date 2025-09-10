@@ -102,6 +102,11 @@ class InternshipController extends Controller
         $applications = DB::table('application_details_view')
             ->select('id', 'student_name', 'institution_name', 'institution_id')
             ->where('status', 'accepted')
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('internships')
+                    ->whereColumn('internships.application_id', 'application_details_view.id');
+            })
             ->orderBy('id')
             ->get();
         $statuses = $this->statusOptions();
@@ -129,6 +134,14 @@ class InternshipController extends Controller
 
         if ($apps->count() !== count($data['application_ids'])) {
             return back()->withErrors(['application_ids' => 'Invalid applications'])->withInput();
+        }
+
+        $existing = DB::table('internships')
+            ->whereIn('application_id', $data['application_ids'])
+            ->pluck('application_id')
+            ->all();
+        if ($existing) {
+            return back()->withErrors(['application_ids' => 'Some applications already have internships'])->withInput();
         }
 
         $first = $apps[$data['application_ids'][0]];

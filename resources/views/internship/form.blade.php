@@ -85,16 +85,33 @@ const allApps = @json($allApplications->map(function ($a) {
         'institution_name' => $a->institution_name,
         'institution_id' => $a->institution_id,
     ];
-})->values());
-let applyAll = document.getElementById('apply-all');
+}));
+const applyAll = document.getElementById('apply-all');
 const applyAllWrapper = document.getElementById('apply-all-wrapper');
 
-function updateOptions(){
-    const selects = wrapper.querySelectorAll('select[name="application_ids[]"]');
+function syncHidden(select){
+    let hidden = select.parentNode.querySelector('input[type="hidden"][name="application_ids[]"]');
+    if(select.disabled){
+        if(!hidden){
+            hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'application_ids[]';
+            select.parentNode.appendChild(hidden);
+        }
+        hidden.value = select.value;
+        select.removeAttribute('name');
+    }else{
+        if(hidden) hidden.remove();
+        select.name = 'application_ids[]';
+    }
+}
+
+function updateUI(){
+    let selects = wrapper.querySelectorAll('select[name="application_ids[]"]');
     const firstSelect = selects[0];
     const firstApp = allApps.find(a => String(a.id) === firstSelect.value);
     const institutionId = firstApp ? String(firstApp.institution_id) : null;
-    const selected = Array.from(selects).map(s => s.value);
+    const selectedIds = Array.from(selects).map(s => s.value);
 
     selects.forEach((select, idx) => {
         const current = select.value;
@@ -105,7 +122,7 @@ function updateOptions(){
             options = allApps.filter(a => String(a.institution_id) === institutionId);
         }
         if(idx > 0){
-            options = options.filter(a => !selected.includes(String(a.id)) || String(a.id) === current);
+            options = options.filter(a => !selectedIds.includes(String(a.id)) || String(a.id) === current);
         }
         if(select.tomselect){
             select.tomselect.destroy();
@@ -120,64 +137,72 @@ function updateOptions(){
         });
     });
     window.initTomSelect();
-    const remaining = institutionId ? allApps.filter(a => String(a.institution_id) === institutionId && !selected.includes(String(a.id))) : [];
+
+    const remaining = institutionId
+        ? allApps.filter(a => String(a.institution_id) === institutionId && !selectedIds.includes(String(a.id)))
+        : [];
     addBtn.disabled = !institutionId || remaining.length === 0 || (applyAll && applyAll.checked);
+
     if(applyAll){
         applyAllWrapper.style.display = institutionId ? 'block' : 'none';
         if(applyAll.checked){
-            selects.forEach((sel, idx) => { if(idx > 0) sel.closest('.application-item').remove(); });
+            wrapper.querySelectorAll('.application-item').forEach((item, idx) => {
+                if(idx > 0) item.remove();
+            });
             remaining.forEach(app => {
                 const tpl = document.getElementById('application-template');
                 const clone = tpl.content.cloneNode(true);
-                const newSelect = clone.querySelector('select');
-                newSelect.value = app.id;
+                const sel = clone.querySelector('select');
+                sel.value = app.id;
                 wrapper.appendChild(clone);
             });
-            selects.forEach(sel => sel.disabled = true);
-        }else{
-            selects.forEach(sel => sel.disabled = (wrapper.querySelectorAll('.application-item').length > 1));
+            selects = wrapper.querySelectorAll('select[name="application_ids[]"]');
+            selects.forEach(sel => { sel.disabled = true; syncHidden(sel); });
+            window.initTomSelect();
+            return;
         }
-    }else{
-        selects.forEach(sel => sel.disabled = (wrapper.querySelectorAll('.application-item').length > 1 && sel === firstSelect));
     }
+
+    selects.forEach((sel, idx) => {
+        sel.disabled = idx === 0 && selects.length > 1;
+        syncHidden(sel);
+    });
 }
 
-addBtn.addEventListener('click', function(){
+addBtn.addEventListener('click', () => {
     const tpl = document.getElementById('application-template');
     const clone = tpl.content.cloneNode(true);
-    const newSelect = clone.querySelector('select');
     const firstSelect = wrapper.querySelector('select[name="application_ids[]"]');
     const firstApp = allApps.find(a => String(a.id) === firstSelect.value);
     if(!firstApp) return;
     const selected = Array.from(wrapper.querySelectorAll('select[name="application_ids[]"]')).map(s => s.value);
     const remaining = allApps.filter(a => String(a.institution_id) === String(firstApp.institution_id) && !selected.includes(String(a.id)));
     if(remaining.length === 0) return;
+    const newSelect = clone.querySelector('select');
     newSelect.value = remaining[0].id;
     wrapper.appendChild(clone);
-    updateOptions();
+    updateUI();
 });
 
-wrapper.addEventListener('click', function(e){
+wrapper.addEventListener('click', e => {
     if(e.target.classList.contains('remove-application')){
         e.target.closest('.application-item').remove();
         if(applyAll && applyAll.checked && wrapper.querySelectorAll('.application-item').length === 1){
             applyAll.checked = false;
         }
-        updateOptions();
+        updateUI();
     }
 });
 
-wrapper.addEventListener('change', function(e){
+wrapper.addEventListener('change', e => {
     if(e.target.matches('select[name="application_ids[]"]')){
-        updateOptions();
+        updateUI();
     }
 });
 
 if(applyAll){
-    applyAll.addEventListener('change', function(){
-        updateOptions();
-    });
+    applyAll.addEventListener('change', updateUI);
 }
 
-updateOptions();
+updateUI();
 </script>

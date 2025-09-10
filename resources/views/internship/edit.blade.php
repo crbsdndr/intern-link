@@ -10,6 +10,7 @@
     'internship' => $internship,
     'applications' => $applications,
     'statuses' => $statuses,
-    'readonly' => true,
+    'selected' => [$internship->application_id],
+    'lockedFirst' => true,
 ])
 @endsection

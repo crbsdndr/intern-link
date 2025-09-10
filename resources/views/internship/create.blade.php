@@ -10,6 +10,7 @@
     'internship' => null,
     'applications' => $applications,
     'statuses' => $statuses,
-    'readonly' => false,
+    'selected' => [],
+    'lockedFirst' => false,
 ])
 @endsection

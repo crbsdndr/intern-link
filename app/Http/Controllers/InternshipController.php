@@ -99,7 +99,8 @@ class InternshipController extends Controller
             abort(401);
         }
         $applications = DB::table('application_details_view')
-            ->select('id', 'student_name', 'institution_name')
+            ->select('id', 'student_name', 'institution_name', 'institution_id')
+            ->where('status', 'accepted')
             ->orderBy('id')
             ->get();
         $statuses = $this->statusOptions();
@@ -113,22 +114,54 @@ class InternshipController extends Controller
         }
         $statuses = $this->statusOptions();
         $data = $request->validate([
-            'application_id' => 'required|exists:applications,id',
+            'application_ids' => 'required|array|min:1',
+            'application_ids.*' => 'distinct|exists:applications,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'status' => 'required|in:' . implode(',', $statuses),
         ]);
 
-        $app = DB::table('applications')
-            ->select('student_id', 'institution_id', 'period_id')
-            ->where('id', $data['application_id'])
-            ->first();
-        abort_if(!$app, 400);
-        $data['student_id'] = $app->student_id;
-        $data['institution_id'] = $app->institution_id;
-        $data['period_id'] = $app->period_id;
+        $apps = DB::table('applications')
+            ->select('id', 'student_id', 'institution_id', 'period_id', 'status')
+            ->whereIn('id', $data['application_ids'])
+            ->get()->keyBy('id');
 
-        Internship::create($data);
+        if (count($apps) !== count($data['application_ids'])) {
+            return back()->withErrors([
+                'application_ids' => 'Invalid applications provided',
+            ]);
+        }
+
+        $firstInstitution = $apps[$data['application_ids'][0]]->institution_id;
+        foreach ($data['application_ids'] as $appId) {
+            $app = $apps[$appId];
+            if ($app->status !== 'accepted') {
+                return back()->withErrors([
+                    'application_ids' => 'Applications must be accepted',
+                ]);
+            }
+            if ($app->institution_id !== $firstInstitution) {
+                return back()->withErrors([
+                    'application_ids' => 'Applications must be from the same institution',
+                ]);
+            }
+        }
+
+        DB::transaction(function () use ($apps, $data) {
+            foreach ($data['application_ids'] as $appId) {
+                $app = $apps[$appId];
+                Internship::create([
+                    'application_id' => $app->id,
+                    'student_id' => $app->student_id,
+                    'institution_id' => $app->institution_id,
+                    'period_id' => $app->period_id,
+                    'start_date' => $data['start_date'],
+                    'end_date' => $data['end_date'],
+                    'status' => $data['status'],
+                ]);
+            }
+        });
+
         return redirect('/internship');
     }
 
@@ -140,7 +173,10 @@ class InternshipController extends Controller
         $internship = DB::table('internship_details_view')->where('id', $id)->first();
         abort_if(!$internship, 404);
         $applications = DB::table('application_details_view')
-            ->select('id', 'student_name', 'institution_name')
+            ->select('id', 'student_name', 'institution_name', 'institution_id')
+            ->where('status', 'accepted')
+            ->where('institution_id', $internship->institution_id)
+            ->where('id', '!=', $internship->application_id)
             ->orderBy('id')
             ->get();
         $statuses = $this->statusOptions();
@@ -155,22 +191,64 @@ class InternshipController extends Controller
         $internship = Internship::findOrFail($id);
         $statuses = $this->statusOptions();
         $data = $request->validate([
-            'application_id' => 'required|exists:applications,id',
+            'application_ids' => 'required|array|min:1',
+            'application_ids.*' => 'distinct|exists:applications,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'status' => 'required|in:' . implode(',', $statuses),
         ]);
 
-        $app = DB::table('applications')
-            ->select('student_id', 'institution_id', 'period_id')
-            ->where('id', $data['application_id'])
-            ->first();
-        abort_if(!$app, 400);
-        $data['student_id'] = $app->student_id;
-        $data['institution_id'] = $app->institution_id;
-        $data['period_id'] = $app->period_id;
+        if (!in_array($internship->application_id, $data['application_ids'])) {
+            return back()->withErrors([
+                'application_ids' => 'Original application must be included',
+            ]);
+        }
 
-        $internship->update($data);
+        $apps = DB::table('applications')
+            ->select('id', 'student_id', 'institution_id', 'period_id', 'status')
+            ->whereIn('id', $data['application_ids'])
+            ->get()->keyBy('id');
+
+        if (count($apps) !== count($data['application_ids'])) {
+            return back()->withErrors([
+                'application_ids' => 'Invalid applications provided',
+            ]);
+        }
+
+        foreach ($data['application_ids'] as $appId) {
+            $app = $apps[$appId];
+            if ($app->status !== 'accepted') {
+                return back()->withErrors([
+                    'application_ids' => 'Applications must be accepted',
+                ]);
+            }
+            if ($app->institution_id !== $internship->institution_id) {
+                return back()->withErrors([
+                    'application_ids' => 'Applications must be from the same institution',
+                ]);
+            }
+        }
+
+        DB::transaction(function () use ($apps, $data) {
+            foreach ($apps as $app) {
+                $attr = [
+                    'application_id' => $app->id,
+                    'student_id' => $app->student_id,
+                    'institution_id' => $app->institution_id,
+                    'period_id' => $app->period_id,
+                    'start_date' => $data['start_date'],
+                    'end_date' => $data['end_date'],
+                    'status' => $data['status'],
+                ];
+                $existing = Internship::where('application_id', $app->id)->first();
+                if ($existing) {
+                    $existing->update($attr);
+                } else {
+                    Internship::create($attr);
+                }
+            }
+        });
+
         return redirect('/internship');
     }
 

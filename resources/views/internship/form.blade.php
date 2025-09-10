@@ -6,16 +6,50 @@
 
     @include('components.form-errors')
 
-    <div class="mb-3">
-        <label class="form-label">Application</label>
-        <select name="application_id" class="form-select tom-select" {{ $readonly ? 'disabled' : '' }}>
-            @foreach($applications as $application)
-                <option value="{{ $application->id }}" {{ old('application_id', optional($internship)->application_id) == $application->id ? 'selected' : '' }}>{{ $application->student_name }} – {{ $application->institution_name }}</option>
-            @endforeach
-        </select>
-        @if($readonly)
-            <input type="hidden" name="application_id" value="{{ old('application_id', optional($internship)->application_id) }}">
-        @endif
+    @php
+        $allApplications = collect($applications);
+        if(isset($internship)){
+            $allApplications = $allApplications->prepend((object)[
+                'id' => $internship->application_id,
+                'student_name' => $internship->student_name,
+                'institution_name' => $internship->institution_name,
+                'institution_id' => $internship->institution_id,
+            ]);
+        }
+    @endphp
+
+    <div id="applications-wrapper">
+        <div class="mb-3 application-item d-flex align-items-start">
+            <div class="flex-grow-1">
+                <label class="form-label">Application</label>
+                <select name="application_ids[]" class="form-select tom-select" {{ $readonly ? 'disabled' : '' }}>
+                    @foreach($allApplications as $application)
+                        <option value="{{ $application->id }}" {{ old('application_ids.0', optional($internship)->application_id) == $application->id ? 'selected' : '' }}>{{ $application->student_name }} – {{ $application->institution_name }}</option>
+                    @endforeach
+                </select>
+                @if($readonly)
+                    <input type="hidden" name="application_ids[]" value="{{ old('application_ids.0', optional($internship)->application_id) }}">
+                @endif
+            </div>
+        </div>
+    </div>
+    <button type="button" id="add-application" class="btn btn-secondary mb-3">+</button>
+    <template id="application-template">
+        <div class="mb-3 application-item d-flex align-items-start">
+            <div class="flex-grow-1">
+                <label class="form-label">Application</label>
+                <select name="application_ids[]" class="form-select tom-select">
+                    @foreach($applications as $application)
+                        <option value="{{ $application->id }}">{{ $application->student_name }} – {{ $application->institution_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <button type="button" class="btn btn-danger ms-2 remove-application">-</button>
+        </div>
+    </template>
+    <div class="form-check mb-3" id="apply-all-wrapper" style="display:none;">
+        <input type="checkbox" class="form-check-input" id="apply-all" name="apply_all" value="1">
+        <label class="form-check-label" for="apply-all">Select all applications from this institution</label>
     </div>
 
     <div class="mb-3">
@@ -40,3 +74,108 @@
     <a href="/internship" class="btn btn-secondary">Back</a>
     <button type="submit" class="btn btn-primary">Save</button>
 </form>
+
+<script>
+const wrapper = document.getElementById('applications-wrapper');
+const addBtn = document.getElementById('add-application');
+const allApps = @json($allApplications->map(fn($a) => [
+    'id' => $a->id,
+    'student_name' => $a->student_name,
+    'institution_name' => $a->institution_name,
+    'institution_id' => $a->institution_id,
+])->values());
+let applyAll = document.getElementById('apply-all');
+const applyAllWrapper = document.getElementById('apply-all-wrapper');
+
+function updateOptions(){
+    const selects = wrapper.querySelectorAll('select[name="application_ids[]"]');
+    const firstSelect = selects[0];
+    const firstApp = allApps.find(a => String(a.id) === firstSelect.value);
+    const institutionId = firstApp ? String(firstApp.institution_id) : null;
+    const selected = Array.from(selects).map(s => s.value);
+
+    selects.forEach((select, idx) => {
+        const current = select.value;
+        let options = [];
+        if(idx === 0){
+            options = allApps;
+        }else if(institutionId){
+            options = allApps.filter(a => String(a.institution_id) === institutionId);
+        }
+        if(idx > 0){
+            options = options.filter(a => !selected.includes(String(a.id)) || String(a.id) === current);
+        }
+        if(select.tomselect){
+            select.tomselect.destroy();
+        }
+        select.innerHTML = '';
+        options.forEach(app => {
+            const opt = document.createElement('option');
+            opt.value = app.id;
+            opt.textContent = `${app.student_name} – ${app.institution_name}`;
+            if(String(app.id) === current) opt.selected = true;
+            select.appendChild(opt);
+        });
+    });
+    window.initTomSelect();
+    const remaining = institutionId ? allApps.filter(a => String(a.institution_id) === institutionId && !selected.includes(String(a.id))) : [];
+    addBtn.disabled = !institutionId || remaining.length === 0 || (applyAll && applyAll.checked);
+    if(applyAll){
+        applyAllWrapper.style.display = institutionId ? 'block' : 'none';
+        if(applyAll.checked){
+            selects.forEach((sel, idx) => { if(idx > 0) sel.closest('.application-item').remove(); });
+            remaining.forEach(app => {
+                const tpl = document.getElementById('application-template');
+                const clone = tpl.content.cloneNode(true);
+                const newSelect = clone.querySelector('select');
+                newSelect.value = app.id;
+                wrapper.appendChild(clone);
+            });
+            selects.forEach(sel => sel.disabled = true);
+        }else{
+            selects.forEach(sel => sel.disabled = (wrapper.querySelectorAll('.application-item').length > 1));
+        }
+    }else{
+        selects.forEach(sel => sel.disabled = (wrapper.querySelectorAll('.application-item').length > 1 && sel === firstSelect));
+    }
+}
+
+addBtn.addEventListener('click', function(){
+    const tpl = document.getElementById('application-template');
+    const clone = tpl.content.cloneNode(true);
+    const newSelect = clone.querySelector('select');
+    const firstSelect = wrapper.querySelector('select[name="application_ids[]"]');
+    const firstApp = allApps.find(a => String(a.id) === firstSelect.value);
+    if(!firstApp) return;
+    const selected = Array.from(wrapper.querySelectorAll('select[name="application_ids[]"]')).map(s => s.value);
+    const remaining = allApps.filter(a => String(a.institution_id) === String(firstApp.institution_id) && !selected.includes(String(a.id)));
+    if(remaining.length === 0) return;
+    newSelect.value = remaining[0].id;
+    wrapper.appendChild(clone);
+    updateOptions();
+});
+
+wrapper.addEventListener('click', function(e){
+    if(e.target.classList.contains('remove-application')){
+        e.target.closest('.application-item').remove();
+        if(applyAll && applyAll.checked && wrapper.querySelectorAll('.application-item').length === 1){
+            applyAll.checked = false;
+        }
+        updateOptions();
+    }
+});
+
+wrapper.addEventListener('change', function(e){
+    if(e.target.matches('select[name="application_ids[]"]')){
+        updateOptions();
+    }
+});
+
+if(applyAll){
+    applyAll.addEventListener('change', function(){
+        updateOptions();
+    });
+}
+
+updateOptions();
+</script>

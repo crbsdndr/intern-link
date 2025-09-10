@@ -122,8 +122,13 @@
 const wrapper = document.getElementById('students-wrapper');
 const addBtn = document.getElementById('add-student');
 const allStudents = @json($students->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values());
+let applyAll = null;
 
 function updateOptions() {
+    if (applyAll && applyAll.checked) {
+        if (addBtn) addBtn.disabled = true;
+        return;
+    }
     const selects = wrapper.querySelectorAll('select[name="student_ids[]"]');
     const selected = Array.from(selects).map(s => s.value);
     selects.forEach((select) => {
@@ -153,6 +158,11 @@ if (addBtn) {
     addBtn.addEventListener('click', function(){
         const tpl = document.getElementById('student-template');
         const clone = tpl.content.cloneNode(true);
+        const newSelect = clone.querySelector('select[name="student_ids[]"]');
+        const currentSelected = Array.from(wrapper.querySelectorAll('select[name="student_ids[]"]')).map(s => s.value);
+        const remaining = allStudents.filter(st => !currentSelected.includes(String(st.id)));
+        if (remaining.length === 0) return;
+        newSelect.value = remaining[0].id;
         wrapper.appendChild(clone);
         updateOptions();
     });
@@ -174,13 +184,15 @@ wrapper.addEventListener('change', function(e){
 updateOptions();
 
 @if($mode === 'edit')
-const applyAll = document.getElementById('apply-all');
+applyAll = document.getElementById('apply-all');
 if (applyAll) {
     applyAll.addEventListener('change', function(){
         if (this.checked) {
             wrapper.querySelectorAll('.student-item').forEach((el, idx) => { if (idx > 0) el.remove(); });
+            wrapper.querySelectorAll('.remove-student').forEach(btn => btn.disabled = true);
             if (addBtn) addBtn.disabled = true;
         } else {
+            wrapper.querySelectorAll('.remove-student').forEach(btn => btn.disabled = false);
             updateOptions();
         }
     });

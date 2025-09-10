@@ -105,6 +105,63 @@ class ApplicationMultiStudentTest extends TestCase
         $this->assertDatabaseHas('applications', ['id' => $app2->id, 'status' => 'accepted', 'notes' => 'updated', 'student_id' => $student2]);
     }
 
+    public function test_apply_all_flag_updates_all_students_of_institution(): void
+    {
+        $student1 = \DB::table('students')->insertGetId(['name' => 'Alice']);
+        $student2 = \DB::table('students')->insertGetId(['name' => 'Bob']);
+        $student3 = \DB::table('students')->insertGetId(['name' => 'Carol']);
+        $otherStudent = \DB::table('students')->insertGetId(['name' => 'Eve']);
+
+        $institution = \DB::table('institutions')->insertGetId(['name' => 'Inst']);
+        $otherInst = \DB::table('institutions')->insertGetId(['name' => 'Other']);
+        \DB::table('institution_quotas')->insert(['institution_id' => $institution, 'period_id' => 1]);
+        \DB::table('institution_quotas')->insert(['institution_id' => $otherInst, 'period_id' => 1]);
+
+        $app1 = Application::create([
+            'student_id' => $student1,
+            'institution_id' => $institution,
+            'period_id' => 1,
+            'status' => 'draft',
+            'submitted_at' => '2024-01-01',
+        ]);
+
+        Application::create([
+            'student_id' => $student2,
+            'institution_id' => $institution,
+            'period_id' => 1,
+            'status' => 'draft',
+            'submitted_at' => '2024-01-01',
+        ]);
+
+        Application::create([
+            'student_id' => $student3,
+            'institution_id' => $institution,
+            'period_id' => 1,
+            'status' => 'draft',
+            'submitted_at' => '2024-01-01',
+        ]);
+
+        $otherApp = Application::create([
+            'student_id' => $otherStudent,
+            'institution_id' => $otherInst,
+            'period_id' => 1,
+            'status' => 'draft',
+            'submitted_at' => '2024-01-01',
+        ]);
+
+        $this->withoutMiddleware()->withSession(['role' => 'admin'])->put('/application/' . $app1->id, [
+            'student_ids' => [$student1],
+            'institution_id' => $institution,
+            'status' => 'accepted',
+            'submitted_at' => '2024-02-01',
+            'apply_all' => 1,
+        ])->assertRedirect('/application');
+
+        $this->assertDatabaseHas('applications', ['student_id' => $student2, 'status' => 'accepted']);
+        $this->assertDatabaseHas('applications', ['student_id' => $student3, 'status' => 'accepted']);
+        $this->assertDatabaseHas('applications', ['id' => $otherApp->id, 'status' => 'draft']);
+    }
+
     public function test_store_requires_existing_students(): void
     {
         $student1 = \DB::table('students')->insertGetId(['name' => 'Alice']);

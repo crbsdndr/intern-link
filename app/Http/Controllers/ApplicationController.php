@@ -199,6 +199,7 @@ class ApplicationController extends Controller
             'decision_at' => 'nullable|date',
             'rejection_reason' => 'nullable|string',
             'notes' => 'nullable|string',
+            'apply_all' => 'sometimes|boolean',
         ]);
 
         if (!in_array($application->student_id, $data['student_ids'])) {
@@ -207,15 +208,23 @@ class ApplicationController extends Controller
             ]);
         }
 
-        $existing = Application::where('institution_id', $application->institution_id)
-            ->whereIn('student_id', $data['student_ids'])
-            ->pluck('student_id')
-            ->all();
-        $missing = array_diff($data['student_ids'], $existing);
-        if ($missing) {
-            return back()->withErrors([
-                'student_ids' => 'One or more students do not have applications for this institution',
-            ]);
+        $applyAll = $request->boolean('apply_all');
+        if ($applyAll) {
+            $studentIds = Application::where('institution_id', $application->institution_id)
+                ->pluck('student_id')
+                ->all();
+        } else {
+            $studentIds = $data['student_ids'];
+            $existing = Application::where('institution_id', $application->institution_id)
+                ->whereIn('student_id', $studentIds)
+                ->pluck('student_id')
+                ->all();
+            $missing = array_diff($studentIds, $existing);
+            if ($missing) {
+                return back()->withErrors([
+                    'student_ids' => 'One or more students do not have applications for this institution',
+                ]);
+            }
         }
 
         $periodId = DB::table('institution_quotas')
@@ -239,10 +248,12 @@ class ApplicationController extends Controller
             'notes' => $data['notes'] ?? null,
         ];
 
-        DB::transaction(function () use ($application, $data, $updateData) {
-            Application::where('institution_id', $application->institution_id)
-                ->whereIn('student_id', $data['student_ids'])
-                ->update($updateData);
+        DB::transaction(function () use ($application, $updateData, $applyAll, $studentIds) {
+            $query = Application::where('institution_id', $application->institution_id);
+            if (!$applyAll) {
+                $query->whereIn('student_id', $studentIds);
+            }
+            $query->update($updateData);
         });
 
         return redirect('/application')->with('status', 'Applications updated');

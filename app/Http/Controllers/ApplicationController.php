@@ -98,7 +98,12 @@ class ApplicationController extends Controller
         if (session('role') === 'student') {
             abort(401);
         }
-        $students = DB::table('student_details_view')->select('id','name')->orderBy('name')->get();
+        $students = DB::table('student_details_view as s')
+            ->leftJoin('applications as a', 'a.student_id', '=', 's.id')
+            ->whereNull('a.id')
+            ->select('s.id','s.name')
+            ->orderBy('s.name')
+            ->get();
         $institutions = DB::table('institutions')->select('id','name')->orderBy('name')->get();
         $statuses = $this->statusOptions();
         return view('application.create', compact('students','institutions','statuses'));
@@ -120,6 +125,13 @@ class ApplicationController extends Controller
             'rejection_reason' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
+
+        $existing = Application::whereIn('student_id', $data['student_ids'])->pluck('student_id')->all();
+        if ($existing) {
+            return back()->withErrors([
+                'student_ids' => 'One or more selected students already have an application',
+            ])->withInput();
+        }
 
         $periodId = DB::table('institution_quotas')
             ->where('institution_id', $data['institution_id'])
@@ -157,7 +169,15 @@ class ApplicationController extends Controller
         }
         $application = DB::table('application_details_view')->where('id', $id)->first();
         abort_if(!$application, 404);
-        $students = DB::table('student_details_view')->select('id','name')->orderBy('name')->get();
+
+        $students = DB::table('applications as a')
+            ->join('student_details_view as s', 's.id', '=', 'a.student_id')
+            ->where('a.institution_id', $application->institution_id)
+            ->where('a.id', '!=', $application->id)
+            ->select('s.id','s.name')
+            ->orderBy('s.name')
+            ->get();
+
         $institutions = DB::table('institutions')->select('id','name')->orderBy('name')->get();
         $statuses = $this->statusOptions();
         return view('application.edit', compact('application','students','institutions','statuses'));
@@ -171,17 +191,41 @@ class ApplicationController extends Controller
         $application = Application::findOrFail($id);
         $statuses = $this->statusOptions();
         $data = $request->validate([
-            'student_id' => 'required|exists:students,id',
+            'student_ids' => 'required|array|min:1',
+            'student_ids.*' => 'distinct|exists:students,id',
             'institution_id' => 'required|exists:institutions,id',
             'status' => 'required|in:' . implode(',', $statuses),
             'submitted_at' => 'required|date',
             'decision_at' => 'nullable|date',
             'rejection_reason' => 'nullable|string',
             'notes' => 'nullable|string',
-            'apply_to_all' => 'nullable|boolean',
+            'apply_all' => 'sometimes|boolean',
         ]);
 
-        $applyToAll = $request->boolean('apply_to_all');
+        if (!in_array($application->student_id, $data['student_ids'])) {
+            return back()->withErrors([
+                'student_ids' => 'Original student must be included',
+            ]);
+        }
+
+        $applyAll = $request->boolean('apply_all');
+        if ($applyAll) {
+            $studentIds = Application::where('institution_id', $application->institution_id)
+                ->pluck('student_id')
+                ->all();
+        } else {
+            $studentIds = $data['student_ids'];
+            $existing = Application::where('institution_id', $application->institution_id)
+                ->whereIn('student_id', $studentIds)
+                ->pluck('student_id')
+                ->all();
+            $missing = array_diff($studentIds, $existing);
+            if ($missing) {
+                return back()->withErrors([
+                    'student_ids' => 'One or more students do not have applications for this institution',
+                ]);
+            }
+        }
 
         $periodId = DB::table('institution_quotas')
             ->where('institution_id', $data['institution_id'])
@@ -194,21 +238,25 @@ class ApplicationController extends Controller
             ]);
         }
 
-        $data['period_id'] = $periodId;
+        $updateData = [
+            'institution_id' => $data['institution_id'],
+            'period_id' => $periodId,
+            'status' => $data['status'],
+            'submitted_at' => $data['submitted_at'],
+            'decision_at' => $data['decision_at'] ?? null,
+            'rejection_reason' => $data['rejection_reason'] ?? null,
+            'notes' => $data['notes'] ?? null,
+        ];
 
-        DB::transaction(function () use ($application, $data, $applyToAll) {
-            $application->update($data);
-
-            if ($applyToAll) {
-                $updateData = $data;
-                unset($updateData['student_id'], $updateData['apply_to_all']);
-                Application::where('institution_id', $data['institution_id'])
-                    ->where('id', '!=', $application->id)
-                    ->update($updateData);
+        DB::transaction(function () use ($application, $updateData, $applyAll, $studentIds) {
+            $query = Application::where('institution_id', $application->institution_id);
+            if (!$applyAll) {
+                $query->whereIn('student_id', $studentIds);
             }
+            $query->update($updateData);
         });
 
-        return redirect('/application')->with('status', $applyToAll ? 'All applications for this institution have been updated' : 'Application updated');
+        return redirect('/application')->with('status', 'Applications updated');
     }
 
     public function destroy($id)

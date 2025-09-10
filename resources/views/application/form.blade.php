@@ -125,7 +125,9 @@ function updateOptions() {
             }
         });
     });
-    window.initTomSelect();
+    if (window.initTomSelect) {
+        window.initTomSelect();
+    }
     const remaining = allStudents.filter(st => !selected.includes(String(st.id)));
     if (addBtn) {
         addBtn.disabled = remaining.length === 0 || (applyAll && applyAll.checked);
@@ -159,27 +161,28 @@ wrapper.addEventListener('change', function(e){
     }
 });
 
-updateOptions();
-
+window.addEventListener('load', () => {
+    updateOptions();
 @if($mode === 'edit')
-applyAll = document.getElementById('apply-all');
-if (applyAll) {
-    applyAll.addEventListener('change', function(){
-        if (this.checked) {
-            const currentSelected = Array.from(wrapper.querySelectorAll('select[name="student_ids[]"]')).map(s => s.value);
-            const remaining = allStudents.filter(st => !currentSelected.includes(String(st.id)));
-            remaining.forEach(st => {
-                const tpl = document.getElementById('student-template');
-                const clone = tpl.content.cloneNode(true);
-                const sel = clone.querySelector('select[name="student_ids[]"]');
-                sel.value = st.id;
-                wrapper.appendChild(clone);
-            });
-        }
-        updateOptions();
-    });
-}
+    applyAll = document.getElementById('apply-all');
+    if (applyAll) {
+        applyAll.addEventListener('change', function(){
+            if (this.checked) {
+                const currentSelected = Array.from(wrapper.querySelectorAll('select[name="student_ids[]"]')).map(s => s.value);
+                const remaining = allStudents.filter(st => !currentSelected.includes(String(st.id)));
+                remaining.forEach(st => {
+                    const tpl = document.getElementById('student-template');
+                    const clone = tpl.content.cloneNode(true);
+                    const sel = clone.querySelector('select[name="student_ids[]"]');
+                    sel.value = st.id;
+                    wrapper.appendChild(clone);
+                });
+            }
+            updateOptions();
+        });
+    }
 @endif
+});
 </script>
 @endif
 

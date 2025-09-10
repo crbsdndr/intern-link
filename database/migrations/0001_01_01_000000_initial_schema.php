@@ -96,6 +96,7 @@ return new class extends Migration
             $table->string('student_number', 50)->unique();
             $table->string('national_sn', 50)->unique();
             $table->string('major', 100);
+            $table->string('class', 100)->index();
             $table->string('batch', 9);
             $table->text('notes')->nullable();
             $table->text('photo')->nullable();
@@ -133,7 +134,9 @@ return new class extends Migration
             $table->string('city', 100)->nullable();
             $table->string('province', 100)->nullable();
             $table->text('website')->nullable();
+            $table->string('industry', 100)->index();
             $table->text('notes')->nullable();
+            $table->string('photo', 255)->nullable();
             $table->timestampsTz();
         });
         DB::statement(<<<'SQL'
@@ -276,6 +279,60 @@ return new class extends Migration
         FOR EACH ROW EXECUTE FUNCTION set_updated_at();
         SQL);
 
+        // CACHE TABLES
+        Schema::create('cache', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->mediumText('value');
+            $table->integer('expiration');
+        });
+        Schema::create('cache_locks', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->string('owner');
+            $table->integer('expiration');
+        });
+
+        // JOB TABLES
+        Schema::create('jobs', function (Blueprint $table) {
+            $table->id();
+            $table->string('queue')->index();
+            $table->longText('payload');
+            $table->unsignedTinyInteger('attempts');
+            $table->unsignedInteger('reserved_at')->nullable();
+            $table->unsignedInteger('available_at');
+            $table->unsignedInteger('created_at');
+        });
+        Schema::create('job_batches', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->string('name');
+            $table->integer('total_jobs');
+            $table->integer('pending_jobs');
+            $table->integer('failed_jobs');
+            $table->longText('failed_job_ids');
+            $table->mediumText('options')->nullable();
+            $table->integer('cancelled_at')->nullable();
+            $table->integer('created_at');
+            $table->integer('finished_at')->nullable();
+        });
+        Schema::create('failed_jobs', function (Blueprint $table) {
+            $table->id();
+            $table->string('uuid')->unique();
+            $table->text('connection');
+            $table->text('queue');
+            $table->longText('payload');
+            $table->longText('exception');
+            $table->timestamp('failed_at')->useCurrent();
+        });
+
+        // SESSIONS TABLE
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->foreignId('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
+        });
+
         // =============================
         // 3) Business-rule triggers
         // =============================
@@ -381,56 +438,10 @@ return new class extends Migration
         CREATE TRIGGER trg_internship_enforce_app BEFORE INSERT OR UPDATE OF application_id ON internships
         FOR EACH ROW EXECUTE FUNCTION enforce_internship_from_accepted_application();
         SQL);
-
-        // =============================
-        // 4) Views
-        // =============================
-        DB::statement(<<<'SQL'
-        CREATE OR REPLACE VIEW v_application_summary AS
-        SELECT a.id AS application_id,
-               s.id AS student_id,
-               u.name AS student_name,
-               i.name AS institution_name,
-               p.year AS period_year,
-               p.term AS period_term,
-               a.status,
-               a.submitted_at,
-               a.decision_at
-        FROM applications a
-        JOIN students s   ON s.id = a.student_id
-        JOIN users u      ON u.id = s.user_id
-        JOIN institutions i ON i.id = a.institution_id
-        JOIN periods p    ON p.id = a.period_id;
-        SQL);
-
-        DB::statement(<<<'SQL'
-        CREATE OR REPLACE VIEW v_internship_detail AS
-        SELECT it.id AS internship_id,
-               it.status AS internship_status,
-               it.start_date,
-               it.end_date,
-               u.name AS student_name,
-               i.name AS institution_name,
-               p.year AS period_year,
-               p.term AS period_term,
-               usv.name AS primary_supervisor_name
-        FROM internships it
-        JOIN students s       ON s.id = it.student_id
-        JOIN users u          ON u.id = s.user_id
-        JOIN institutions i   ON i.id = it.institution_id
-        JOIN periods p        ON p.id = it.period_id
-        LEFT JOIN internship_supervisors its ON its.internship_id = it.id AND its.is_primary = TRUE
-        LEFT JOIN supervisors sv     ON sv.id = its.supervisor_id
-        LEFT JOIN users usv          ON usv.id = sv.user_id;
-        SQL);
     }
 
     public function down(): void
     {
-        // Drop views
-        DB::statement("DROP VIEW IF EXISTS v_internship_detail;");
-        DB::statement("DROP VIEW IF EXISTS v_application_summary;");
-
         // Drop business-rule triggers
         DB::statement("DROP TRIGGER IF EXISTS trg_internship_enforce_app ON internships;");
         DB::statement("DROP TRIGGER IF EXISTS trg_app_bump_quota ON applications;");
@@ -464,6 +475,12 @@ return new class extends Migration
         Schema::dropIfExists('students');
         Schema::dropIfExists('users');
         Schema::dropIfExists('periods');
+        Schema::dropIfExists('sessions');
+        Schema::dropIfExists('failed_jobs');
+        Schema::dropIfExists('job_batches');
+        Schema::dropIfExists('jobs');
+        Schema::dropIfExists('cache_locks');
+        Schema::dropIfExists('cache');
 
         // (Optional) Drop functions/enums if you are sure nothing else uses them
         // DB::statement("DROP FUNCTION IF EXISTS enforce_internship_from_accepted_application();");

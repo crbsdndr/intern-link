@@ -136,25 +136,47 @@ class InternshipController extends Controller
             return back()->withErrors(['application_ids' => 'Invalid applications'])->withInput();
         }
 
-        $existing = DB::table('internships')
+        $existingApps = DB::table('internships')
             ->whereIn('application_id', $data['application_ids'])
             ->pluck('application_id')
             ->all();
-        if ($existing) {
-            return back()->withErrors(['application_ids' => 'Some applications already have internships'])->withInput();
+        $existingStudents = DB::table('internships')
+            ->whereIn('student_id', $apps->pluck('student_id'))
+            ->pluck('student_id')
+            ->all();
+
+        $existingAppSet = array_flip($existingApps);
+        $existingStudentSet = array_flip($existingStudents);
+        $seenStudents = [];
+        $errors = [];
+
+        foreach ($data['application_ids'] as $idx => $id) {
+            $app = $apps[$id];
+            if ($app->status !== 'accepted') {
+                $errors["application_ids.$idx"] = 'Application must be accepted';
+            }
+            if (isset($existingAppSet[$id])) {
+                $errors["application_ids.$idx"] = 'Application already has internship';
+            }
+            if (isset($existingStudentSet[$app->student_id])) {
+                $errors["application_ids.$idx"] = 'Student already has internship';
+            }
+            if (isset($seenStudents[$app->student_id])) {
+                $errors["application_ids.$idx"] = 'Duplicate student';
+            } else {
+                $seenStudents[$app->student_id] = true;
+            }
+        }
+
+        if ($errors) {
+            return back()->withErrors($errors)->withInput();
         }
 
         $first = $apps[$data['application_ids'][0]];
-        if ($first->status !== 'accepted') {
-            return back()->withErrors(['application_ids' => 'Applications must be accepted'])->withInput();
-        }
 
         DB::transaction(function () use ($data, $apps, $first) {
             foreach ($data['application_ids'] as $id) {
                 $app = $apps[$id];
-                if ($app->status !== 'accepted') {
-                    throw ValidationException::withMessages(['application_ids' => 'Applications must be accepted']);
-                }
                 if ($app->institution_id !== $first->institution_id) {
                     throw ValidationException::withMessages(['application_ids' => 'Applications must be from the same institution']);
                 }
@@ -218,10 +240,36 @@ class InternshipController extends Controller
             return back()->withErrors(['application_ids' => 'Invalid applications'])->withInput();
         }
 
-        $first = $apps[$internship->application_id];
-        if ($first->status !== 'accepted') {
-            return back()->withErrors(['application_ids' => 'Applications must be accepted'])->withInput();
+        $existingStudents = DB::table('internships')
+            ->whereIn('student_id', $apps->pluck('student_id'))
+            ->whereNotIn('application_id', $data['application_ids'])
+            ->pluck('student_id')
+            ->all();
+
+        $existingStudentSet = array_flip($existingStudents);
+        $seenStudents = [];
+        $errors = [];
+
+        foreach ($data['application_ids'] as $idx => $aid) {
+            $app = $apps[$aid];
+            if ($app->status !== 'accepted') {
+                $errors["application_ids.$idx"] = 'Application must be accepted';
+            }
+            if (isset($existingStudentSet[$app->student_id])) {
+                $errors["application_ids.$idx"] = 'Student already has internship';
+            }
+            if (isset($seenStudents[$app->student_id])) {
+                $errors["application_ids.$idx"] = 'Duplicate student';
+            } else {
+                $seenStudents[$app->student_id] = true;
+            }
         }
+
+        if ($errors) {
+            return back()->withErrors($errors)->withInput();
+        }
+
+        $first = $apps[$internship->application_id];
 
         $internships = Internship::whereIn('application_id', $data['application_ids'])->get()->keyBy('application_id');
         if ($internships->count() !== count($data['application_ids'])) {
@@ -231,9 +279,6 @@ class InternshipController extends Controller
         DB::transaction(function () use ($data, $apps, $first, $internships) {
             foreach ($data['application_ids'] as $id) {
                 $app = $apps[$id];
-                if ($app->status !== 'accepted') {
-                    throw ValidationException::withMessages(['application_ids' => 'Applications must be accepted']);
-                }
                 if ($app->institution_id !== $first->institution_id) {
                     throw ValidationException::withMessages(['application_ids' => 'Applications must be from the same institution']);
                 }

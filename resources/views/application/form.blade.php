@@ -8,55 +8,44 @@
 
     @php $mode = $mode ?? null; @endphp
 
-    @if($mode === 'create')
-    <div id="students-wrapper">
-        <div class="mb-3 student-item d-flex align-items-start">
-            <div class="flex-grow-1">
-                <label class="form-label">Student Name</label>
+    @if($mode === 'create' || $mode === 'edit')
+    <div class="mb-3">
+        <label class="form-label">Students</label>
+        <div id="students-wrapper">
+            @if($mode === 'create')
+            <div class="d-flex mb-2 student-item">
                 <select name="student_ids[]" class="form-select tom-select">
                     @foreach($students as $student)
                         <option value="{{ $student->id }}">{{ $student->name }}</option>
                     @endforeach
                 </select>
+                <button type="button" class="btn btn-danger ms-2 remove-student d-none">-</button>
             </div>
+            @else
+            <div class="d-flex mb-2 student-item">
+                <input type="hidden" name="student_ids[]" value="{{ $application->student_id }}">
+                <input type="text" class="form-control" value="{{ $application->student_name }}" readonly>
+            </div>
+            @endif
         </div>
+        <button type="button" id="add-student" class="btn btn-secondary mt-2">+</button>
+        @if($mode === 'edit')
+        <div class="form-check mt-2">
+            <input type="checkbox" class="form-check-input" id="apply-all" name="apply_all" value="1">
+            <label class="form-check-label" for="apply-all">Apply to all students of this institution</label>
+        </div>
+        @endif
+        <template id="student-template">
+            <div class="d-flex mb-2 student-item">
+                <select name="student_ids[]" class="form-select tom-select">
+                    @foreach($students as $student)
+                        <option value="{{ $student->id }}">{{ $student->name }}</option>
+                    @endforeach
+                </select>
+                <button type="button" class="btn btn-danger ms-2 remove-student">-</button>
+            </div>
+        </template>
     </div>
-    <button type="button" id="add-student" class="btn btn-secondary mb-3">+</button>
-    <template id="student-template">
-        <div class="mb-3 student-item d-flex align-items-start">
-            <div class="flex-grow-1">
-                <label class="form-label">Student Name</label>
-                <select name="student_ids[]" class="form-select tom-select">
-                    @foreach($students as $student)
-                        <option value="{{ $student->id }}">{{ $student->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <button type="button" class="btn btn-danger ms-2 remove-student">-</button>
-        </div>
-    </template>
-    @elseif($mode === 'edit')
-    <div id="students-wrapper">
-        <div class="mb-3 student-item">
-            <label class="form-label">Student Name</label>
-            <input type="hidden" name="student_ids[]" value="{{ $application->student_id }}">
-            <input type="text" class="form-control" value="{{ $application->student_name }}" readonly>
-        </div>
-    </div>
-    <button type="button" id="add-student" class="btn btn-secondary mb-3">+</button>
-    <template id="student-template">
-        <div class="mb-3 student-item d-flex align-items-start">
-            <div class="flex-grow-1">
-                <label class="form-label">Student Name</label>
-                <select name="student_ids[]" class="form-select tom-select">
-                    @foreach($students as $student)
-                        <option value="{{ $student->id }}">{{ $student->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <button type="button" class="btn btn-danger ms-2 remove-student">-</button>
-        </div>
-    </template>
     @else
     <div class="mb-3">
         <label class="form-label">Student Name</label>
@@ -106,13 +95,6 @@
         <textarea name="notes" class="form-control">{{ old('notes', optional($application)->notes) }}</textarea>
     </div>
 
-    @if($mode === 'edit')
-    <div class="form-check mb-3">
-        <input type="checkbox" class="form-check-input" id="apply-all" name="apply_all" value="1">
-        <label class="form-check-label" for="apply-all">Apply to all students of this institution</label>
-    </div>
-    @endif
-
     <a href="/application" class="btn btn-secondary">Back</a>
     <button type="submit" class="btn btn-primary">Save</button>
 </form>
@@ -125,10 +107,6 @@ const allStudents = @json($students->map(fn($s) => ['id' => $s->id, 'name' => $s
 let applyAll = null;
 
 function updateOptions() {
-    if (applyAll && applyAll.checked) {
-        if (addBtn) addBtn.disabled = true;
-        return;
-    }
     const selects = wrapper.querySelectorAll('select[name="student_ids[]"]');
     const selected = Array.from(selects).map(s => s.value);
     selects.forEach((select) => {
@@ -147,10 +125,12 @@ function updateOptions() {
             }
         });
     });
-    window.initTomSelect();
+    if (window.initTomSelect) {
+        window.initTomSelect();
+    }
     const remaining = allStudents.filter(st => !selected.includes(String(st.id)));
     if (addBtn) {
-        addBtn.disabled = remaining.length === 0;
+        addBtn.disabled = remaining.length === 0 || (applyAll && applyAll.checked);
     }
 }
 
@@ -181,23 +161,28 @@ wrapper.addEventListener('change', function(e){
     }
 });
 
-updateOptions();
-
+window.addEventListener('load', () => {
+    updateOptions();
 @if($mode === 'edit')
-applyAll = document.getElementById('apply-all');
-if (applyAll) {
-    applyAll.addEventListener('change', function(){
-        if (this.checked) {
-            wrapper.querySelectorAll('.student-item').forEach((el, idx) => { if (idx > 0) el.remove(); });
-            wrapper.querySelectorAll('.remove-student').forEach(btn => btn.disabled = true);
-            if (addBtn) addBtn.disabled = true;
-        } else {
-            wrapper.querySelectorAll('.remove-student').forEach(btn => btn.disabled = false);
+    applyAll = document.getElementById('apply-all');
+    if (applyAll) {
+        applyAll.addEventListener('change', function(){
+            if (this.checked) {
+                const currentSelected = Array.from(wrapper.querySelectorAll('select[name="student_ids[]"]')).map(s => s.value);
+                const remaining = allStudents.filter(st => !currentSelected.includes(String(st.id)));
+                remaining.forEach(st => {
+                    const tpl = document.getElementById('student-template');
+                    const clone = tpl.content.cloneNode(true);
+                    const sel = clone.querySelector('select[name="student_ids[]"]');
+                    sel.value = st.id;
+                    wrapper.appendChild(clone);
+                });
+            }
             updateOptions();
-        }
-    });
-}
+        });
+    }
 @endif
+});
 </script>
 @endif
 

@@ -7,86 +7,156 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class StudentController extends Controller
 {
     /**
      * Columns searched and displayed. Adjust here if needed.
      */
-    private const SEARCH_COLUMNS = ['name', 'major', 'class'];
-    private const DISPLAY_COLUMNS = ['id', 'name', 'major', 'class'];
+    private const SEARCH_COLUMNS = [
+        'name',
+        'email',
+        'phone',
+        'student_number',
+        'national_sn',
+        'major',
+        'class',
+        'batch',
+    ];
+
+    private const DISPLAY_COLUMNS = [
+        'id',
+        'name',
+        'email',
+        'phone',
+        'student_number',
+        'national_sn',
+        'major',
+        'class',
+        'batch',
+    ];
+
+    private const EXTRA_COLUMNS = ['notes', 'photo', 'email_verified_at', 'created_at', 'updated_at'];
 
     public function index(Request $request)
     {
         $query = DB::table('student_details_view')
-            ->select(self::DISPLAY_COLUMNS);
+            ->select(array_merge(self::DISPLAY_COLUMNS, self::EXTRA_COLUMNS));
+
         if (session('role') === 'student') {
             $query->where('id', $this->currentStudentId());
         }
 
         $filters = [];
 
-        if ($major = $request->query('major~')) {
-            $query->where('major', 'like', '%' . $major . '%');
-            $filters['major~'] = 'Major: ' . $major;
+        $name = trim($request->query('name', ''));
+        if ($name !== '') {
+            $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($name) . '%']);
+            $filters['name'] = 'Name: ' . $name;
         }
 
-        if ($batchParam = $request->query('batch')) {
-            if (Str::startsWith($batchParam, 'in:')) {
-                $batches = array_filter(explode(',', Str::after($batchParam, 'in:')));
-                if ($batches) {
-                    $query->whereIn('batch', $batches);
-                    $filters['batch'] = 'Batch: ' . implode(', ', $batches);
-                }
-            }
+        $email = trim($request->query('email', ''));
+        if ($email !== '') {
+            $query->whereRaw('LOWER(email) LIKE ?', ['%' . strtolower($email) . '%']);
+            $filters['email'] = 'Email: ' . $email;
         }
 
-        if ($created = $request->query('created_at')) {
-            if (Str::startsWith($created, 'range:')) {
-                [$start, $end] = array_pad(explode(',', Str::after($created, 'range:')), 2, null);
-                if ($start) {
-                    $query->whereDate('created_at', '>=', $start);
-                }
-                if ($end) {
-                    $query->whereDate('created_at', '<=', $end);
-                }
-                $filters['created_at'] = 'Created: ' . $start . ' - ' . $end;
-            }
+        $phone = trim($request->query('phone', ''));
+        if ($phone !== '') {
+            $query->whereRaw("LOWER(COALESCE(phone, '')) LIKE ?", ['%' . strtolower($phone) . '%']);
+            $filters['phone'] = 'Phone: ' . $phone;
         }
 
-        if ($updated = $request->query('updated_at')) {
-            if (Str::startsWith($updated, 'range:')) {
-                [$start, $end] = array_pad(explode(',', Str::after($updated, 'range:')), 2, null);
-                if ($start) {
-                    $query->whereDate('updated_at', '>=', $start);
-                }
-                if ($end) {
-                    $query->whereDate('updated_at', '<=', $end);
-                }
-                $filters['updated_at'] = 'Updated: ' . $start . ' - ' . $end;
+        $emailVerified = $request->query('email_verified');
+        if (in_array($emailVerified, ['true', 'false'], true)) {
+            if ($emailVerified === 'true') {
+                $query->whereNotNull('email_verified_at');
+            } else {
+                $query->whereNull('email_verified_at');
             }
+            $filters['email_verified'] = 'Is Email Verified?: ' . ucfirst($emailVerified);
+        }
+
+        $emailVerifiedAt = $request->query('email_verified_at');
+        if ($emailVerifiedAt) {
+            $query->whereDate('email_verified_at', $emailVerifiedAt);
+            $filters['email_verified_at'] = 'Email Verified At: ' . $emailVerifiedAt;
+        }
+
+        $studentNumber = trim($request->query('student_number', ''));
+        if ($studentNumber !== '') {
+            $query->whereRaw('LOWER(student_number) LIKE ?', ['%' . strtolower($studentNumber) . '%']);
+            $filters['student_number'] = 'Student Number: ' . $studentNumber;
+        }
+
+        $nationalSn = trim($request->query('national_sn', ''));
+        if ($nationalSn !== '') {
+            $query->whereRaw('LOWER(national_sn) LIKE ?', ['%' . strtolower($nationalSn) . '%']);
+            $filters['national_sn'] = 'National Student Number: ' . $nationalSn;
+        }
+
+        $major = trim($request->query('major', ''));
+        if ($major !== '') {
+            $query->whereRaw('LOWER(major) LIKE ?', ['%' . strtolower($major) . '%']);
+            $filters['major'] = 'Major: ' . $major;
+        }
+
+        $class = trim($request->query('class', ''));
+        if ($class !== '') {
+            $query->whereRaw('LOWER(class) LIKE ?', ['%' . strtolower($class) . '%']);
+            $filters['class'] = 'Class: ' . $class;
+        }
+
+        $batch = trim($request->query('batch', ''));
+        if ($batch !== '') {
+            $query->where('batch', $batch);
+            $filters['batch'] = 'Batch: ' . $batch;
+        }
+
+        $hasNotes = $request->query('has_notes');
+        if (in_array($hasNotes, ['true', 'false'], true)) {
+            if ($hasNotes === 'true') {
+                $query->whereNotNull('notes')
+                    ->whereRaw("TRIM(notes) <> ''");
+            } else {
+                $query->where(function ($sub) {
+                    $sub->whereNull('notes')
+                        ->orWhereRaw("TRIM(COALESCE(notes, '')) = ''");
+                });
+            }
+            $filters['has_notes'] = 'Has Notes?: ' . ucfirst($hasNotes);
+        }
+
+        $hasPhoto = $request->query('has_photo');
+        if (in_array($hasPhoto, ['true', 'false'], true)) {
+            if ($hasPhoto === 'true') {
+                $query->whereNotNull('photo')
+                    ->whereRaw("TRIM(photo) <> ''");
+            } else {
+                $query->where(function ($sub) {
+                    $sub->whereNull('photo')
+                        ->orWhereRaw("TRIM(COALESCE(photo, '')) = ''");
+                });
+            }
+            $filters['has_photo'] = 'Has Photo?: ' . ucfirst($hasPhoto);
         }
 
         if ($q = trim($request->query('q', ''))) {
             $qLower = strtolower($q);
             $query->where(function ($sub) use ($qLower) {
                 foreach (self::SEARCH_COLUMNS as $col) {
-                    $sub->orWhereRaw('LOWER(' . $col . ') LIKE ?', ['%' . $qLower . '%']);
+                    $sub->orWhereRaw(
+                        'LOWER(COALESCE(' . $col . ", '')) LIKE ?",
+                        ['%' . $qLower . '%']
+                    );
                 }
             });
         }
 
-        $sort = $request->query('sort', 'created_at:desc');
-        [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
-        $allowedSorts = array_merge(self::DISPLAY_COLUMNS, ['created_at', 'updated_at']);
-        if (!in_array($sortField, $allowedSorts)) {
-            $sortField = 'created_at';
-        }
-        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
-        $query->orderBy($sortField, $sortDir);
-
-        $students = $query->paginate(10)->withQueryString();
+        $students = $query
+            ->orderByDesc('created_at')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('student.index', [
             'students' => $students,
@@ -150,7 +220,7 @@ class StudentController extends Controller
             'photo' => $data['photo'] ?? null,
         ]);
 
-        return redirect('/student');
+        return redirect('/students')->with('status', 'Student created.');
     }
 
     public function edit($id)
@@ -204,10 +274,10 @@ class StudentController extends Controller
         ]);
 
         $message = session('role') === 'student'
-            ? 'Profil berhasil diperbarui.'
+            ? 'Profile updated.'
             : 'Student updated.';
 
-        return redirect('/student')->with('status', $message);
+        return redirect('/students')->with('status', $message);
     }
 
     public function destroy(Request $request, $id)
@@ -222,9 +292,9 @@ class StudentController extends Controller
         if (session('user_id') === $student->user_id) {
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-            return redirect('/login')->with('status', 'Akun Anda telah dihapus. Anda telah keluar.');
+            return redirect('/login')->with('status', 'Your account has been deleted. You have been logged out.');
         }
 
-        return redirect('/student')->with('status', 'Student deleted.');
+        return redirect('/students')->with('status', 'Student deleted.');
     }
 }

@@ -31,14 +31,14 @@ CRUD Admin is used to perform operations on the **user** table with the **Admin*
      * Name (text)  
      * Email (text)  
      * Phone (text)  
-     * Is Email Verified? (radio: True / False)  
+     * Is Email Verified? (radio: True / False / Any)  
      * Email Verified At (date)  
    * **Reset** button to clear filters  
    * **Apply** button to apply filters  
    * Note: Filters can be combined for more specific search results.  
 
 4. **Table** with columns: Name, Email, Phone.  
-Notes: Anticipate if the table width exceeds the screen width due to its content. By adding a horizontal scroll bar below the table if it exceeds the screen width.
+Notes: Anticipate if the table width exceeds the screen width due to its content. By adding a horizontal scroll bar below the table if it exceeds the screen width. Don't force the table to be long and wide explicitly, but adjust it to the content.
 
 5. Display **10 records per page**, with **Next** and **Back** navigation.  
 
@@ -56,7 +56,9 @@ Notes: Anticipate if the table width exceeds the screen width due to its content
    * Name (Text)  
    * Email (Email)  
    * Phone (Number)  
-   * Password (Password)  
+   * Password (Password)
+   * Cancel (Button)  
+   * Save (Button)
 
 3. Notes:  
    * ID is not an input field.  
@@ -84,10 +86,12 @@ Admin details are displayed as:
 1. Page title: **Update Admin**.  
 
 2. Inputs:  
-   * Name (Text)  
-   * Email (Email)  
+   * Name (Text)
+   * Email (Email)
    * Phone (Number)  
-   * Password (Password)  
+   * Password (Password)
+   * Cancel (Button)
+   * Save (Button)
 
 3. Notes:  
    * ID is not an input field.  

@@ -56,13 +56,13 @@ Route::middleware('auth.session')->group(function () {
         Route::get('/supervisors', [MetaController::class, 'supervisors']);
     });
 
-    Route::prefix('student')->group(function () {
+    Route::prefix('students')->group(function () {
         Route::get('/', [StudentController::class, 'index']);
-        Route::get('/add', [StudentController::class, 'create']);
+        Route::get('/create', [StudentController::class, 'create']);
         Route::post('/', [StudentController::class, 'store']);
         Route::middleware('student.self')->group(function () {
-            Route::get('{id}/see', [StudentController::class, 'show']);
-            Route::get('{id}/edit', [StudentController::class, 'edit'])->name('student.edit');
+            Route::get('{id}/read', [StudentController::class, 'show']);
+            Route::get('{id}/update', [StudentController::class, 'edit'])->name('student.edit');
             Route::put('{id}', [StudentController::class, 'update']);
             Route::delete('{id}', [StudentController::class, 'destroy']);
         });

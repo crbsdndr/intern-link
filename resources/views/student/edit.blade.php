@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Student')
+@section('title', 'Update Student')
 
 @section('content')
-<h1>Edit Student</h1>
-@include('student.form', ['action' => '/student/' . $student->id, 'method' => 'PUT', 'student' => $student])
+<h1>Update Student</h1>
+@include('student.form', ['action' => '/students/' . $student->id, 'method' => 'PUT', 'student' => $student])
 @endsection

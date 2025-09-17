@@ -13,7 +13,7 @@
     <nav id="sidebar" class="bg-light border-end" style="min-width:200px;">
         <div class="list-group list-group-flush">
             <a href="/" class="list-group-item list-group-item-action">Dashboard</a>
-            <a href="/student" class="list-group-item list-group-item-action">Students</a>
+            <a href="/students" class="list-group-item list-group-item-action">Students</a>
             <a href="/supervisor" class="list-group-item list-group-item-action">Supervisors</a>
             @if(session('role') === 'developer')
             <a href="/developer" class="list-group-item list-group-item-action">Developers</a>
@@ -43,5 +43,6 @@ document.getElementById('sidebarToggle').addEventListener('click', function(){
     this.setAttribute('aria-expanded', expanded ? 'false' : 'true');
 });
 </script>
+@stack('scripts')
 </body>
 </html>

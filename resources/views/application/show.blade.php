@@ -6,7 +6,7 @@
 <h1>Application Details</h1>
 <ul class="list-unstyled">
     <li>Submitted At: {{ $application->submitted_at }}</li>
-    <li>Student Name: <a href="/student/{{ $application->student_id }}/see">{{ $application->student_name }}</a></li>
+    <li>Student Name: <a href="/students/{{ $application->student_id }}/read">{{ $application->student_name }}</a></li>
     <li>Institution Name: <a href="/institution/{{ $application->institution_id }}/see">{{ $application->institution_name }}</a></li>
     <li>Status: {{ $application->status }}</li>
     <li>Decision At: {{ $application->decision_at }}</li>

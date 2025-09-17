@@ -13,6 +13,7 @@ return new class extends Migration
                    u.id AS user_id,
                    u.name,
                    u.email,
+                   u.email_verified_at,
                    u.phone,
                    u.role,
                    s.student_number,

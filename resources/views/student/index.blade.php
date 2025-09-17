@@ -3,13 +3,14 @@
 @section('title', 'Students')
 
 @section('content')
+@php($isStudent = session('role') === 'student')
+@php($queryParams = request()->query())
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Students</h1>
-    @php($isStudent = session('role') === 'student')
     <div class="d-flex align-items-center gap-2">
-        <form method="get" action="{{ url()->current() }}" id="student-search-form" class="position-relative">
+        <form method="get" action="{{ route('students.index') }}" id="student-search-form" class="position-relative">
             <div class="input-group" style="min-width:280px;">
-                <input type="search" name="q" id="student-search-input" class="form-control" placeholder="Cari…" aria-label="Search" value="{{ request('q') }}">
+                <input type="search" name="q" id="student-search-input" class="form-control" placeholder="Search students..." aria-label="Search" value="{{ request('q') }}">
                 <button class="btn btn-outline-secondary" type="submit" id="student-search-submit">
                     <i class="bi bi-search"></i>
                 </button>
@@ -31,9 +32,9 @@
             @endif
         </button>
         @if($isStudent)
-            <button class="btn btn-primary" disabled>Add</button>
+            <button class="btn btn-primary" disabled>Create Student</button>
         @else
-            <a href="/student/add" class="btn btn-primary">Add</a>
+            <a href="{{ route('students.create') }}" class="btn btn-primary">Create Student</a>
         @endif
     </div>
 </div>
@@ -41,56 +42,56 @@
 @if(count($filters))
     <div class="mb-3">
         @foreach($filters as $param => $label)
-            @php($q = Arr::except(request()->query(), [$param]))
-            <a href="{{ url()->current() . ($q ? '?' . http_build_query($q) : '') }}" class="badge bg-secondary text-decoration-none me-2">
+            @php($queryWithout = $queryParams)
+            @php(unset($queryWithout[$param], $queryWithout['page']))
+            @php($queryString = http_build_query($queryWithout))
+            <a href="{{ route('students.index') . ($queryString ? '?' . $queryString : '') }}" class="badge bg-secondary text-decoration-none me-2">
                 {{ $label }} <i class="bi bi-x ms-1"></i>
             </a>
         @endforeach
     </div>
 @endif
 
-
-<table class="table table-bordered">
+<table class="table table-bordered align-middle">
     <thead>
         <tr>
-            <th>No</th>
             <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>NIS</th>
+            <th>NISN</th>
             <th>Major</th>
             <th>Class</th>
-            <th>Action</th>
+            <th>Batch</th>
+            <th class="text-center" style="width:160px;">Actions</th>
         </tr>
     </thead>
     <tbody>
         @forelse($students as $student)
         <tr>
-            <td>{{ $students->total() - ($students->currentPage() - 1) * $students->perPage() - $loop->index }}</td>
             <td>{{ $student->name }}</td>
+            <td>{{ $student->email }}</td>
+            <td>{{ $student->phone ?? '-' }}</td>
+            <td>{{ $student->student_number }}</td>
+            <td>{{ $student->national_sn }}</td>
             <td>{{ $student->major }}</td>
             <td>{{ $student->class }}</td>
-            <td>
-                <a href="/student/{{ $student->id }}/see" class="btn btn-sm btn-secondary">View</a>
-                @if($isStudent)
-                    <a href="/student/{{ $student->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="/student/{{ $student->id }}" method="POST" style="display:inline-block">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                    </form>
-                @else
-                    <a href="/student/{{ $student->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="/student/{{ $student->id }}" method="POST" style="display:inline-block">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                    </form>
-                @endif
+            <td>{{ $student->batch }}</td>
+            <td class="text-center">
+                <a href="{{ route('students.show', $student->id) }}" class="btn btn-sm btn-secondary">View</a>
+                <a href="{{ route('students.edit', $student->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                <form action="{{ route('students.destroy', $student->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
             </td>
         </tr>
         @empty
         <tr>
-            <td colspan="4" class="text-center">
+            <td colspan="9" class="text-center">
                 @if(request('q'))
-                    Tidak ada hasil untuk '{{ request('q') }}'.
+                    No students found for "{{ request('q') }}".
                 @else
                     No students found.
                 @endif
@@ -100,10 +101,10 @@
     </tbody>
 </table>
 
-<p class="text-muted">Total: {{ $students->total() }} results</p>
+<p class="text-muted">Total Students: {{ $students->total() }}</p>
 
 <div class="d-flex justify-content-between align-items-center">
-    <span>(Page {{ $students->currentPage() }} of {{ $students->lastPage() }})</span>
+    <span>Page {{ $students->currentPage() }} out of {{ $students->lastPage() }}</span>
     <div class="d-flex gap-2">
         @if ($students->onFirstPage())
             <span class="text-muted">Back</span>
@@ -120,49 +121,98 @@
 
 <div class="offcanvas offcanvas-end" tabindex="-1" id="studentFilter">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title">Filter</h5>
+        <h5 class="offcanvas-title">Filter Students</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
     </div>
     <div class="offcanvas-body">
         <form method="get" id="student-filter-form">
+            <input type="hidden" name="q" value="{{ request('q') }}">
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-control" name="name" value="{{ request('name') }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" name="email" value="{{ request('email') }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Phone</label>
+                <input type="text" class="form-control" name="phone" value="{{ request('phone') }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Is Email Verified?</label>
+                <div class="d-flex gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="is_email_verified" id="is_email_verified_true" value="true" @checked(request('is_email_verified') === 'true')>
+                        <label class="form-check-label" for="is_email_verified_true">True</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="is_email_verified" id="is_email_verified_false" value="false" @checked(request('is_email_verified') === 'false')>
+                        <label class="form-check-label" for="is_email_verified_false">False</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="is_email_verified" id="is_email_verified_any" value="" @checked(request('is_email_verified') === null || request('is_email_verified') === '')>
+                        <label class="form-check-label" for="is_email_verified_any">Any</label>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email Verified At</label>
+                <input type="date" class="form-control" name="email_verified_at" value="{{ request('email_verified_at') }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Student Number</label>
+                <input type="text" class="form-control" name="student_number" value="{{ request('student_number') }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">National Student Number</label>
+                <input type="text" class="form-control" name="national_sn" value="{{ request('national_sn') }}">
+            </div>
             <div class="mb-3">
                 <label class="form-label">Major</label>
-                <input type="text" class="form-control" name="major~" value="{{ request('major~') }}">
+                <input type="text" class="form-control" name="major" value="{{ request('major') }}">
             </div>
-            @php($batchValue = '')
-            @if(request()->has('batch') && str_starts_with(request('batch'), 'in:'))
-                @php($batchValue = substr(request('batch'), 3))
-            @endif
             <div class="mb-3">
-                <label class="form-label">Batch</label>
-                <input type="text" class="form-control" id="filter-batch" placeholder="2023/2024,2024/2025" value="{{ $batchValue }}">
-                <input type="hidden" name="batch" id="filter-batch-hidden">
+                <label class="form-label">Class</label>
+                <input type="text" class="form-control" name="class" value="{{ request('class') }}">
             </div>
-            @php($createdRange = request('created_at'))
-            @php($createdStart = $createdEnd = '')
-            @if($createdRange && str_starts_with($createdRange, 'range:'))
-                @php([$createdStart, $createdEnd] = array_pad(explode(',', substr($createdRange, 6)), 2, ''))
-            @endif
             <div class="mb-3">
-                <label class="form-label">Created At</label>
-                <div class="d-flex gap-2">
-                    <input type="date" class="form-control" id="created_at_start" value="{{ $createdStart }}">
-                    <input type="date" class="form-control" id="created_at_end" value="{{ $createdEnd }}">
+                <label class="form-label">Batch (Year)</label>
+                <input type="number" class="form-control" name="batch" min="1900" max="2100" step="1" value="{{ request('batch') }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Have notes?</label>
+                <div class="d-flex gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="has_notes" id="has_notes_true" value="true" @checked(request('has_notes') === 'true')>
+                        <label class="form-check-label" for="has_notes_true">True</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="has_notes" id="has_notes_false" value="false" @checked(request('has_notes') === 'false')>
+                        <label class="form-check-label" for="has_notes_false">False</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="has_notes" id="has_notes_any" value="" @checked(request('has_notes') === null || request('has_notes') === '')>
+                        <label class="form-check-label" for="has_notes_any">Any</label>
+                    </div>
                 </div>
-                <input type="hidden" name="created_at" id="created_at_range">
             </div>
-            @php($updatedRange = request('updated_at'))
-            @php($updatedStart = $updatedEnd = '')
-            @if($updatedRange && str_starts_with($updatedRange, 'range:'))
-                @php([$updatedStart, $updatedEnd] = array_pad(explode(',', substr($updatedRange, 6)), 2, ''))
-            @endif
             <div class="mb-3">
-                <label class="form-label">Updated At</label>
-                <div class="d-flex gap-2">
-                    <input type="date" class="form-control" id="updated_at_start" value="{{ $updatedStart }}">
-                    <input type="date" class="form-control" id="updated_at_end" value="{{ $updatedEnd }}">
+                <label class="form-label">Have photo?</label>
+                <div class="d-flex gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="has_photo" id="has_photo_true" value="true" @checked(request('has_photo') === 'true')>
+                        <label class="form-check-label" for="has_photo_true">True</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="has_photo" id="has_photo_false" value="false" @checked(request('has_photo') === 'false')>
+                        <label class="form-check-label" for="has_photo_false">False</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="has_photo" id="has_photo_any" value="" @checked(request('has_photo') === null || request('has_photo') === '')>
+                        <label class="form-check-label" for="has_photo_any">Any</label>
+                    </div>
                 </div>
-                <input type="hidden" name="updated_at" id="updated_at_range">
             </div>
             <div class="d-flex gap-2">
                 <button type="button" class="btn btn-secondary" id="student-filter-reset">Reset</button>
@@ -204,37 +254,11 @@ studentSearchClear.addEventListener('click', function(){
     submitStudentSearch();
 });
 
-document.getElementById('student-filter-form').addEventListener('submit', function(){
-    var batch = document.getElementById('filter-batch').value.trim();
-    var batchHidden = document.getElementById('filter-batch-hidden');
-    if(batch){
-        batchHidden.value = 'in:' + batch.split(',').map(function(s){return s.trim();}).join(',');
-    }else{
-        batchHidden.disabled = true;
-    }
-
-    var cs = document.getElementById('created_at_start').value;
-    var ce = document.getElementById('created_at_end').value;
-    var ch = document.getElementById('created_at_range');
-    if(cs || ce){
-        ch.value = 'range:' + cs + ',' + ce;
-    }else{
-        ch.disabled = true;
-    }
-
-    var us = document.getElementById('updated_at_start').value;
-    var ue = document.getElementById('updated_at_end').value;
-    var uh = document.getElementById('updated_at_range');
-    if(us || ue){
-        uh.value = 'range:' + us + ',' + ue;
-    }else{
-        uh.disabled = true;
-    }
-});
-
-document.getElementById('student-filter-reset').addEventListener('click', function(){
-    window.location = window.location.pathname;
-});
+var filterReset = document.getElementById('student-filter-reset');
+if (filterReset) {
+    filterReset.addEventListener('click', function(){
+        window.location = '{{ route('students.index') }}';
+    });
+}
 </script>
 @endsection
-

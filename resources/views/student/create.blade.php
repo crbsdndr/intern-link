@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Add Student')
+@section('title', 'Create Student')
 
 @section('content')
-<h1>Add Student</h1>
-@include('student.form', ['action' => '/student', 'method' => 'POST', 'student' => null])
+<h1>Create Student</h1>
+@include('student.form', ['action' => route('students.store'), 'method' => 'POST', 'student' => null])
 @endsection

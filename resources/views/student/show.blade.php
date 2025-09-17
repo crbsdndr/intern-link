@@ -14,33 +14,33 @@
     </div>
     <div class="col-md-9">
         <ul class="list-unstyled">
-            <li><strong>{{ $student->name }}</strong></li>
-            <li>Email: {{ $student->email }}</li>
-            <li>Phone: {{ $student->phone }}</li>
-            <li>Role: {{ $student->role }}</li>
-            <li>User ID: {{ $student->user_id }}</li>
-            <li>Student Number: {{ $student->student_number }}</li>
-            <li>National Student Number: {{ $student->national_sn }}</li>
-            <li>Major: {{ $student->major }}</li>
-            <li>Class: {{ $student->class }}</li>
-            <li>Batch: {{ $student->batch }}</li>
-            <li>Notes: {{ $student->notes }}</li>
+            <li><strong>Photo:</strong> {{ $student->photo ?? '-' }}</li>
+            <li><strong>Name:</strong> {{ $student->name }}</li>
+            <li><strong>Email:</strong> {{ $student->email }}</li>
+            <li><strong>Phone:</strong> {{ $student->phone ?? '-' }}</li>
+            <li><strong>Email Verified At:</strong> {{ $student->email_verified_at ?? 'False' }}</li>
+            <li><strong>Student Number:</strong> {{ $student->student_number }}</li>
+            <li><strong>National Student Number:</strong> {{ $student->national_sn }}</li>
+            <li><strong>Major:</strong> {{ $student->major }}</li>
+            <li><strong>Class:</strong> {{ $student->class }}</li>
+            <li><strong>Batch:</strong> {{ $student->batch }}</li>
+            <li><strong>Notes:</strong> {{ $student->notes ?? '-' }}</li>
         </ul>
     </div>
 </div>
 @php($isStudent = session('role') === 'student')
 <div class="mt-3">
-    <a href="/student" class="btn btn-secondary">Back</a>
+    <a href="{{ route('students.index') }}" class="btn btn-secondary">Back</a>
     @if($isStudent)
-        <a href="/student/{{ $student->id }}/edit" class="btn btn-warning">Edit</a>
-        <form action="/student/{{ $student->id }}" method="POST" style="display:inline-block">
+        <a href="{{ route('students.edit', $student->id) }}" class="btn btn-warning">Edit</a>
+        <form action="{{ route('students.destroy', $student->id) }}" method="POST" style="display:inline-block">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-danger">Delete</button>
         </form>
     @else
-        <a href="/student/{{ $student->id }}/edit" class="btn btn-warning">Edit</a>
-        <form action="/student/{{ $student->id }}" method="POST" style="display:inline-block">
+        <a href="{{ route('students.edit', $student->id) }}" class="btn btn-warning">Edit</a>
+        <form action="{{ route('students.destroy', $student->id) }}" method="POST" style="display:inline-block">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-danger">Delete</button>

@@ -9,7 +9,7 @@
         $student = \Illuminate\Support\Facades\DB::table('students')->where('user_id', $userId)->select('id','photo')->first();
         if ($student) {
             $photo = $student->photo;
-            $settingsUrl = route('student.edit', ['id' => $student->id]);
+            $settingsUrl = route('students.edit', ['id' => $student->id]);
         }
     } elseif ($role === 'supervisor') {
         $supervisor = \Illuminate\Support\Facades\DB::table('supervisors')->where('user_id', $userId)->select('id','photo')->first();
@@ -30,7 +30,7 @@
     <div class="dropdown ms-auto">
         <button class="btn btn-light dropdown-toggle d-flex align-items-center" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             @if($photo)
-                <img src="{{ $photo }}" alt="Foto profil" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+                <img src="{{ $photo }}" alt="Profile photo" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
             @else
                 <i class="bi bi-person-circle fs-4 me-2"></i>
             @endif
@@ -38,7 +38,7 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
             @if($settingsUrl)
-            <li><a class="dropdown-item" href="{{ $settingsUrl }}">Pengaturan</a></li>
+            <li><a class="dropdown-item" href="{{ $settingsUrl }}">Settings</a></li>
             <li><hr class="dropdown-divider"></li>
             @endif
             <li>

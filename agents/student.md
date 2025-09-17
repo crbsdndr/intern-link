@@ -18,7 +18,12 @@ CRUD Student is used to perform operations on the **user** table with the **Stud
 
 1. Page title: **Students**.  
 
-2. **Search Input**  
+2. **Button filter**
+   * This button only appears when applying filters.
+   * The number of buttons corresponds to how many filters are applied.
+   * Button format: “{filter name}: {filter value}”
+
+3. **Search Input**  
    * Search records based on all columns displayed in the table (no 10-record limit).  
    * Search runs automatically whenever the input changes.  
    * The **Search** button is provided in case the automatic search does not work.

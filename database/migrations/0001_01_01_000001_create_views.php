@@ -98,8 +98,6 @@ return new class extends Migration
                    a.submitted_at,
                    a.created_at,
                    a.updated_at,
-                   a.decision_at,
-                   a.rejection_reason,
                    a.notes
             FROM applications a
             JOIN students s ON s.id = a.student_id
@@ -196,8 +194,7 @@ return new class extends Migration
                p.year AS period_year,
                p.term AS period_term,
                a.status,
-               a.submitted_at,
-               a.decision_at
+               a.submitted_at
         FROM applications a
         JOIN students s   ON s.id = a.student_id
         JOIN users u      ON u.id = s.user_id

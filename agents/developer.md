@@ -17,14 +17,19 @@ CRUD Developer is used to perform operations on the **user** table with the **De
 
 ## List – `/developers/`
 
-1. Page title: **Developers**.  
+1. Page title: **Developers**.
 
-2. **Search Input**  
+2. **Button filter**
+   * This button only appears when applying filters.
+   * The number of buttons corresponds to how many filters are applied.
+   * Button format: “{filter name}: {filter value}”
+
+3. **Search Input**  
    * Search records based on all columns displayed in the table (no 10-record limit).  
    * Search runs automatically whenever the input changes.  
    * The **Search** button is provided in case the automatic search does not work.
 
-3. **Filter** (sidebar opens from the right after clicking the filter button):  
+4. **Filter** (sidebar opens from the right after clicking the filter button):  
    * Title: **Filter Developer**  
    * **X** button to close the sidebar  
    * Inputs:  
@@ -37,14 +42,14 @@ CRUD Developer is used to perform operations on the **user** table with the **De
    * **Apply** button to apply filters  
    * Note: Filters can be combined for more specific search results.  
 
-4. **Table** with columns: Name, Email, Phone.  
+5. **Table** with columns: Name, Email, Phone.  
 Notes: Anticipate if the table width exceeds the screen width due to its content. By adding a horizontal scroll bar below the table if it exceeds the screen width. Don't force the table to be long and wide explicitly, but adjust it to the content.
 
-5. Display **10 records per page**, with **Next** and **Back** navigation.  
+6. Display **10 records per page**, with **Next** and **Back** navigation.  
 
-6. Display the total number of developers.  
+7. Display the total number of developers.  
 
-7. Display page information in the format: `Page X out of N` (X = current page, N = total pages).  
+8. Display page information in the format: `Page X out of N` (X = current page, N = total pages).  
 
 ---
 

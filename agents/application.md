@@ -15,13 +15,19 @@ The CRUD Application is used to perform operations on the **application** table.
 ---
 
 ## List – `/applications/`
-1. Page title: **Applications**  
-2. **Search Input**  
+1. Page title: **Applications**
+
+2. **Button filter**
+   * This button only appears when applying filters.
+   * The number of buttons corresponds to how many filters are applied.
+   * Button format: “{filter name}: {filter value}”
+
+3. **Search Input**  
    * Search across all displayed table columns (no 10-record limit).  
    * Search runs automatically whenever the input changes.  
-   * A **Search** button is provided in case auto-search does not work.  
+   * A **Search** button is provided in case auto-search does not work.
 
-3. **Filter** (sidebar opens from the right when the filter button is clicked)  
+4. **Filter** (sidebar opens from the right when the filter button is clicked)  
    * Title: **Filter Applications**  
    * **X** button to close the sidebar  
    * Inputs:  
@@ -37,13 +43,15 @@ The CRUD Application is used to perform operations on the **application** table.
    * **Apply** button to apply filters  
    * Note: Filters can be combined for more specific searches.  
 
-4. **Table** columns: Student Name, Institution Name, Year, Term, Status Application, Student Access, Submitted At.  
+5. **Table** columns: Student Name, Institution Name, Year, Term, Status Application, Student Access, Submitted At.  
    * Anticipate table width exceeding screen size → add horizontal scroll.  
    * Do not force table to stretch; adjust only as needed to fit content.  
 
-5. Show **10 records per page** with **Next** and **Back** navigation.  
-6. Show the total number of applications.  
-7. Show page info in the format: `Page X out of N` (X = current page, N = total pages).  
+6. Show **10 records per page** with **Next** and **Back** navigation.
+
+7. Show the total number of applications.
+
+8. Show page info in the format: `Page X out of N` (X = current page, N = total pages).  
 
 ---
 

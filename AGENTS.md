@@ -64,3 +64,4 @@ Check the files in the **Agents** folder for full details on each CRUD. This fol
 * Learn to write and use reusable code. If it’s not feasible → leave it.
 * UI/UX must remain consistent in similar contexts. For example, the Save button in the Create page for both Student and Application must have the same color and border radius.
 * Use English throughout the project unless explicitly instructed to use another language.
+* When you plan to implement something, always look at other systems that have the same context. Perhaps those systems have already implemented it. That way, you can simply follow the format and UI. This will ensure greater consistency.

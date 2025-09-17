@@ -18,7 +18,6 @@ class ApplicationSeeder extends Seeder
                 'period_id' => $i,
                 'status' => 'accepted',
                 'submitted_at' => $now,
-                'decision_at' => $now,
             ]);
         }
     }

@@ -192,9 +192,8 @@ return new class extends Migration
             $table->foreignId('institution_id')->constrained('institutions')->restrictOnDelete();
             $table->foreignId('period_id')->constrained('periods')->restrictOnDelete();
             $table->string('status')->default('submitted'); // cast to enum below
+            $table->boolean('student_access')->default(false);
             $table->timestampTz('submitted_at')->useCurrent();
-            $table->timestampTz('decision_at')->nullable();
-            $table->text('rejection_reason')->nullable();
             $table->text('notes')->nullable();
             $table->timestampsTz();
             $table->unique(['student_id','institution_id','period_id'], 'uq_application_unique_per_period');

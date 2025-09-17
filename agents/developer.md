@@ -22,7 +22,7 @@ CRUD Developer is used to perform operations on the **user** table with the **De
 2. **Search Input**  
    * Search records based on all columns displayed in the table (no 10-record limit).  
    * Search runs automatically whenever the input changes.  
-   * A **Search** button is available if the automatic search does not work.  
+   * The **Search** button is provided in case the automatic search does not work.
 
 3. **Filter** (sidebar opens from the right after clicking the filter button):  
    * Title: **Filter Developer**  
@@ -38,6 +38,7 @@ CRUD Developer is used to perform operations on the **user** table with the **De
    * Note: Filters can be combined for more specific search results.  
 
 4. **Table** with columns: Name, Email, Phone.  
+Notes: Anticipate if the table width exceeds the screen width due to its content. By adding a horizontal scroll bar below the table if it exceeds the screen width.
 
 5. Display **10 records per page**, with **Next** and **Back** navigation.  
 

@@ -25,8 +25,8 @@ return new class extends Migration
                    s.photo,
                    s.created_at,
                    s.updated_at
-            FROM students s
-            JOIN users u ON s.user_id = u.id;
+            FROM app.students s
+            JOIN core.users u ON s.user_id = u.id;
         SQL);
 
         DB::statement(<<<'SQL'
@@ -43,21 +43,21 @@ return new class extends Migration
                    s.photo,
                    s.created_at,
                    s.updated_at
-            FROM supervisors s
-            JOIN users u ON s.user_id = u.id;
+            FROM app.supervisors s
+            JOIN core.users u ON s.user_id = u.id;
         SQL);
 
         DB::statement(<<<'SQL'
             CREATE OR REPLACE VIEW institution_details_view AS
             WITH primary_contact AS (
                 SELECT DISTINCT ON (institution_id) id, institution_id, name, email, phone, position, is_primary
-                FROM institution_contacts
+                FROM app.institution_contacts
                 ORDER BY institution_id, is_primary DESC, id
             ),
             latest_quota AS (
                 SELECT DISTINCT ON (institution_id) iq.id, iq.institution_id, iq.quota, iq.used, iq.notes, p.year, p.term
-                FROM institution_quotas iq
-                JOIN periods p ON p.id = iq.period_id
+                FROM app.institution_quotas iq
+                JOIN app.periods p ON p.id = iq.period_id
                 ORDER BY iq.institution_id, p.year DESC, p.term DESC, iq.id DESC
             )
             SELECT i.id,
@@ -79,7 +79,7 @@ return new class extends Migration
                    lq.quota,
                    lq.used,
                    lq.notes AS quota_notes
-            FROM institutions i
+            FROM app.institutions i
             LEFT JOIN primary_contact pc ON pc.institution_id = i.id
             LEFT JOIN latest_quota lq ON lq.institution_id = i.id;
         SQL);
@@ -99,11 +99,11 @@ return new class extends Migration
                    a.created_at,
                    a.updated_at,
                    a.notes
-            FROM applications a
-            JOIN students s ON s.id = a.student_id
-            JOIN users u ON u.id = s.user_id
-            JOIN institutions i ON i.id = a.institution_id
-            JOIN periods p ON p.id = a.period_id;
+            FROM app.applications a
+            JOIN app.students s ON s.id = a.student_id
+            JOIN core.users u ON u.id = s.user_id
+            JOIN app.institutions i ON i.id = a.institution_id
+            JOIN app.periods p ON p.id = a.period_id;
         SQL);
 
         DB::statement(<<<'SQL'
@@ -122,11 +122,11 @@ return new class extends Migration
                    it.status,
                    it.created_at,
                    it.updated_at
-            FROM internships it
-            JOIN students s ON s.id = it.student_id
-            JOIN users u ON u.id = s.user_id
-            JOIN institutions i ON i.id = it.institution_id
-            JOIN periods p ON p.id = it.period_id;
+            FROM app.internships it
+            JOIN app.students s ON s.id = it.student_id
+            JOIN core.users u ON u.id = s.user_id
+            JOIN app.institutions i ON i.id = it.institution_id
+            JOIN app.periods p ON p.id = it.period_id;
         SQL);
 
         DB::statement(<<<'SQL'
@@ -146,14 +146,14 @@ return new class extends Migration
               p.year                   AS period_year,
               p.term                   AS period_term,
               it.status                AS internship_status
-            FROM monitoring_logs ml
-            JOIN internships it       ON it.id = ml.internship_id
-            JOIN students s           ON s.id = it.student_id
-            JOIN users u              ON u.id = s.user_id
-            JOIN institutions inst    ON inst.id = it.institution_id
-            JOIN periods p            ON p.id = it.period_id
-            LEFT JOIN supervisors sv  ON sv.id = ml.supervisor_id
-            LEFT JOIN users usv       ON usv.id = sv.user_id;
+            FROM app.monitoring_logs ml
+            JOIN app.internships it       ON it.id = ml.internship_id
+            JOIN app.students s           ON s.id = it.student_id
+            JOIN core.users u              ON u.id = s.user_id
+            JOIN app.institutions inst    ON inst.id = it.institution_id
+            JOIN app.periods p            ON p.id = it.period_id
+            LEFT JOIN app.supervisors sv  ON sv.id = ml.supervisor_id
+            LEFT JOIN core.users usv       ON usv.id = sv.user_id;
         SQL);
 
         DB::statement(<<<'SQL'
@@ -175,14 +175,14 @@ return new class extends Migration
               p.year           AS period_year,
               p.term           AS period_term,
               usv.name         AS supervisor_name
-            FROM monitoring_logs ml
-            JOIN internships it       ON it.id = ml.internship_id
-            JOIN students s           ON s.id = it.student_id
-            JOIN users u              ON u.id = s.user_id
-            JOIN institutions inst    ON inst.id = it.institution_id
-            JOIN periods p            ON p.id = it.period_id
-            LEFT JOIN supervisors sv  ON sv.id = ml.supervisor_id
-            LEFT JOIN users usv       ON usv.id = sv.user_id;
+            FROM app.monitoring_logs ml
+            JOIN app.internships it       ON it.id = ml.internship_id
+            JOIN app.students s           ON s.id = it.student_id
+            JOIN core.users u              ON u.id = s.user_id
+            JOIN app.institutions inst    ON inst.id = it.institution_id
+            JOIN app.periods p            ON p.id = it.period_id
+            LEFT JOIN app.supervisors sv  ON sv.id = ml.supervisor_id
+            LEFT JOIN core.users usv       ON usv.id = sv.user_id;
         SQL);
 
         DB::statement(<<<'SQL'
@@ -195,11 +195,11 @@ return new class extends Migration
                p.term AS period_term,
                a.status,
                a.submitted_at
-        FROM applications a
-        JOIN students s   ON s.id = a.student_id
-        JOIN users u      ON u.id = s.user_id
-        JOIN institutions i ON i.id = a.institution_id
-        JOIN periods p    ON p.id = a.period_id;
+        FROM app.applications a
+        JOIN app.students s   ON s.id = a.student_id
+        JOIN core.users u      ON u.id = s.user_id
+        JOIN app.institutions i ON i.id = a.institution_id
+        JOIN app.periods p    ON p.id = a.period_id;
         SQL);
 
         DB::statement(<<<'SQL'
@@ -213,14 +213,14 @@ return new class extends Migration
                p.year AS period_year,
                p.term AS period_term,
                usv.name AS primary_supervisor_name
-        FROM internships it
-        JOIN students s       ON s.id = it.student_id
-        JOIN users u          ON u.id = s.user_id
-        JOIN institutions i   ON i.id = it.institution_id
-        JOIN periods p        ON p.id = it.period_id
-        LEFT JOIN internship_supervisors its ON its.internship_id = it.id AND its.is_primary = TRUE
-        LEFT JOIN supervisors sv     ON sv.id = its.supervisor_id
-        LEFT JOIN users usv          ON usv.id = sv.user_id;
+        FROM app.internships it
+        JOIN app.students s       ON s.id = it.student_id
+        JOIN core.users u          ON u.id = s.user_id
+        JOIN app.institutions i   ON i.id = it.institution_id
+        JOIN app.periods p        ON p.id = it.period_id
+        LEFT JOIN app.internship_supervisors its ON its.internship_id = it.id AND its.is_primary = TRUE
+        LEFT JOIN app.supervisors sv     ON sv.id = its.supervisor_id
+        LEFT JOIN core.users usv          ON usv.id = sv.user_id;
         SQL);
     }
 

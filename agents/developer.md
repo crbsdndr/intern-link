@@ -8,7 +8,7 @@ CRUD Developer is used to perform operations on the **user** table with the **De
 
 ## Access Rights
 
-* **Create**: No client role can create new data.  
+* **Create**: No role can create.  
 * **Read**: A developer can only view their own data.  
 * **Update**: A developer can only update their own data.  
 * **Delete**: A developer can only delete their own data.  
@@ -19,15 +19,15 @@ CRUD Developer is used to perform operations on the **user** table with the **De
 
 1. Page title: **Developers**.
 
-2. **Button filter**
+2. **Search Input**  
+   * Search across all displayed table columns (no 10-record limit).  
+   * Search runs automatically whenever the input changes.  
+   * A **Search** button is provided in case auto-search does not work.
+
+3. **Button filter**
    * This button only appears when applying filters.
    * The number of buttons corresponds to how many filters are applied.
    * Button format: “{filter name}: {filter value}”
-
-3. **Search Input**  
-   * Search records based on all columns displayed in the table (no 10-record limit).  
-   * Search runs automatically whenever the input changes.  
-   * The **Search** button is provided in case the automatic search does not work.
 
 4. **Filter** (sidebar opens from the right after clicking the filter button):  
    * Title: **Filter Developer**  

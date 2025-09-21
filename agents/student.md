@@ -1,6 +1,6 @@
 # agents/student.md
 
-CRUD Student is used to perform operations on the **user** table with the **Student** role, along with the **student** table. The **student** table is therefore highly dependent on the user table.
+CRUD Student is used to perform operations on the **user** table with the **Student** role, along with the **student** table. The **student** table is therefore highly dependent on the **user** table.
 
 > Before reading this document, make sure you have already read **AGENTS.md** to understand the context.
 

@@ -19,15 +19,15 @@ CRUD Admin is used to perform operations on the **user** table with the **Admin*
 
 1. Page title: **Admins**.
 
-2. **Button filter**
+2. **Search Input**  
+   * Search across all displayed table columns (no 10-record limit).  
+   * Search runs automatically whenever the input changes.  
+   * A **Search** button is provided in case auto-search does not work.
+
+3. **Button filter**
    * This button only appears when applying filters.
    * The number of buttons corresponds to how many filters are applied.
    * Button format: “{filter name}: {filter value}”
-
-3. **Search Input**  
-   * Search records based on all columns displayed in the table (no 10-record limit).  
-   * Search is performed automatically whenever the input changes.  
-   * The **Search** button is provided in case the automatic search does not work.
 
 4. **Filter** (sidebar opens from the right when the filter button is clicked):  
    * Title: **Filter Admins**  

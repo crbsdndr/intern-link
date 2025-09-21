@@ -7,25 +7,25 @@ The CRUD Application is used to perform operations on the **application** table.
 ---
 
 ## Access Rights
-* **Create**: The Student role can only create an application for themselves. Higher roles can perform full Create operations.  
+* **Create**: The Student role can only create an application for themselves if and only if he does not have other application data. Higher roles can perform full Create operations.
 * **Read**: The Student role can only view their own application. Higher roles can perform full Read operations.  
 * **Update**: The Student role can only update if the *Student Access* column is set to **True**. Higher roles can perform full Update operations.  
-* **Delete**: The Student role can only delete if given permission by a higher role. Higher roles can perform full Delete operations.  
+* **Delete**: The Student role can only delete if the *Student Access* column is set to **True**.. Higher roles can perform full Delete operations.  
 
 ---
 
 ## List – `/applications/`
 1. Page title: **Applications**
 
-2. **Button filter**
-   * This button only appears when applying filters.
-   * The number of buttons corresponds to how many filters are applied.
-   * Button format: “{filter name}: {filter value}”
-
-3. **Search Input**  
+2. **Search Input**  
    * Search across all displayed table columns (no 10-record limit).  
    * Search runs automatically whenever the input changes.  
    * A **Search** button is provided in case auto-search does not work.
+
+3. **Button filter**
+   * This button only appears when applying filters.
+   * The number of buttons corresponds to how many filters are applied.
+   * Button format: “{filter name}: {filter value}”
 
 4. **Filter** (sidebar opens from the right when the filter button is clicked)  
    * Title: **Filter Applications**  
@@ -33,8 +33,7 @@ The CRUD Application is used to perform operations on the **application** table.
    * Inputs:  
      * Student Name (Text)  
      * Institution Name (Text)  
-     * Year Period (Date – year only)  
-     * Term Period (Number)  
+     * Period (Dropdown) (Tom Select) (format: "{year}: {term}")
      * Status Application (Dropdown, no Tom Select)  
      * Student Access (Radio: True / False / Any)  
      * Submitted At (Date)  
@@ -60,19 +59,18 @@ The CRUD Application is used to perform operations on the **application** table.
 2. Inputs:  
    * Student Name (Dropdown, Tom Select)  
    * Institution Name (Dropdown, Tom Select)  
-   * Period Year (Number)  
-   * Period Term (Number)  
-   * Status Application (Dropdown, no Tom Select)  
-   * Student Access (Radio: True / False / Any)  
-   * Submitted At (Date)  
-   * Notes (Textarea)  
-   * Cancel (Button)  
-   * Save (Button)  
+   * Period (Dropdown) (Tom Select) (format: "{year}: {term}")
+   * Status Application (Dropdown, no Tom Select)
+   * Student Access (Radio: True / False / Any) (Display the input only if the role is not a student)
+   * Submitted At (Date)
+   * Notes (Textarea)
+   * Cancel (Button)
+   * Save (Button)
 
 3. Notes:  
    * Student Name input shows the name, not the ID. Database still stores the ID.  
-   * Institution Name works the same way.  
-   * If the Year + Term Period combination does not yet exist in the Period table → create a new record, then link with its ID. If it already exists → just link to the existing ID.  
+   * Period shows the year and term, not the ID, Database still stores the ID.
+   * Institution Name works the same way.
 
 4. **Cancel** button navigates back.  
 5. **Save** button stores the new data.  
@@ -81,9 +79,9 @@ The CRUD Application is used to perform operations on the **application** table.
 
 ## Read – `/applications/[id]/read/`
 Application details displayed as:  
-* Student Photo  
+* Student Photo
 * Student Name (click → `/students/[id]/read/`)  
-* Student Email  
+* Student Email
 * Student Phone  
 * Student Number  
 * National Student Number  
@@ -121,28 +119,27 @@ Application details displayed as:
 ## Update – `/applications/[id]/update/`
 1. Page title: **Update Application**  
 2. Inputs:  
-   * Student Name (Dropdown, Tom Select – disabled, default from database)  
-   * "+" (Button) to add a new Student Name  
-   * Additional Student Name (Dropdown, Tom Select, appears after pressing +)  
-   * Institution Name (Dropdown, Tom Select)  
-   * Period Year (Number)  
-   * Period Term (Number)  
-   * Status Application (Dropdown, no Tom Select)  
-   * Student Access (Radio: True / False / Any)  
-   * Submitted At (Date)  
-   * Notes (Textarea)  
-   * Apply to all applications with the same institution (Checkbox)  
-   * Cancel (Button)  
-   * Save (Button)  
+   * Student Name (Dropdown, Tom Select – disabled, default from database)
+   * "+" (Button) to add a new Student Name
+   * Additional Student Name (Dropdown, Tom Select, appears after pressing +)
+   * Institution Name (Dropdown, Tom Select)
+   * Period (Dropdown) (Tom Select) (format: "{year}: {term}")
+   * Status Application (Dropdown, no Tom Select)
+   * Student Access (Radio: True / False / Any) (Display the input only if the role is not a student)
+   * Submitted At (Date)
+   * Notes (Textarea)
+   * Apply to all applications with the same institution (Checkbox)
+   * Cancel (Button)
+   * Save (Button)
 
 3. Notes:  
-   * Student Name & Institution Name are displayed as names; the database still stores IDs.  
-   * If Year + Term Period does not yet exist → create a new record, then link the ID.  
-   * All inputs load default values from the database.  
-   * Additional Student Name dropdown only shows students from the same institution as the first Student Name.  
-   * The checkbox automatically adds all Student Names from the same institution.  
-   * Do not display Student Names already selected in other inputs.  
-   * If all Student Names from the institution are already selected → the + button becomes disabled.  
+   * Student Name & Institution Name are displayed as names; the database still stores IDs.
+   * All inputs load default values from the database.
+   * Additional Student Name dropdown only shows students from the same institution as the first Student Name and make sure that the selected name does not appear again in the dropdown menu.
+   * The checkbox automatically adds all Student Names from the same institution.
+   * Do not display Student Names already selected in other inputs.
+   * If all Student Names from the institution are already selected → the + button becomes disabled.
+   * Period shows the year and term, not the ID, Database still stores the ID.
 
 4. **Cancel** button navigates back.  
 5. **Save** button stores changes.  

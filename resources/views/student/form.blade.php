@@ -54,7 +54,7 @@
         <input type="text" name="photo" id="student-photo" class="form-control" value="{{ old('photo', optional($student)->photo) }}">
     </div>
     <div class="col-12 d-flex gap-2">
-        <a href="/students" class="btn btn-secondary">Cancel</a>
+        <a href="/students" class="btn btn-outline-secondary">Cancel</a>
         <button type="submit" class="btn btn-primary">Save</button>
     </div>
 </form>

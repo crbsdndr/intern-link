@@ -13,8 +13,6 @@ class InstitutionIndustryTest extends TestCase
     {
         parent::setUp();
 
-        \DB::statement('DROP TABLE IF EXISTS institutions CASCADE');
-
         Schema::create('institutions', function (Blueprint $table) {
             $table->id();
             $table->string('name');

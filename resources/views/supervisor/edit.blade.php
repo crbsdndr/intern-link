@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Update Supervisor')
+@section('title', 'Edit Supervisor')
 
 @section('content')
-<h1>Update Supervisor</h1>
-@include('supervisor.form', ['action' => url('/supervisors/' . $supervisor->id), 'method' => 'PUT', 'supervisor' => $supervisor])
+<h1>Edit Supervisor</h1>
+@include('supervisor.form', ['action' => '/supervisor/' . $supervisor->id, 'method' => 'PUT', 'supervisor' => $supervisor])
 @endsection

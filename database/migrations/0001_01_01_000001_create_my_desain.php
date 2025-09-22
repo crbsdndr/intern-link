@@ -351,6 +351,15 @@ return new class extends Migration
         CREATE OR REPLACE FUNCTION app.set_default_hold_ttl()
         RETURNS trigger LANGUAGE plpgsql AS $$
         BEGIN
+          IF TG_OP='INSERT' THEN
+            IF app.is_active_status(NEW.status) AND NEW.hold_expires_at IS NULL THEN
+              NEW.hold_expires_at := now() + interval '24 hours';
+            END IF;
+          ELSIF TG_OP='UPDATE' THEN
+            IF NOT app.is_active_status(OLD.status) AND app.is_active_status(NEW.status) AND NEW.hold_expires_at IS NULL THEN
+              NEW.hold_expires_at := now() + interval '24 hours';
+            END IF;
+          END IF;
           RETURN NEW;
         END $$;
         SQL);
@@ -441,8 +450,16 @@ return new class extends Migration
         DB::statement(<<<'SQL'
         CREATE OR REPLACE FUNCTION app.cancel_expired_holds()
         RETURNS integer LANGUAGE plpgsql AS $$
+        DECLARE v_count int;
         BEGIN
-          RETURN 0;
+          UPDATE app.applications a
+             SET status = 'cancelled',
+                 updated_at = now()
+           WHERE app.is_active_status(a.status)
+             AND a.hold_expires_at IS NOT NULL
+             AND a.hold_expires_at < now();
+          GET DIAGNOSTICS v_count = ROW_COUNT;
+          RETURN v_count;
         END $$;
         SQL);
 
@@ -535,7 +552,8 @@ return new class extends Migration
           content        text NOT NULL,
           type           public.monitor_type_enum NOT NULL DEFAULT 'weekly',
           created_at     timestamptz NOT NULL DEFAULT now(),
-          updated_at     timestamptz NOT NULL DEFAULT now()
+          updated_at     timestamptz NOT NULL DEFAULT now(),
+          CONSTRAINT chk_score_range CHECK (score IS NULL OR score BETWEEN 0 AND 100)
         );
         SQL);
 

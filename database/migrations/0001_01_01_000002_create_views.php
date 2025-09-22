@@ -55,7 +55,7 @@ return new class extends Migration
                 ORDER BY institution_id, is_primary DESC, id
             ),
             latest_quota AS (
-                SELECT DISTINCT ON (institution_id) iq.id, iq.institution_id, iq.quota, iq.used, iq.notes, p.year, p.term
+                SELECT DISTINCT ON (institution_id) iq.id, iq.institution_id, iq.quota, iq.used, p.year, p.term
                 FROM app.institution_quotas iq
                 JOIN app.periods p ON p.id = iq.period_id
                 ORDER BY iq.institution_id, p.year DESC, p.term DESC, iq.id DESC
@@ -77,8 +77,7 @@ return new class extends Migration
                    lq.year AS period_year,
                    lq.term AS period_term,
                    lq.quota,
-                   lq.used,
-                   lq.notes AS quota_notes
+                   lq.used
             FROM app.institutions i
             LEFT JOIN primary_contact pc ON pc.institution_id = i.id
             LEFT JOIN latest_quota lq ON lq.institution_id = i.id;
@@ -135,7 +134,6 @@ return new class extends Migration
               ml.id                    AS monitoring_log_id,
               ml.log_date,
               ml.type                  AS log_type,
-              ml.score,
               COALESCE(ml.title, NULL) AS title,
               ml.content,
               ml.supervisor_id,
@@ -162,7 +160,6 @@ return new class extends Migration
               ml.id            AS monitoring_log_id,
               ml.log_date,
               ml.type          AS log_type,
-              ml.score,
               ml.title,
               ml.content,
               ml.supervisor_id,

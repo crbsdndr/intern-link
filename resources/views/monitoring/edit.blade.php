@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Monitoring Log')
+@section('title', 'Update Monitoring Log')
 
 @section('content')
-<h1>Edit Monitoring Log</h1>
+<h1>Update Monitoring Log</h1>
 @include('monitoring.form', [
-    'action' => '/monitoring/' . $log->monitoring_log_id,
+    'action' => url('/monitoring/' . $log->monitoring_log_id),
     'method' => 'PUT',
     'log' => $log,
     'internships' => $internships,

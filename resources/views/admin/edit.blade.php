@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Admin')
+@section('title', 'Update Admin')
 
 @section('content')
-<h1>Edit Admin</h1>
-@include('admin.form', ['action' => '/admin/' . $admin->id, 'method' => 'PUT', 'admin' => $admin])
+<h1>Update Admin</h1>
+@include('admin.form', ['action' => url('/admins/' . $admin->id), 'method' => 'PUT', 'admin' => $admin])
 @endsection

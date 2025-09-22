@@ -68,15 +68,15 @@ Route::middleware('auth.session')->group(function () {
         });
     });
 
-    Route::prefix('supervisor')->group(function () {
+    Route::prefix('supervisors')->group(function () {
         Route::get('/', [SupervisorController::class, 'index']);
         Route::middleware('role:admin,developer')->group(function () {
-            Route::get('/add', [SupervisorController::class, 'create']);
+            Route::get('/create', [SupervisorController::class, 'create']);
             Route::post('/', [SupervisorController::class, 'store']);
         });
         Route::middleware('supervisor.self')->group(function () {
-            Route::get('{id}/see', [SupervisorController::class, 'show']);
-            Route::get('{id}/edit', [SupervisorController::class, 'edit'])->name('supervisor.edit');
+            Route::get('{id}/read', [SupervisorController::class, 'show']);
+            Route::get('{id}/update', [SupervisorController::class, 'edit'])->name('supervisors.edit');
             Route::put('{id}', [SupervisorController::class, 'update']);
             Route::delete('{id}', [SupervisorController::class, 'destroy']);
         });
@@ -94,24 +94,24 @@ Route::middleware('auth.session')->group(function () {
         });
     });
 
-    Route::prefix('admin')->middleware('admin')->group(function () {
+    Route::prefix('admins')->middleware('admin')->group(function () {
         Route::get('/', [AdminUserController::class, 'index']);
-        Route::get('/add', [AdminUserController::class, 'create']);
+        Route::get('/create', [AdminUserController::class, 'create']);
         Route::post('/', [AdminUserController::class, 'store']);
         Route::middleware('admin.self')->group(function () {
-            Route::get('{id}/see', [AdminUserController::class, 'show']);
-            Route::get('{id}/edit', [AdminUserController::class, 'edit'])->name('admin.edit');
+            Route::get('{id}/read', [AdminUserController::class, 'show']);
+            Route::get('{id}/update', [AdminUserController::class, 'edit'])->name('admins.edit');
             Route::put('{id}', [AdminUserController::class, 'update']);
             Route::delete('{id}', [AdminUserController::class, 'destroy']);
         });
     });
 
-    Route::prefix('institution')->group(function () {
+    Route::prefix('institutions')->group(function () {
         Route::get('/', [InstitutionController::class, 'index']);
-        Route::get('/add', [InstitutionController::class, 'create']);
+        Route::get('/create', [InstitutionController::class, 'create']);
         Route::post('/', [InstitutionController::class, 'store']);
-        Route::get('{id}/see', [InstitutionController::class, 'show']);
-        Route::get('{id}/edit', [InstitutionController::class, 'edit']);
+        Route::get('{id}/read', [InstitutionController::class, 'show']);
+        Route::get('{id}/update', [InstitutionController::class, 'edit']);
         Route::put('{id}', [InstitutionController::class, 'update']);
         Route::delete('{id}', [InstitutionController::class, 'destroy']);
     });

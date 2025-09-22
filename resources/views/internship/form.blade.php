@@ -17,7 +17,7 @@
         <button type="button" class="btn btn-secondary mt-2" id="add-application">+</button>
         <div class="form-check mt-2">
             <input type="checkbox" class="form-check-input" id="take-all">
-            <label class="form-check-label" for="take-all">Ambil semua se-institusi</label>
+            <label class="form-check-label" for="take-all">Select all from this institution</label>
         </div>
     </div>
 

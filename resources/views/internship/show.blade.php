@@ -3,11 +3,17 @@
 @section('title', 'Internship Details')
 
 @section('content')
-<h1><a href="/application/{{ $internship->application_id }}/see">{{ $internship->student_name }} – {{ $internship->institution_name }}</a></h1>
-<ul class="list-unstyled">
-    <li>Start Date: {{ $internship->start_date }}</li>
-    <li>End Date: {{ $internship->end_date }}</li>
-    <li>Status: {{ $internship->status }}</li>
-</ul>
+<h1>Internship Details</h1>
+<div class="card">
+    <div class="card-body">
+        <ul class="list-unstyled mb-0">
+            <li class="mb-2"><strong>Student:</strong> <a href="/application/{{ $internship->application_id }}/see">{{ $internship->student_name }}</a></li>
+            <li class="mb-2"><strong>Institution:</strong> {{ $internship->institution_name }}</li>
+            <li class="mb-2"><strong>Start Date:</strong> {{ $internship->start_date ?? '—' }}</li>
+            <li class="mb-2"><strong>End Date:</strong> {{ $internship->end_date ?? '—' }}</li>
+            <li><strong>Status:</strong> {{ $internship->status }}</li>
+        </ul>
+    </div>
+</div>
 <a href="/internship" class="btn btn-secondary mt-3">Back</a>
 @endsection

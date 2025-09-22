@@ -28,7 +28,7 @@ class MonitoringLogController extends Controller
         $query = DB::table('monitoring_logs as ml')
             ->join('internship_details_view as it', 'it.id', '=', 'ml.internship_id')
             ->leftJoin('supervisor_details_view as sv', 'sv.id', '=', 'ml.supervisor_id')
-            ->select('ml.id as id', 'ml.log_date', 'it.student_name', 'it.institution_name', 'sv.name as supervisor_name', 'ml.type as log_type', 'ml.score', 'ml.title', 'ml.content', 'ml.created_at', 'ml.updated_at');
+            ->select('ml.id as id', 'ml.log_date', 'it.student_name', 'it.institution_name', 'sv.name as supervisor_name', 'ml.type as log_type', 'ml.title', 'ml.content', 'ml.created_at', 'ml.updated_at');
         if (session('role') === 'student') {
             $query->where('it.student_id', $this->currentStudentId());
         }
@@ -54,16 +54,14 @@ class MonitoringLogController extends Controller
             $term = strtolower($search);
             $driver = DB::getDriverName();
             $dateCast = $driver === 'pgsql' ? 'ml.log_date::text' : 'CAST(ml.log_date AS CHAR)';
-            $scoreCast = $driver === 'pgsql' ? 'ml.score::text' : 'CAST(ml.score AS CHAR)';
             $typeCast = $driver === 'pgsql' ? 'ml.type::text' : 'CAST(ml.type AS CHAR)';
-            $query->where(function ($q) use ($term, $dateCast, $scoreCast, $typeCast) {
+            $query->where(function ($q) use ($term, $dateCast, $typeCast) {
                 $q->whereRaw('LOWER(ml.title) LIKE ?', ["%{$term}%"])
                     ->orWhereRaw("LOWER($typeCast) LIKE ?", ["%{$term}%"])
                     ->orWhereRaw('LOWER(it.student_name) LIKE ?', ["%{$term}%"])
                     ->orWhereRaw('LOWER(it.institution_name) LIKE ?', ["%{$term}%"])
                     ->orWhereRaw('LOWER(sv.name) LIKE ?', ["%{$term}%"])
-                    ->orWhereRaw("LOWER($dateCast) LIKE ?", ["%{$term}%"])
-                    ->orWhereRaw("LOWER($scoreCast) LIKE ?", ["%{$term}%"]);
+                    ->orWhereRaw("LOWER($dateCast) LIKE ?", ["%{$term}%"]);
             });
         }
 
@@ -121,7 +119,6 @@ class MonitoringLogController extends Controller
             'log_date' => 'required|date',
             'supervisor_id' => 'nullable|exists:supervisors,id',
             'type' => 'required|in:' . implode(',', $types),
-            'score' => 'nullable|integer|min:0|max:100',
             'title' => 'nullable|string|max:150',
             'content' => 'required|string',
         ]);
@@ -158,7 +155,6 @@ class MonitoringLogController extends Controller
             'log_date' => 'required|date',
             'supervisor_id' => 'nullable|exists:supervisors,id',
             'type' => 'required|in:' . implode(',', $types),
-            'score' => 'nullable|integer|min:0|max:100',
             'title' => 'nullable|string|max:150',
             'content' => 'required|string',
         ]);

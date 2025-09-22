@@ -1,16 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Create Institution')
+@section('title', 'Add Institution')
 
 @section('content')
-<h1>Create Institution</h1>
-@include('institution.form', [
-    'action' => '/institutions',
-    'method' => 'POST',
-    'institution' => null,
-    'cities' => $cities,
-    'provinces' => $provinces,
-    'industries' => $industries,
-    'periods' => $periods,
-])
+<h1>Add Institution</h1>
+@include('institution.form', ['action' => '/institution', 'method' => 'POST', 'institution' => null, 'cities' => $cities, 'provinces' => $provinces])
 @endsection

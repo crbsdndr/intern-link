@@ -20,7 +20,7 @@
     } elseif ($role === 'admin') {
         $settingsUrl = route('admins.edit', ['id' => $userId]);
     } elseif ($role === 'developer') {
-        $settingsUrl = route('developer.edit', ['id' => $userId]);
+        $settingsUrl = route('developers.edit', ['id' => $userId]);
     }
 @endphp
 <header class="navbar navbar-light bg-light border-bottom px-3 d-flex align-items-center">

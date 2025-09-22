@@ -82,13 +82,13 @@ Route::middleware('auth.session')->group(function () {
         });
     });
 
-    Route::prefix('developer')->middleware('developer')->group(function () {
+    Route::prefix('developers')->middleware('developer')->group(function () {
         Route::get('/', [DeveloperController::class, 'index']);
-        Route::get('/add', [DeveloperController::class, 'create']);
+        Route::get('/create', [DeveloperController::class, 'create']);
         Route::post('/', [DeveloperController::class, 'store']);
         Route::middleware('developer.self')->group(function () {
-            Route::get('{id}/see', [DeveloperController::class, 'show']);
-            Route::get('{id}/edit', [DeveloperController::class, 'edit'])->name('developer.edit');
+            Route::get('{id}/read', [DeveloperController::class, 'show']);
+            Route::get('{id}/update', [DeveloperController::class, 'edit'])->name('developers.edit');
             Route::put('{id}', [DeveloperController::class, 'update']);
             Route::delete('{id}', [DeveloperController::class, 'destroy']);
         });

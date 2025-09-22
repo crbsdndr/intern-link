@@ -26,6 +26,6 @@
             <div class="form-text">Leave blank to keep the current password.</div>
         @endif
     </div>
-    <a href="/developer" class="btn btn-secondary">Cancel</a>
+    <a href="/developers" class="btn btn-secondary">Cancel</a>
     <button type="submit" class="btn btn-primary">Save</button>
 </form>

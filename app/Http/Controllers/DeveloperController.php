@@ -16,9 +16,8 @@ class DeveloperController extends Controller
 
     public function index(Request $request)
     {
-        $query = DB::table('users')
+        $query = DB::table('developer_details_view')
             ->select('id', 'name', 'email', 'phone', 'email_verified_at', 'created_at', 'updated_at')
-            ->where('role', 'developer')
             ->where('id', session('user_id'));
 
         $filters = [];
@@ -93,18 +92,20 @@ class DeveloperController extends Controller
 
     public function show($id)
     {
-        $developer = User::where('role', 'developer')->findOrFail($id);
+        $developer = DB::table('developer_details_view')->where('id', $id)->first();
+        abort_if(!$developer, 404);
+
         return view('developer.show', compact('developer'));
     }
 
     public function create()
     {
-        abort(401, 'Akses ditolak.');
+        abort(401, 'Access denied.');
     }
 
     public function store(Request $request)
     {
-        abort(401, 'Akses ditolak.');
+        abort(401, 'Access denied.');
     }
 
     public function edit($id)
@@ -132,11 +133,26 @@ class DeveloperController extends Controller
         }
         $developer->save();
 
-        return redirect('/developer')->with('status', 'Profil berhasil diperbarui.');
+        return redirect('/developers')->with('status', 'Profile updated.');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        abort(401, 'Akses ditolak.');
+        $developer = User::where('role', 'developer')->findOrFail($id);
+
+        if ((int) $developer->id !== (int) session('user_id')) {
+            abort(401, 'Access denied.');
+        }
+
+        $developer->delete();
+
+        if ((int) session('user_id') === (int) $developer->id) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect('/login')->with('status', 'Your account has been deleted. You have been logged out.');
+        }
+
+        return redirect('/developers')->with('status', 'Developer deleted.');
     }
 }

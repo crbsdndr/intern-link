@@ -21,7 +21,6 @@
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">{{ count($filters) }}</span>
             @endif
         </button>
-        <button class="btn btn-primary" disabled>Create Developer</button>
     </div>
 </div>
 
@@ -54,9 +53,13 @@
                 <td>{{ $developer->email }}</td>
                 <td>{{ $developer->phone ?? '—' }}</td>
                 <td class="text-nowrap">
-                    <a href="/developer/{{ $developer->id }}/see" class="btn btn-sm btn-secondary">Read</a>
-                    <a href="/developer/{{ $developer->id }}/edit" class="btn btn-sm btn-warning">Update</a>
-                    <button class="btn btn-sm btn-danger" disabled>Delete</button>
+                    <a href="/developers/{{ $developer->id }}/read" class="btn btn-sm btn-secondary">Read</a>
+                    <a href="/developers/{{ $developer->id }}/update" class="btn btn-sm btn-warning">Update</a>
+                    <form action="/developers/{{ $developer->id }}" method="POST" class="d-inline developer-delete-form">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
                 </td>
             </tr>
         @empty
@@ -88,7 +91,7 @@
 @php($resetBase = request('q') ? url()->current() . '?q=' . urlencode(request('q')) : url()->current())
 <div class="offcanvas offcanvas-end" tabindex="-1" id="developerFilter" aria-labelledby="developerFilterLabel">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="developerFilterLabel">Filter Developers</h5>
+        <h5 class="offcanvas-title" id="developerFilterLabel">Filter Developer</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
@@ -183,6 +186,15 @@ developerFilterForm.addEventListener('submit', () => {
 
 developerFilterReset.addEventListener('click', () => {
     window.location = developerFilterReset.dataset.resetUrl;
+});
+
+document.querySelectorAll('.developer-delete-form').forEach(form => {
+    form.addEventListener('submit', event => {
+        const confirmed = window.confirm('Are you sure you want to delete this developer? This action cannot be undone.');
+        if (!confirmed) {
+            event.preventDefault();
+        }
+    });
 });
 </script>
 @endsection

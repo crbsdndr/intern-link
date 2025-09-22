@@ -15,6 +15,9 @@ class StudentClassTest extends TestCase
     {
         parent::setUp();
 
+        \DB::statement('DROP TABLE IF EXISTS students CASCADE');
+        Schema::dropIfExists('users');
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');

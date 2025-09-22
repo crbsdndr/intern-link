@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Developer')
+@section('title', 'Update Developer')
 
 @section('content')
-<h1>Edit Developer</h1>
-@include('developer.form', ['action' => "/developer/{$developer->id}", 'method' => 'PUT', 'developer' => $developer])
+<h1>Update Developer</h1>
+@include('developer.form', ['action' => url('/developer/' . $developer->id), 'method' => 'PUT', 'developer' => $developer])
 @endsection

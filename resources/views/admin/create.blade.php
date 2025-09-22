@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Add Admin')
+@section('title', 'Create Admin')
 
 @section('content')
-<h1>Add Admin</h1>
-@include('admin.form', ['action' => '/admin', 'method' => 'POST', 'admin' => null])
+<h1>Create Admin</h1>
+@include('admin.form', ['action' => url('/admins'), 'method' => 'POST', 'admin' => null])
 @endsection

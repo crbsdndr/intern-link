@@ -13,7 +13,6 @@ class MonitoringLog extends Model
         'internship_id',
         'supervisor_id',
         'log_date',
-        'score',
         'title',
         'content',
         'type',

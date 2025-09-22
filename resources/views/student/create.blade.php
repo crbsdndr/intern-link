@@ -4,5 +4,5 @@
 
 @section('content')
 <h1>Create Student</h1>
-@include('student.form', ['action' => '/students', 'method' => 'POST', 'student' => null])
+@include('student.form', ['action' => url('/students'), 'method' => 'POST', 'student' => null])
 @endsection

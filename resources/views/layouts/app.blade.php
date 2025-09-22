@@ -16,7 +16,7 @@
             <a href="/students" class="list-group-item list-group-item-action">Students</a>
             <a href="/supervisors" class="list-group-item list-group-item-action">Supervisors</a>
             @if(session('role') === 'developer')
-            <a href="/developer" class="list-group-item list-group-item-action">Developers</a>
+            <a href="/developers" class="list-group-item list-group-item-action">Developers</a>
             @endif
             <a href="/institutions" class="list-group-item list-group-item-action">Institutions</a>
             <a href="/application" class="list-group-item list-group-item-action">Applications</a>

@@ -4,5 +4,5 @@
 
 @section('content')
 <h1>Update Developer</h1>
-@include('developer.form', ['action' => url('/developer/' . $developer->id), 'method' => 'PUT', 'developer' => $developer])
+@include('developer.form', ['action' => url('/developers/' . $developer->id), 'method' => 'PUT', 'developer' => $developer])
 @endsection

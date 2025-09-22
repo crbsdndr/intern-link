@@ -10,12 +10,19 @@
             <li class="mb-2"><strong>Name:</strong> {{ $developer->name }}</li>
             <li class="mb-2"><strong>Email:</strong> {{ $developer->email }}</li>
             <li class="mb-2"><strong>Phone:</strong> {{ $developer->phone ?? '—' }}</li>
-            <li><strong>Email Verified At:</strong> {{ $developer->email_verified_at ? $developer->email_verified_at : 'False' }}</li>
+            <li>
+                <strong>Email Verified At:</strong>
+                @if($developer->email_verified_at)
+                    {{ $developer->email_verified_at }}
+                @else
+                    <span class="fw-semibold">False</span>
+                @endif
+            </li>
         </ul>
     </div>
 </div>
-<a href="/developer" class="btn btn-secondary mt-3">Back</a>
+<a href="/developers" class="btn btn-secondary mt-3">Back</a>
 @if(session('user_id') == $developer->id)
-    <a href="/developer/{{ $developer->id }}/edit" class="btn btn-primary mt-3">Update</a>
+    <a href="/developers/{{ $developer->id }}/update" class="btn btn-primary mt-3">Update</a>
 @endif
 @endsection

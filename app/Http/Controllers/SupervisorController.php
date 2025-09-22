@@ -7,20 +7,27 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class SupervisorController extends Controller
 {
     /**
      * Columns searched and displayed. Adjust here if needed.
      */
-    private const SEARCH_COLUMNS = ['name', 'department'];
-    private const DISPLAY_COLUMNS = ['id', 'name', 'department'];
+    private const SEARCH_COLUMNS = ['name', 'email', 'phone', 'department'];
 
     public function index(Request $request)
     {
         $query = DB::table('supervisor_details_view as sv')
-            ->select('sv.id', 'sv.name', 'sv.department', 'sv.created_at', 'sv.updated_at');
+            ->select(
+                'sv.id',
+                'sv.name',
+                'sv.email',
+                'sv.phone',
+                'sv.department',
+                'sv.email_verified_at',
+                'sv.notes',
+                'sv.photo'
+            );
         if (session('role') === 'student') {
             $query->join('monitoring_logs as ml', 'sv.id', '=', 'ml.supervisor_id')
                 ->join('internships as it', 'ml.internship_id', '=', 'it.id')
@@ -32,34 +39,103 @@ class SupervisorController extends Controller
 
         $filters = [];
 
-        if ($dept = $request->query('department~')) {
-            $query->where('sv.department', 'like', '%' . $dept . '%');
-            $filters['department~'] = 'Department: ' . $dept;
+        if ($name = trim($request->query('name', ''))) {
+            $query->where('sv.name', 'like', '%' . $name . '%');
+            $filters[] = [
+                'param' => 'name',
+                'label' => 'Name: ' . $name,
+            ];
         }
 
-        if ($created = $request->query('created_at')) {
-            if (Str::startsWith($created, 'range:')) {
-                [$start, $end] = array_pad(explode(',', Str::after($created, 'range:')), 2, null);
-                if ($start) {
-                    $query->whereDate('sv.created_at', '>=', $start);
-                }
-                if ($end) {
-                    $query->whereDate('sv.created_at', '<=', $end);
-                }
-                $filters['created_at'] = 'Created: ' . $start . ' - ' . $end;
+        if ($email = trim($request->query('email', ''))) {
+            $query->where('sv.email', 'like', '%' . $email . '%');
+            $filters[] = [
+                'param' => 'email',
+                'label' => 'Email: ' . $email,
+            ];
+        }
+
+        if ($phone = trim($request->query('phone', ''))) {
+            $query->where('sv.phone', 'like', '%' . $phone . '%');
+            $filters[] = [
+                'param' => 'phone',
+                'label' => 'Phone: ' . $phone,
+            ];
+        }
+
+        if ($department = trim($request->query('department', ''))) {
+            $query->where('sv.department', 'like', '%' . $department . '%');
+            $filters[] = [
+                'param' => 'department',
+                'label' => 'Department: ' . $department,
+            ];
+        }
+
+        $emailVerified = $request->query('email_verified');
+        if (in_array($emailVerified, ['true', 'false'], true)) {
+            if ($emailVerified === 'true') {
+                $query->whereNotNull('sv.email_verified_at');
+                $filters[] = [
+                    'param' => 'email_verified',
+                    'label' => 'Is Email Verified?: True',
+                ];
+            } else {
+                $query->whereNull('sv.email_verified_at');
+                $filters[] = [
+                    'param' => 'email_verified',
+                    'label' => 'Is Email Verified?: False',
+                ];
             }
         }
 
-        if ($updated = $request->query('updated_at')) {
-            if (Str::startsWith($updated, 'range:')) {
-                [$start, $end] = array_pad(explode(',', Str::after($updated, 'range:')), 2, null);
-                if ($start) {
-                    $query->whereDate('sv.updated_at', '>=', $start);
-                }
-                if ($end) {
-                    $query->whereDate('sv.updated_at', '<=', $end);
-                }
-                $filters['updated_at'] = 'Updated: ' . $start . ' - ' . $end;
+        $verifiedDate = $request->query('email_verified_at');
+        if ($verifiedDate && preg_match('/^\d{4}-\d{2}-\d{2}$/', $verifiedDate)) {
+            $query->whereDate('sv.email_verified_at', $verifiedDate);
+            $filters[] = [
+                'param' => 'email_verified_at',
+                'label' => 'Email Verified At: ' . $verifiedDate,
+            ];
+        }
+
+        $hasNotes = $request->query('has_notes');
+        if (in_array($hasNotes, ['true', 'false'], true)) {
+            if ($hasNotes === 'true') {
+                $query->whereNotNull('sv.notes')
+                    ->whereRaw("TRIM(sv.notes) <> ''");
+                $filters[] = [
+                    'param' => 'has_notes',
+                    'label' => 'Have Notes?: True',
+                ];
+            } else {
+                $query->where(function ($sub) {
+                    $sub->whereNull('sv.notes')
+                        ->orWhereRaw("TRIM(sv.notes) = ''");
+                });
+                $filters[] = [
+                    'param' => 'has_notes',
+                    'label' => 'Have Notes?: False',
+                ];
+            }
+        }
+
+        $hasPhoto = $request->query('has_photo');
+        if (in_array($hasPhoto, ['true', 'false'], true)) {
+            if ($hasPhoto === 'true') {
+                $query->whereNotNull('sv.photo')
+                    ->whereRaw("TRIM(sv.photo) <> ''");
+                $filters[] = [
+                    'param' => 'has_photo',
+                    'label' => 'Have Photo?: True',
+                ];
+            } else {
+                $query->where(function ($sub) {
+                    $sub->whereNull('sv.photo')
+                        ->orWhereRaw("TRIM(sv.photo) = ''");
+                });
+                $filters[] = [
+                    'param' => 'has_photo',
+                    'label' => 'Have Photo?: False',
+                ];
             }
         }
 
@@ -72,14 +148,7 @@ class SupervisorController extends Controller
             });
         }
 
-        $sort = $request->query('sort', 'created_at:desc');
-        [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
-        $allowedSorts = array_merge(self::DISPLAY_COLUMNS, ['created_at', 'updated_at']);
-        if (!in_array($sortField, $allowedSorts)) {
-            $sortField = 'created_at';
-        }
-        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
-        $query->orderBy('sv.' . $sortField, $sortDir);
+        $query->orderBy('sv.name');
 
         $supervisors = $query->paginate(10)->withQueryString();
 
@@ -121,14 +190,14 @@ class SupervisorController extends Controller
             abort(401);
         }
         $data = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string',
-            'password' => 'required|string',
-            'supervisor_number' => 'required|string|unique:supervisors,supervisor_number',
-            'department' => 'required|string',
-            'notes' => 'nullable|string',
-            'photo' => 'nullable|string',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'phone' => 'nullable|string|max:20',
+            'password' => 'required|string|min:8',
+            'supervisor_number' => 'required|string|max:50|unique:supervisors,supervisor_number',
+            'department' => 'required|string|max:255',
+            'notes' => 'nullable|string|max:1000',
+            'photo' => 'nullable|string|max:255',
         ]);
 
         $user = User::create([
@@ -147,7 +216,7 @@ class SupervisorController extends Controller
             'photo' => $data['photo'] ?? null,
         ]);
 
-        return redirect('/supervisor');
+        return redirect('/supervisors');
     }
 
     public function edit($id)
@@ -175,14 +244,14 @@ class SupervisorController extends Controller
         $user = $supervisor->user;
 
         $data = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string',
-            'password' => 'nullable|string',
-            'supervisor_number' => 'required|string|unique:supervisors,supervisor_number,' . $supervisor->id,
-            'department' => 'required|string',
-            'notes' => 'nullable|string',
-            'photo' => 'nullable|string',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'password' => 'nullable|string|min:8',
+            'supervisor_number' => 'required|string|max:50|unique:supervisors,supervisor_number,' . $supervisor->id,
+            'department' => 'required|string|max:255',
+            'notes' => 'nullable|string|max:1000',
+            'photo' => 'nullable|string|max:255',
         ]);
 
         $user->name = $data['name'];
@@ -200,7 +269,7 @@ class SupervisorController extends Controller
             'photo' => $data['photo'] ?? null,
         ]);
 
-        return redirect('/supervisor');
+        return redirect('/supervisors');
     }
 
     public function destroy($id)
@@ -213,6 +282,6 @@ class SupervisorController extends Controller
         }
         $supervisor = Supervisor::findOrFail($id);
         $supervisor->user()->delete();
-        return redirect('/supervisor');
+        return redirect('/supervisors');
     }
 }

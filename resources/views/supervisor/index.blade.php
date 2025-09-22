@@ -3,212 +3,242 @@
 @section('title', 'Supervisors')
 
 @section('content')
+@php($role = session('role'))
+@php($isStudent = $role === 'student')
+@php($isSupervisor = $role === 'supervisor')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Supervisors</h1>
-    @php($isStudent = session('role') === 'student')
-    @php($isSupervisor = session('role') === 'supervisor')
+    <h1 class="mb-0">Supervisors</h1>
     <div class="d-flex align-items-center gap-2">
         <form method="get" action="{{ url()->current() }}" id="supervisor-search-form" class="position-relative">
-            <div class="input-group" style="min-width:280px;">
-                <input type="search" name="q" id="supervisor-search-input" class="form-control" placeholder="Cari…" aria-label="Search" value="{{ request('q') }}">
-                <button class="btn btn-outline-secondary" type="submit" id="supervisor-search-submit"><i class="bi bi-search"></i></button>
-                <button class="btn btn-outline-secondary" type="button" id="supervisor-search-clear" @if(!request('q')) style="display:none;" @endif><i class="bi bi-x"></i></button>
+            <div class="input-group" style="min-width: 260px;">
+                <input type="search" name="q" id="supervisor-search-input" class="form-control" placeholder="Search supervisors" value="{{ request('q') }}" autocomplete="off">
+                <button class="btn btn-outline-secondary" type="submit" id="supervisor-search-submit">Search</button>
             </div>
-            <div id="supervisor-search-spinner" class="position-absolute top-50 end-0 translate-middle-y me-2 d-none">
-                <div class="spinner-border spinner-border-sm text-secondary"></div>
-            </div>
-            @foreach(request()->except('q','page') as $param => $value)
+            @foreach(request()->except(['q','page']) as $param => $value)
                 <input type="hidden" name="{{ $param }}" value="{{ $value }}">
             @endforeach
         </form>
-        <button class="btn btn-outline-secondary position-relative" data-bs-toggle="offcanvas" data-bs-target="#supervisorFilter" title="Filter">
-            <i class="bi bi-funnel"></i>
+        <button class="btn btn-outline-secondary position-relative" type="button" data-bs-toggle="offcanvas" data-bs-target="#supervisorFilter" aria-controls="supervisorFilter">
+            Filter
             @if(count($filters))
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">{{ count($filters) }}</span>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">{{ count($filters) }}</span>
             @endif
         </button>
-        @if($isStudent || $isSupervisor)
-            <button class="btn btn-primary" disabled>Add</button>
-        @else
-            <a href="/supervisor/add" class="btn btn-primary">Add</a>
+        @if(in_array($role, ['admin', 'developer'], true))
+            <a href="/supervisors/create" class="btn btn-primary">Create Supervisor</a>
         @endif
     </div>
 </div>
 
 @if(count($filters))
-    <div class="mb-3">
-        @foreach($filters as $param => $label)
-            @php($q = Arr::except(request()->query(), [$param]))
-            <a href="{{ url()->current() . ($q ? '?' . http_build_query($q) : '') }}" class="badge bg-secondary text-decoration-none me-2">
-                {{ $label }} <i class="bi bi-x ms-1"></i>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        @foreach($filters as $filter)
+            @php($query = request()->except([$filter['param'], 'page']))
+            @php($queryString = http_build_query(array_filter($query, fn($value) => $value !== null && $value !== '')))
+            <a href="{{ url()->current() . ($queryString ? '?' . $queryString : '') }}" class="btn btn-sm btn-outline-secondary">
+                {{ $filter['label'] }}
             </a>
         @endforeach
     </div>
 @endif
 
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>No</th>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @forelse($supervisors as $supervisor)
-        <tr>
-            <td>{{ $supervisors->total() - ($supervisors->currentPage() - 1) * $supervisors->perPage() - $loop->index }}</td>
-            <td>{{ $supervisor->name }}</td>
-            <td>{{ $supervisor->department }}</td>
-            <td>
-                <a href="/supervisor/{{ $supervisor->id }}/see" class="btn btn-sm btn-secondary">View</a>
-                @if($isStudent || ($isSupervisor && $supervisor->id !== $currentSupervisorId))
-                    <button class="btn btn-sm btn-warning" disabled>Edit</button>
-                    <button class="btn btn-sm btn-danger" disabled>Delete</button>
-                @else
-                    <a href="/supervisor/{{ $supervisor->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="/supervisor/{{ $supervisor->id }}" method="POST" style="display:inline-block">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                    </form>
-                @endif
-            </td>
-        </tr>
-        @empty
-        <tr>
-            <td colspan="4" class="text-center">
-                @if(request('q'))
-                    Tidak ada hasil untuk '{{ request('q') }}'.
-                @else
-                    No supervisors found.
-                @endif
-            </td>
-        </tr>
-        @endforelse
-    </tbody>
-</table>
-
-<p class="text-muted">Total: {{ $supervisors->total() }} results</p>
-
-<div class="d-flex justify-content-between align-items-center">
-    <span>(Page {{ $supervisors->currentPage() }} of {{ $supervisors->lastPage() }})</span>
-    <div class="d-flex gap-2">
-        @if ($supervisors->onFirstPage())
-            <span class="text-muted">Back</span>
-        @else
-            <a href="{{ $supervisors->previousPageUrl() }}" class="btn btn-outline-secondary">Back</a>
-        @endif
-        @if ($supervisors->hasMorePages())
-            <a href="{{ $supervisors->nextPageUrl() }}" class="btn btn-outline-secondary">Next</a>
-        @else
-            <span class="text-muted">Next</span>
-        @endif
-    </div>
+<div class="table-responsive">
+    <table class="table table-bordered align-middle mb-3">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Department</th>
+                <th scope="col" class="text-nowrap">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($supervisors as $supervisor)
+                <tr>
+                    <td>{{ $supervisor->name }}</td>
+                    <td>{{ $supervisor->email }}</td>
+                    <td>{{ $supervisor->phone ?? '—' }}</td>
+                    <td>{{ $supervisor->department ?? '—' }}</td>
+                    <td class="text-nowrap">
+                        <a href="/supervisors/{{ $supervisor->id }}/read" class="btn btn-sm btn-secondary">Read</a>
+                        @if($isSupervisor && $supervisor->id !== $currentSupervisorId)
+                            <button class="btn btn-sm btn-warning" disabled>Update</button>
+                            <button class="btn btn-sm btn-danger" disabled>Delete</button>
+                        @elseif($isStudent)
+                            <button class="btn btn-sm btn-warning" disabled>Update</button>
+                            <button class="btn btn-sm btn-danger" disabled>Delete</button>
+                        @else
+                            <a href="/supervisors/{{ $supervisor->id }}/update" class="btn btn-sm btn-warning">Update</a>
+                            <form action="/supervisors/{{ $supervisor->id }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this supervisor?')">Delete</button>
+                            </form>
+                        @endif
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="text-center">No supervisors found.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="supervisorFilter">
+<p class="text-muted mb-1">Total Supervisors: {{ $supervisors->total() }}</p>
+<p class="text-muted">Page {{ $supervisors->currentPage() }} out of {{ $supervisors->lastPage() }}</p>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    @if ($supervisors->onFirstPage())
+        <span class="btn btn-outline-secondary disabled">Back</span>
+    @else
+        <a href="{{ $supervisors->previousPageUrl() }}" class="btn btn-outline-secondary">Back</a>
+    @endif
+
+    @if ($supervisors->hasMorePages())
+        <a href="{{ $supervisors->nextPageUrl() }}" class="btn btn-outline-secondary">Next</a>
+    @else
+        <span class="btn btn-outline-secondary disabled">Next</span>
+    @endif
+</div>
+
+@php($resetBase = request('q') ? url()->current() . '?q=' . urlencode(request('q')) : url()->current())
+<div class="offcanvas offcanvas-end" tabindex="-1" id="supervisorFilter" aria-labelledby="supervisorFilterLabel">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title">Filter</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        <h5 class="offcanvas-title" id="supervisorFilterLabel">Filter Supervisors</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
         <form method="get" id="supervisor-filter-form">
-            <div class="mb-3">
-                <label class="form-label">Department</label>
-                <input type="text" class="form-control" name="department~" value="{{ request('department~') }}">
-            </div>
-            @php($createdRange = request('created_at'))
-            @php($createdStart = $createdEnd = '')
-            @if($createdRange && str_starts_with($createdRange, 'range:'))
-                @php([$createdStart, $createdEnd] = array_pad(explode(',', substr($createdRange, 6)), 2, ''))
+            @if(request('q'))
+                <input type="hidden" name="q" value="{{ request('q') }}">
             @endif
             <div class="mb-3">
-                <label class="form-label">Created At</label>
-                <div class="d-flex gap-2">
-                    <input type="date" class="form-control" id="created_at_start" value="{{ $createdStart }}">
-                    <input type="date" class="form-control" id="created_at_end" value="{{ $createdEnd }}">
-                </div>
-                <input type="hidden" name="created_at" id="created_at_range">
+                <label class="form-label" for="filter-name">Name</label>
+                <input type="text" class="form-control" name="name" id="filter-name" value="{{ request('name') }}">
             </div>
-            @php($updatedRange = request('updated_at'))
-            @php($updatedStart = $updatedEnd = '')
-            @if($updatedRange && str_starts_with($updatedRange, 'range:'))
-                @php([$updatedStart, $updatedEnd] = array_pad(explode(',', substr($updatedRange, 6)), 2, ''))
-            @endif
             <div class="mb-3">
-                <label class="form-label">Updated At</label>
-                <div class="d-flex gap-2">
-                    <input type="date" class="form-control" id="updated_at_start" value="{{ $updatedStart }}">
-                    <input type="date" class="form-control" id="updated_at_end" value="{{ $updatedEnd }}">
+                <label class="form-label" for="filter-email">Email</label>
+                <input type="text" class="form-control" name="email" id="filter-email" value="{{ request('email') }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="filter-phone">Phone</label>
+                <input type="text" class="form-control" name="phone" id="filter-phone" value="{{ request('phone') }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="filter-department">Department</label>
+                <input type="text" class="form-control" name="department" id="filter-department" value="{{ request('department') }}">
+            </div>
+            <div class="mb-3">
+                <span class="form-label d-block">Is Email Verified?</span>
+                @php($emailVerified = request('email_verified'))
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="email_verified" id="email-verified-true" value="true" {{ $emailVerified === 'true' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="email-verified-true">True</label>
                 </div>
-                <input type="hidden" name="updated_at" id="updated_at_range">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="email_verified" id="email-verified-false" value="false" {{ $emailVerified === 'false' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="email-verified-false">False</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="email_verified" id="email-verified-any" value="any" {{ !in_array($emailVerified, ['true','false'], true) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="email-verified-any">Any</label>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="filter-email-verified-at">Email Verified At</label>
+                <input type="date" class="form-control" name="email_verified_at" id="filter-email-verified-at" value="{{ request('email_verified_at') }}">
+            </div>
+            <div class="mb-3">
+                <span class="form-label d-block">Have notes?</span>
+                @php($hasNotes = request('has_notes'))
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="has_notes" id="has-notes-true" value="true" {{ $hasNotes === 'true' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="has-notes-true">True</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="has_notes" id="has-notes-false" value="false" {{ $hasNotes === 'false' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="has-notes-false">False</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="has_notes" id="has-notes-any" value="any" {{ !in_array($hasNotes, ['true','false'], true) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="has-notes-any">Any</label>
+                </div>
+            </div>
+            <div class="mb-4">
+                <span class="form-label d-block">Have photo?</span>
+                @php($hasPhoto = request('has_photo'))
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="has_photo" id="has-photo-true" value="true" {{ $hasPhoto === 'true' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="has-photo-true">True</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="has_photo" id="has-photo-false" value="false" {{ $hasPhoto === 'false' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="has-photo-false">False</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="has_photo" id="has-photo-any" value="any" {{ !in_array($hasPhoto, ['true','false'], true) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="has-photo-any">Any</label>
+                </div>
             </div>
             <div class="d-flex gap-2">
-                <button type="button" class="btn btn-secondary" id="supervisor-filter-reset">Reset</button>
-                <button type="submit" class="btn btn-primary">Apply</button>
+                <button type="button" class="btn btn-secondary flex-fill" id="supervisor-filter-reset" data-reset-url="{{ $resetBase }}">Reset</button>
+                <button type="submit" class="btn btn-primary flex-fill">Apply</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-var supervisorSearchForm = document.getElementById('supervisor-search-form');
-var supervisorSearchInput = document.getElementById('supervisor-search-input');
-var supervisorSearchClear = document.getElementById('supervisor-search-clear');
-var supervisorSearchSpinner = document.getElementById('supervisor-search-spinner');
-var supervisorSearchTimer;
+const supervisorSearchForm = document.getElementById('supervisor-search-form');
+const supervisorSearchInput = document.getElementById('supervisor-search-input');
+let supervisorSearchTimer;
 
-function submitSupervisorSearch(){
-    supervisorSearchSpinner.classList.remove('d-none');
-    var params = new URLSearchParams(new FormData(supervisorSearchForm));
-    if(!supervisorSearchInput.value) { params.delete('q'); }
+function submitSupervisorSearch() {
+    const formData = new FormData(supervisorSearchForm);
+    const params = new URLSearchParams();
+    for (const [key, value] of formData.entries()) {
+        if (key === 'q' && value.trim() === '') {
+            continue;
+        }
+        params.append(key, value);
+    }
     params.delete('page');
-    var query = params.toString();
+    const query = params.toString();
     window.location = supervisorSearchForm.getAttribute('action') + (query ? '?' + query : '');
 }
 
-supervisorSearchInput.addEventListener('input', function(){
-    supervisorSearchClear.style.display = this.value ? 'block' : 'none';
+supervisorSearchInput.addEventListener('input', () => {
     clearTimeout(supervisorSearchTimer);
     supervisorSearchTimer = setTimeout(submitSupervisorSearch, 300);
 });
 
-supervisorSearchForm.addEventListener('submit', function(e){
-    e.preventDefault();
+supervisorSearchForm.addEventListener('submit', event => {
+    event.preventDefault();
     submitSupervisorSearch();
 });
 
-supervisorSearchClear.addEventListener('click', function(){
-    supervisorSearchInput.value = '';
-    submitSupervisorSearch();
-});
+const filterForm = document.getElementById('supervisor-filter-form');
+const resetButton = document.getElementById('supervisor-filter-reset');
 
-document.getElementById('supervisor-filter-form').addEventListener('submit', function(){
-    var cs = document.getElementById('created_at_start').value;
-    var ce = document.getElementById('created_at_end').value;
-    var ch = document.getElementById('created_at_range');
-    if(cs || ce){
-        ch.value = 'range:' + cs + ',' + ce;
-    }else{
-        ch.disabled = true;
-    }
-
-    var us = document.getElementById('updated_at_start').value;
-    var ue = document.getElementById('updated_at_end').value;
-    var uh = document.getElementById('updated_at_range');
-    if(us || ue){
-        uh.value = 'range:' + us + ',' + ue;
-    }else{
-        uh.disabled = true;
+filterForm.addEventListener('submit', () => {
+    const optionalRadios = ['email_verified', 'has_notes', 'has_photo'];
+    optionalRadios.forEach(name => {
+        const checked = filterForm.querySelector(`input[name="${name}"]:checked`);
+        if (checked && checked.value === 'any') {
+            checked.disabled = true;
+        }
+    });
+    const dateInput = document.getElementById('filter-email-verified-at');
+    if (dateInput && !dateInput.value) {
+        dateInput.disabled = true;
     }
 });
 
-document.getElementById('supervisor-filter-reset').addEventListener('click', function(){
-    window.location = window.location.pathname;
+resetButton.addEventListener('click', () => {
+    window.location = resetButton.dataset.resetUrl;
 });
 </script>
 @endsection
-

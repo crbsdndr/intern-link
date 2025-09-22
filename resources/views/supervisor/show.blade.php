@@ -4,26 +4,19 @@
 
 @section('content')
 <h1>Supervisor Details</h1>
-<div class="row">
-    <div class="col-md-3">
-        @if($supervisor->photo)
-            <img src="{{ $supervisor->photo }}" alt="{{ $supervisor->name }}" class="img-fluid">
-        @else
-            <div class="bg-secondary text-white text-center p-3">No Photo</div>
-        @endif
-    </div>
-    <div class="col-md-9">
-        <ul class="list-unstyled">
-            <li><strong>{{ $supervisor->name }}</strong></li>
-            <li>Email: {{ $supervisor->email }}</li>
-            <li>Phone: {{ $supervisor->phone }}</li>
-            <li>Role: {{ $supervisor->role }}</li>
-            <li>User ID: {{ $supervisor->user_id }}</li>
-            <li>Supervisor Number: {{ $supervisor->supervisor_number }}</li>
-            <li>Department: {{ $supervisor->department }}</li>
-            <li>Notes: {{ $supervisor->notes }}</li>
+<div class="card">
+    <div class="card-body">
+        <ul class="list-unstyled mb-0">
+            <li class="mb-2"><strong>Photo:</strong> {{ $supervisor->photo ?? '—' }}</li>
+            <li class="mb-2"><strong>Name:</strong> {{ $supervisor->name }}</li>
+            <li class="mb-2"><strong>Email:</strong> {{ $supervisor->email }}</li>
+            <li class="mb-2"><strong>Phone:</strong> {{ $supervisor->phone ?? '—' }}</li>
+            <li class="mb-2"><strong>Email Verified At:</strong> {{ $supervisor->email_verified_at ? $supervisor->email_verified_at : 'False' }}</li>
+            <li class="mb-2"><strong>Supervisor Number:</strong> {{ $supervisor->supervisor_number }}</li>
+            <li class="mb-2"><strong>Department:</strong> {{ $supervisor->department ?? '—' }}</li>
+            <li><strong>Notes:</strong> {{ $supervisor->notes ?? '—' }}</li>
         </ul>
     </div>
 </div>
-<a href="/supervisor" class="btn btn-secondary mt-3">Back</a>
+<a href="/supervisors" class="btn btn-secondary mt-3">Back</a>
 @endsection

@@ -4,109 +4,197 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Developers</h1>
+    <h1 class="mb-0">Developers</h1>
     <div class="d-flex align-items-center gap-2">
         <form method="get" action="{{ url()->current() }}" id="developer-search-form" class="position-relative">
-            <div class="input-group" style="min-width:280px;">
-                <input type="search" name="q" id="developer-search-input" class="form-control" placeholder="Cari…" aria-label="Search" value="{{ request('q') }}">
-                <button class="btn btn-outline-secondary" type="submit" id="developer-search-submit"><i class="bi bi-search"></i></button>
-                <button class="btn btn-outline-secondary" type="button" id="developer-search-clear" @if(!request('q')) style="display:none;" @endif><i class="bi bi-x"></i></button>
+            <div class="input-group" style="min-width: 260px;">
+                <input type="search" name="q" id="developer-search-input" class="form-control" placeholder="Search developers" value="{{ request('q') }}" autocomplete="off">
+                <button class="btn btn-outline-secondary" type="submit" id="developer-search-submit">Search</button>
             </div>
-            <div id="developer-search-spinner" class="position-absolute top-50 end-0 translate-middle-y me-2 d-none">
-                <div class="spinner-border spinner-border-sm text-secondary"></div>
-            </div>
+            @foreach(request()->except(['q','page']) as $param => $value)
+                <input type="hidden" name="{{ $param }}" value="{{ $value }}">
+            @endforeach
         </form>
-        <button class="btn btn-primary" disabled>Add</button>
+        <button class="btn btn-outline-secondary position-relative" type="button" data-bs-toggle="offcanvas" data-bs-target="#developerFilter" aria-controls="developerFilter">
+            Filter
+            @if(count($filters))
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">{{ count($filters) }}</span>
+            @endif
+        </button>
     </div>
 </div>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>No</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
+@if(count($filters))
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        @foreach($filters as $filter)
+            @php($query = request()->except([$filter['param'], 'page']))
+            @php($queryString = http_build_query(array_filter($query, fn($value) => $value !== null && $value !== '')))
+            <a href="{{ url()->current() . ($queryString ? '?' . $queryString : '') }}" class="btn btn-sm btn-outline-secondary">
+                {{ $filter['label'] }}
+            </a>
+        @endforeach
+    </div>
+@endif
+
+<div class="table-responsive">
+    <table class="table table-bordered align-middle mb-3">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Phone</th>
+                <th scope="col" class="text-nowrap">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
         @forelse($developers as $developer)
-        <tr>
-            <td>{{ $developers->total() - ($developers->currentPage() - 1) * $developers->perPage() - $loop->index }}</td>
-            <td>{{ $developer->name }}</td>
-            <td>{{ $developer->email }}</td>
-            <td>
-                <a href="/developer/{{ $developer->id }}/see" class="btn btn-sm btn-secondary">View</a>
-                @if(session('user_id') == $developer->id)
-                    <a href="/developer/{{ $developer->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
-                @else
-                    <button class="btn btn-sm btn-warning" disabled>Edit</button>
-                @endif
-                <button class="btn btn-sm btn-danger" disabled>Delete</button>
-            </td>
-        </tr>
+            <tr>
+                <td>{{ $developer->name }}</td>
+                <td>{{ $developer->email }}</td>
+                <td>{{ $developer->phone ?? '—' }}</td>
+                <td class="text-nowrap">
+                    <a href="/developers/{{ $developer->id }}/read" class="btn btn-sm btn-secondary">Read</a>
+                    <a href="/developers/{{ $developer->id }}/update" class="btn btn-sm btn-warning">Update</a>
+                    <form action="/developers/{{ $developer->id }}" method="POST" class="d-inline developer-delete-form">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
         @empty
-        <tr>
-            <td colspan="4" class="text-center">
-                @if(request('q'))
-                    Tidak ada hasil untuk '{{ request('q') }}'.
-                @else
-                    No developers found.
-                @endif
-            </td>
-        </tr>
+            <tr>
+                <td colspan="4" class="text-center">No developers found.</td>
+            </tr>
         @endforelse
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
 
-<p class="text-muted">Showing {{ $developers->count() }} out of {{ $developers->total() }} developers</p>
+<p class="text-muted mb-1">Total Developers: {{ $developers->total() }}</p>
+<p class="text-muted">Page {{ $developers->currentPage() }} out of {{ $developers->lastPage() }}</p>
 
-<div class="d-flex justify-content-between align-items-center">
-    <span>(Page {{ $developers->currentPage() }} of {{ $developers->lastPage() }})</span>
-    <div class="d-flex gap-2">
-        @if ($developers->onFirstPage())
-            <span class="text-muted">Back</span>
-        @else
-            <a href="{{ $developers->previousPageUrl() }}" class="btn btn-outline-secondary">Back</a>
-        @endif
-        @if ($developers->hasMorePages())
-            <a href="{{ $developers->nextPageUrl() }}" class="btn btn-outline-secondary">Next</a>
-        @else
-            <span class="text-muted">Next</span>
-        @endif
+<div class="d-flex justify-content-between align-items-center mb-4">
+    @if ($developers->onFirstPage())
+        <span class="btn btn-outline-secondary disabled">Back</span>
+    @else
+        <a href="{{ $developers->previousPageUrl() }}" class="btn btn-outline-secondary">Back</a>
+    @endif
+
+    @if ($developers->hasMorePages())
+        <a href="{{ $developers->nextPageUrl() }}" class="btn btn-outline-secondary">Next</a>
+    @else
+        <span class="btn btn-outline-secondary disabled">Next</span>
+    @endif
+</div>
+
+@php($resetBase = request('q') ? url()->current() . '?q=' . urlencode(request('q')) : url()->current())
+<div class="offcanvas offcanvas-end" tabindex="-1" id="developerFilter" aria-labelledby="developerFilterLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="developerFilterLabel">Filter Developer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="get" id="developer-filter-form" class="d-flex flex-column gap-3">
+            @if(request('q'))
+                <input type="hidden" name="q" value="{{ request('q') }}">
+            @endif
+            <div>
+                <label class="form-label" for="developer-name">Name</label>
+                <input type="text" class="form-control" id="developer-name" name="name" value="{{ request('name') }}">
+            </div>
+            <div>
+                <label class="form-label" for="developer-email">Email</label>
+                <input type="text" class="form-control" id="developer-email" name="email" value="{{ request('email') }}">
+            </div>
+            <div>
+                <label class="form-label" for="developer-phone">Phone</label>
+                <input type="text" class="form-control" id="developer-phone" name="phone" value="{{ request('phone') }}">
+            </div>
+            @php($emailVerified = request('email_verified'))
+            <div>
+                <span class="form-label d-block">Is Email Verified?</span>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="email_verified" id="dev-email-verified-true" value="true" {{ $emailVerified === 'true' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="dev-email-verified-true">True</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="email_verified" id="dev-email-verified-false" value="false" {{ $emailVerified === 'false' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="dev-email-verified-false">False</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="email_verified" id="dev-email-verified-any" value="any" {{ !in_array($emailVerified, ['true','false'], true) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="dev-email-verified-any">Any</label>
+                </div>
+            </div>
+            <div>
+                <label class="form-label" for="developer-email-verified-at">Email Verified At</label>
+                <input type="date" class="form-control" id="developer-email-verified-at" name="email_verified_at" value="{{ request('email_verified_at') }}">
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-secondary flex-fill" id="developer-filter-reset" data-reset-url="{{ $resetBase }}">Reset</button>
+                <button type="submit" class="btn btn-primary flex-fill">Apply</button>
+            </div>
+        </form>
     </div>
 </div>
 
 <script>
-var developerSearchForm = document.getElementById('developer-search-form');
-var developerSearchInput = document.getElementById('developer-search-input');
-var developerSearchClear = document.getElementById('developer-search-clear');
-var developerSearchSpinner = document.getElementById('developer-search-spinner');
-var developerSearchTimer;
+const developerSearchForm = document.getElementById('developer-search-form');
+const developerSearchInput = document.getElementById('developer-search-input');
+let developerSearchTimer;
 
-function submitDeveloperSearch(){
-    developerSearchSpinner.classList.remove('d-none');
-    var params = new URLSearchParams(new FormData(developerSearchForm));
-    if(!developerSearchInput.value) { params.delete('q'); }
+function submitDeveloperSearch() {
+    const formData = new FormData(developerSearchForm);
+    const params = new URLSearchParams();
+    for (const [key, value] of formData.entries()) {
+        if (key === 'q' && value.trim() === '') {
+            continue;
+        }
+        params.append(key, value);
+    }
     params.delete('page');
-    var query = params.toString();
+    const query = params.toString();
     window.location = developerSearchForm.getAttribute('action') + (query ? '?' + query : '');
 }
 
-developerSearchInput.addEventListener('input', function(){
-    developerSearchClear.style.display = this.value ? 'block' : 'none';
+developerSearchInput.addEventListener('input', () => {
     clearTimeout(developerSearchTimer);
     developerSearchTimer = setTimeout(submitDeveloperSearch, 300);
 });
 
-developerSearchForm.addEventListener('submit', function(e){
-    e.preventDefault();
+developerSearchForm.addEventListener('submit', event => {
+    event.preventDefault();
     submitDeveloperSearch();
 });
 
-developerSearchClear.addEventListener('click', function(){
-    developerSearchInput.value = '';
-    submitDeveloperSearch();
+const developerFilterForm = document.getElementById('developer-filter-form');
+const developerFilterReset = document.getElementById('developer-filter-reset');
+
+developerFilterForm.addEventListener('submit', () => {
+    const optionalRadios = developerFilterForm.querySelectorAll('input[type="radio"][value="any"]');
+    optionalRadios.forEach(radio => {
+        if (radio.checked) {
+            radio.disabled = true;
+        }
+    });
+    const dateInput = document.getElementById('developer-email-verified-at');
+    if (dateInput && !dateInput.value) {
+        dateInput.disabled = true;
+    }
+});
+
+developerFilterReset.addEventListener('click', () => {
+    window.location = developerFilterReset.dataset.resetUrl;
+});
+
+document.querySelectorAll('.developer-delete-form').forEach(form => {
+    form.addEventListener('submit', event => {
+        const confirmed = window.confirm('Are you sure you want to delete this developer? This action cannot be undone.');
+        if (!confirmed) {
+            event.preventDefault();
+        }
+    });
 });
 </script>
 @endsection

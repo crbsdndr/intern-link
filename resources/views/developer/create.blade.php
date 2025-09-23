@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Create Developer')
+@section('title', 'Add Developer')
 
 @section('content')
-<h1>Create Developer</h1>
-@include('developer.form', ['action' => url('/developers'), 'method' => 'POST', 'developer' => null])
+<h1>Add Developer</h1>
+@include('developer.form', ['action' => '/developer', 'method' => 'POST', 'developer' => null])
 @endsection

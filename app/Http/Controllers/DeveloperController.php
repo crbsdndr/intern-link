@@ -6,81 +6,68 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DeveloperController extends Controller
 {
     /**
      * Columns searched and displayed. Adjust here if needed.
      */
-    private const SEARCH_COLUMNS = ['name', 'email', 'phone'];
+    private const SEARCH_COLUMNS = ['name', 'email', 'role'];
+    private const DISPLAY_COLUMNS = ['id', 'name', 'email', 'role'];
 
     public function index(Request $request)
     {
-        $query = DB::table('developer_details_view')
-            ->select('id', 'name', 'email', 'phone', 'email_verified_at', 'created_at', 'updated_at')
+        $query = DB::table('users')
+            ->select('id', 'name', 'email', 'role', 'created_at', 'updated_at')
+            ->where('role', 'developer')
             ->where('id', session('user_id'));
 
         $filters = [];
 
-        $name = trim($request->query('name', ''));
-        if ($name !== '') {
-            $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($name) . '%']);
-            $filters[] = [
-                'param' => 'name',
-                'label' => 'Name: ' . $name,
-            ];
-        }
-
-        $email = trim($request->query('email', ''));
-        if ($email !== '') {
-            $query->whereRaw('LOWER(email) LIKE ?', ['%' . strtolower($email) . '%']);
-            $filters[] = [
-                'param' => 'email',
-                'label' => 'Email: ' . $email,
-            ];
-        }
-
-        $phone = trim($request->query('phone', ''));
-        if ($phone !== '') {
-            $query->whereRaw("LOWER(COALESCE(phone, '')) LIKE ?", ['%' . strtolower($phone) . '%']);
-            $filters[] = [
-                'param' => 'phone',
-                'label' => 'Phone: ' . $phone,
-            ];
-        }
-
-        $emailVerified = $request->query('email_verified');
-        if (in_array($emailVerified, ['true', 'false'], true)) {
-            if ($emailVerified === 'true') {
-                $query->whereNotNull('email_verified_at');
-            } else {
-                $query->whereNull('email_verified_at');
+        if ($created = $request->query('created_at')) {
+            if (Str::startsWith($created, 'range:')) {
+                [$start, $end] = array_pad(explode(',', Str::after($created, 'range:')), 2, null);
+                if ($start) {
+                    $query->whereDate('created_at', '>=', $start);
+                }
+                if ($end) {
+                    $query->whereDate('created_at', '<=', $end);
+                }
+                $filters['created_at'] = 'Created: ' . $start . ' - ' . $end;
             }
-            $filters[] = [
-                'param' => 'email_verified',
-                'label' => 'Is Email Verified?: ' . ucfirst($emailVerified),
-            ];
         }
 
-        $verifiedDate = $request->query('email_verified_at');
-        if ($verifiedDate && preg_match('/^\d{4}-\d{2}-\d{2}$/', $verifiedDate)) {
-            $query->whereDate('email_verified_at', $verifiedDate);
-            $filters[] = [
-                'param' => 'email_verified_at',
-                'label' => 'Email Verified At: ' . $verifiedDate,
-            ];
+        if ($updated = $request->query('updated_at')) {
+            if (Str::startsWith($updated, 'range:')) {
+                [$start, $end] = array_pad(explode(',', Str::after($updated, 'range:')), 2, null);
+                if ($start) {
+                    $query->whereDate('updated_at', '>=', $start);
+                }
+                if ($end) {
+                    $query->whereDate('updated_at', '<=', $end);
+                }
+                $filters['updated_at'] = 'Updated: ' . $start . ' - ' . $end;
+            }
         }
 
         if ($q = trim($request->query('q', ''))) {
             $qLower = strtolower($q);
             $query->where(function ($sub) use ($qLower) {
                 foreach (self::SEARCH_COLUMNS as $col) {
-                    $sub->orWhereRaw('LOWER(COALESCE(' . $col . ", '')) LIKE ?", ['%' . $qLower . '%']);
+                    $sub->orWhereRaw('LOWER(' . $col . ') LIKE ?', ['%' . $qLower . '%']);
                 }
             });
         }
 
-        $query->orderBy('name');
+        $sort = $request->query('sort', 'created_at:desc');
+        [$sortField, $sortDir] = array_pad(explode(':', $sort), 2, 'desc');
+        $allowedSorts = array_merge(self::DISPLAY_COLUMNS, ['created_at', 'updated_at']);
+        if (!in_array($sortField, $allowedSorts)) {
+            $sortField = 'created_at';
+        }
+        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sortField, $sortDir);
 
         $developers = $query->paginate(10)->withQueryString();
 
@@ -92,20 +79,18 @@ class DeveloperController extends Controller
 
     public function show($id)
     {
-        $developer = DB::table('developer_details_view')->where('id', $id)->first();
-        abort_if(!$developer, 404);
-
+        $developer = User::where('role', 'developer')->findOrFail($id);
         return view('developer.show', compact('developer'));
     }
 
     public function create()
     {
-        abort(401, 'Access denied.');
+        abort(401, 'Akses ditolak.');
     }
 
     public function store(Request $request)
     {
-        abort(401, 'Access denied.');
+        abort(401, 'Akses ditolak.');
     }
 
     public function edit($id)
@@ -133,26 +118,11 @@ class DeveloperController extends Controller
         }
         $developer->save();
 
-        return redirect('/developers')->with('status', 'Profile updated.');
+        return redirect('/developer')->with('status', 'Profil berhasil diperbarui.');
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
-        $developer = User::where('role', 'developer')->findOrFail($id);
-
-        if ((int) $developer->id !== (int) session('user_id')) {
-            abort(401, 'Access denied.');
-        }
-
-        $developer->delete();
-
-        if ((int) session('user_id') === (int) $developer->id) {
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return redirect('/login')->with('status', 'Your account has been deleted. You have been logged out.');
-        }
-
-        return redirect('/developers')->with('status', 'Developer deleted.');
+        abort(401, 'Akses ditolak.');
     }
 }

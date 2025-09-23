@@ -13,10 +13,6 @@ class ApplicationMultiStudentTest extends TestCase
     {
         parent::setUp();
 
-        foreach (['applications', 'institution_quotas', 'institutions', 'students'] as $table) {
-            \DB::statement('DROP TABLE IF EXISTS ' . $table . ' CASCADE');
-        }
-
         Schema::create('students', function (Blueprint $table) {
             $table->id();
             $table->string('name');

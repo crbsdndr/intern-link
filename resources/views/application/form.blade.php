@@ -95,7 +95,7 @@
         <textarea name="notes" class="form-control">{{ old('notes', optional($application)->notes) }}</textarea>
     </div>
 
-    <a href="/application" class="btn btn-secondary">Cancel</a>
+    <a href="/application" class="btn btn-secondary">Back</a>
     <button type="submit" class="btn btn-primary">Save</button>
 </form>
 
@@ -185,3 +185,4 @@ window.addEventListener('load', () => {
 });
 </script>
 @endif
+

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Student;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Tests\TestCase;
@@ -13,11 +14,6 @@ class StudentClassTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        \DB::statement('SET search_path TO public');
-
-        Schema::dropIfExists('students');
-        Schema::dropIfExists('users');
 
         Schema::create('users', function (Blueprint $table) {
             $table->id();
@@ -36,19 +32,16 @@ class StudentClassTest extends TestCase
             $table->string('major');
             $table->string('class');
             $table->string('batch');
+            $table->text('notes')->nullable();
+            $table->text('photo')->nullable();
             $table->timestamps();
         });
-
-        \DB::statement('SET search_path TO public, app, core');
     }
 
     protected function tearDown(): void
     {
-        \DB::statement('SET search_path TO public');
         Schema::dropIfExists('students');
         Schema::dropIfExists('users');
-        \DB::statement('SET search_path TO app, core, public');
-
         parent::tearDown();
     }
 
@@ -57,7 +50,7 @@ class StudentClassTest extends TestCase
         $user = User::create([
             'name' => 'John Doe',
             'email' => 'john@example.com',
-            'password' => 'secret',
+            'password' => Hash::make('secret'),
             'role' => 'student',
         ]);
 

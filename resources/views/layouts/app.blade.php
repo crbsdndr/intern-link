@@ -14,16 +14,16 @@
         <div class="list-group list-group-flush">
             <a href="/" class="list-group-item list-group-item-action">Dashboard</a>
             <a href="/students" class="list-group-item list-group-item-action">Students</a>
-            <a href="/supervisor" class="list-group-item list-group-item-action">Supervisors</a>
+            <a href="/supervisors" class="list-group-item list-group-item-action">Supervisors</a>
             @if(session('role') === 'developer')
-            <a href="/developer" class="list-group-item list-group-item-action">Developers</a>
+            <a href="/developers" class="list-group-item list-group-item-action">Developers</a>
             @endif
-            <a href="/institution" class="list-group-item list-group-item-action">Institutions</a>
-            <a href="/application" class="list-group-item list-group-item-action">Applications</a>
+            <a href="/institutions" class="list-group-item list-group-item-action">Institutions</a>
+            <a href="/applications" class="list-group-item list-group-item-action">Applications</a>
             <a href="/internship" class="list-group-item list-group-item-action">Internships</a>
             <a href="/monitoring" class="list-group-item list-group-item-action">Monitorings</a>
             @if(in_array(session('role'), ['admin','developer']))
-            <a href="/admin" class="list-group-item list-group-item-action">Admin</a>
+            <a href="/admins" class="list-group-item list-group-item-action">Admins</a>
             @endif
     </div>
 </nav>

@@ -55,8 +55,8 @@
     </div>
 </div>
 <div class="mt-4 d-flex flex-wrap gap-2">
-    <a href="/students" class="btn btn-outline-secondary">Back</a>
-    <a href="/students/{{ $student->id }}/update" class="btn btn-warning">Edit</a>
+    <a href="/students" class="btn btn-secondary">Back</a>
+    <a href="/students/{{ $student->id }}/update" class="btn btn-warning">Update</a>
     <form action="/students/{{ $student->id }}" method="POST" class="d-inline">
         @csrf
         @method('DELETE')

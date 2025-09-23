@@ -83,9 +83,9 @@ Notes: Anticipate if the table width exceeds the screen width due to its content
      * Contact Phone (number)  
      * Contact Position (text) 
      * Contact Is Primary? (radio: True / False / Any)
-     * Period (Dropdown) (Tom Select) (format: "{year}: {term}") (If the period the user is looking for is not found, display the “Create a new period” option, and remove this input option)
-     * New Period Year (number) (Only display if the “Create a new period” option is selected)
-     * New Period Term (number) (Only display if the “Create a new period” option is selected)
+     * Period (Dropdown) (Tom Select) (format: "{year}: {term}") with a **Create new period** button beside it. Clicking the button hides the dropdown and reveals the inputs below.
+     * New Period Year (number) (Displayed only after pressing **Create new period**)
+     * New Period Term (number) (Displayed only after pressing **Create new period**)
      * Quota (number)
 
 3. Notes:  
@@ -140,9 +140,9 @@ Institution details are displayed as:
      * Contact Phone (number)  
      * Contact Position (text) 
      * Contact Is Primary? (radio: True / False / Any)
-     * Period (Dropdown) (Tom Select) (format: "{year}: {term}") (If the period the user is looking for is not found, display the “Create a new period” option, and remove this input option)
-     * New Period Year (number) (Only display if the “Create a new period” option is selected)
-     * New Period Term (number) (Only display if the “Create a new period” option is selected)
+     * Period (Dropdown) (Tom Select) (format: "{year}: {term}") with a **Create new period** button beside it. Clicking the button hides the dropdown and reveals the inputs below.
+     * New Period Year (number) (Displayed only after pressing **Create new period**)
+     * New Period Term (number) (Displayed only after pressing **Create new period**)
      * Quota (number)
 
 3. Notes:

@@ -15,12 +15,12 @@
         $supervisor = \Illuminate\Support\Facades\DB::table('supervisors')->where('user_id', $userId)->select('id','photo')->first();
         if ($supervisor) {
             $photo = $supervisor->photo;
-            $settingsUrl = route('supervisor.edit', ['id' => $supervisor->id]);
+            $settingsUrl = route('supervisors.edit', ['id' => $supervisor->id]);
         }
     } elseif ($role === 'admin') {
-        $settingsUrl = route('admin.edit', ['id' => $userId]);
+        $settingsUrl = route('admins.edit', ['id' => $userId]);
     } elseif ($role === 'developer') {
-        $settingsUrl = route('developer.edit', ['id' => $userId]);
+        $settingsUrl = route('developers.edit', ['id' => $userId]);
     }
 @endphp
 <header class="navbar navbar-light bg-light border-bottom px-3 d-flex align-items-center">
@@ -30,7 +30,7 @@
     <div class="dropdown ms-auto">
         <button class="btn btn-light dropdown-toggle d-flex align-items-center" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             @if($photo)
-                <img src="{{ $photo }}" alt="Foto profil" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+                <img src="{{ $photo }}" alt="Profile photo" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
             @else
                 <i class="bi bi-person-circle fs-4 me-2"></i>
             @endif
@@ -38,7 +38,7 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
             @if($settingsUrl)
-            <li><a class="dropdown-item" href="{{ $settingsUrl }}">Pengaturan</a></li>
+            <li><a class="dropdown-item" href="{{ $settingsUrl }}">Settings</a></li>
             <li><hr class="dropdown-divider"></li>
             @endif
             <li>

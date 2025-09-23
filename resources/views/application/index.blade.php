@@ -1,257 +1,239 @@
 @extends('layouts.app')
 
-@php use Illuminate\Support\Arr; @endphp
-
 @section('title', 'Applications')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Applications</h1>
-    @php($isStudent = session('role') === 'student')
+@php($role = session('role'))
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h1 class="mb-0">Applications</h1>
     <div class="d-flex align-items-center gap-2">
-        <form method="get" id="application-search-form" class="d-flex">
-            <div class="input-group">
-                <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Cari…" id="application-search-input" style="min-width:280px">
-                @foreach(request()->query() as $param => $value)
-                    @if($param !== 'q' && $param !== 'page' && $param !== 'page_size')
-                        <input type="hidden" name="{{ $param }}" value="{{ $value }}">
-                    @endif
-                @endforeach
-                <button class="btn btn-outline-secondary" type="submit" id="application-search-btn">
-                    <i class="bi bi-search"></i>
-                    <span class="spinner-border spinner-border-sm d-none" id="application-search-spinner"></span>
-                </button>
-                @if(request('q'))
-                <button class="btn btn-outline-secondary" type="button" id="application-search-clear"><i class="bi bi-x"></i></button>
-                @endif
+        <form method="get" action="{{ url()->current() }}" id="application-search-form" class="position-relative">
+            <div class="input-group" style="min-width: 280px;">
+                <input type="search" name="q" id="application-search-input" class="form-control" placeholder="Search applications" value="{{ request('q') }}" autocomplete="off">
+                <button class="btn btn-outline-secondary" type="submit" id="application-search-submit">Search</button>
             </div>
+            @foreach(request()->except(['q','page']) as $param => $value)
+                <input type="hidden" name="{{ $param }}" value="{{ $value }}">
+            @endforeach
         </form>
-        <button class="btn btn-outline-secondary position-relative" data-bs-toggle="offcanvas" data-bs-target="#applicationFilter" title="Filter">
-            <i class="bi bi-funnel"></i>
+        <button class="btn btn-outline-secondary position-relative" type="button" data-bs-toggle="offcanvas" data-bs-target="#applicationFilter" aria-controls="applicationFilter">
+            Filter
             @if(count($filters))
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">{{ count($filters) }}</span>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">{{ count($filters) }}</span>
             @endif
         </button>
-        @if($isStudent)
-            <button class="btn btn-primary" disabled>Add</button>
-        @else
-            <a href="/application/add" class="btn btn-primary">Add</a>
-        @endif
+        <a href="/applications/create" class="btn btn-primary">Create Application</a>
     </div>
 </div>
 
 @if(count($filters))
-    <div class="mb-3">
+    <div class="d-flex flex-wrap gap-2 mb-3">
         @foreach($filters as $param => $label)
-            @php($q = Arr::except(request()->query(), [$param]))
-            <a href="{{ url()->current() . ($q ? '?' . http_build_query($q) : '') }}" class="badge bg-secondary text-decoration-none me-2">
-                {{ $label }} <i class="bi bi-x ms-1"></i>
+            @php($query = collect(request()->query())->except([$param, 'page'])->filter(fn($value) => $value !== null && $value !== '')->toArray())
+            @php($queryString = http_build_query($query))
+            <a href="{{ url()->current() . ($queryString ? '?' . $queryString : '') }}" class="btn btn-sm btn-outline-secondary">
+                {{ $label }}
             </a>
         @endforeach
     </div>
 @endif
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>No</th>
-            <th>Student Name</th>
-            <th>Institution Name</th>
-            <th>Year</th>
-            <th>Term</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="table-responsive">
+    <table class="table table-bordered align-middle mb-3">
+        <thead>
+            <tr class="text-nowrap">
+                <th scope="col">No</th>
+                <th scope="col">Student Name</th>
+                <th scope="col">Institution Name</th>
+                <th scope="col">Year</th>
+                <th scope="col">Term</th>
+                <th scope="col">Status Application</th>
+                <th scope="col">Student Access</th>
+                <th scope="col">Submitted At</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
         @forelse($applications as $application)
-        <tr>
-            <td>{{ $applications->total() - ($applications->currentPage() - 1) * $applications->perPage() - $loop->index }}</td>
-            <td>{{ $application->student_name }}</td>
-            <td>{{ $application->institution_name }}</td>
-            <td>{{ $application->period_year }}</td>
-            <td>{{ $application->period_term }}</td>
-            <td>
-                <a href="/application/{{ $application->id }}/see" class="btn btn-sm btn-secondary">View</a>
-                @if($isStudent)
-                    <button class="btn btn-sm btn-warning" disabled>Edit</button>
-                    <button class="btn btn-sm btn-danger" disabled>Delete</button>
-                @else
-                    <a href="/application/{{ $application->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="/application/{{ $application->id }}" method="POST" style="display:inline-block">
+            <tr>
+                <td>{{ ($applications->currentPage() - 1) * $applications->perPage() + $loop->iteration }}</td>
+                <td>{{ $application->student_name }}</td>
+                <td>{{ $application->institution_name }}</td>
+                <td>{{ $application->period_year }}</td>
+                <td>{{ $application->period_term }}</td>
+                <td>{{ ucwords(str_replace('_', ' ', $application->status)) }}</td>
+                <td>{{ $application->student_access ? 'True' : 'False' }}</td>
+                <td>{{ \Illuminate\Support\Carbon::parse($application->submitted_at)->format('Y-m-d') }}</td>
+                <td class="text-nowrap">
+                    <a href="/applications/{{ $application->id }}/read" class="btn btn-sm btn-secondary">Read</a>
+                    <a href="/applications/{{ $application->id }}/update" class="btn btn-sm btn-warning">Update</a>
+                    <form action="/applications/{{ $application->id }}" method="POST" class="d-inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this application?');">Delete</button>
                     </form>
-                @endif
-            </td>
-        </tr>
+                </td>
+            </tr>
         @empty
-        @if(request('q'))
-        <tr><td colspan="6">Tidak ada hasil untuk '{{ request('q') }}'.</td></tr>
-        @else
-        <tr><td colspan="6">No applications found.</td></tr>
-        @endif
+            <tr>
+                <td colspan="9" class="text-center">No applications found.</td>
+            </tr>
         @endforelse
-    </tbody>
-</table>
-
-<p class="text-muted">Total: {{ $applications->total() }} results</p>
-
-<div class="d-flex justify-content-between align-items-center">
-    <span>(Page {{ $applications->currentPage() }} of {{ $applications->lastPage() }})</span>
-    <div class="d-flex gap-2">
-        @if ($applications->onFirstPage())
-            <span class="text-muted">Back</span>
-        @else
-            <a href="{{ $applications->previousPageUrl() }}" class="btn btn-outline-secondary">Back</a>
-        @endif
-        @if ($applications->hasMorePages())
-            <a href="{{ $applications->nextPageUrl() }}" class="btn btn-outline-secondary">Next</a>
-        @else
-            <span class="text-muted">Next</span>
-        @endif
-    </div>
+        </tbody>
+    </table>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="applicationFilter">
+<p class="text-muted mb-1">Total Applications: {{ $applications->total() }}</p>
+<p class="text-muted">Page {{ $applications->currentPage() }} out of {{ $applications->lastPage() }}</p>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    @if ($applications->onFirstPage())
+        <span class="btn btn-outline-secondary disabled">Back</span>
+    @else
+        <a href="{{ $applications->previousPageUrl() }}" class="btn btn-outline-secondary">Back</a>
+    @endif
+
+    @if ($applications->hasMorePages())
+        <a href="{{ $applications->nextPageUrl() }}" class="btn btn-outline-secondary">Next</a>
+    @else
+        <span class="btn btn-outline-secondary disabled">Next</span>
+    @endif
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="applicationFilter" aria-labelledby="applicationFilterLabel">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title">Filter</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        <h5 class="offcanvas-title" id="applicationFilterLabel">Filter Applications</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-        <form method="get" id="application-filter-form">
-            <input type="hidden" name="q" value="{{ request('q') }}">
-            <input type="hidden" name="sort" value="{{ request('sort') }}">
-            @php($statusValues = [])
-            @if(request()->has('status') && str_starts_with(request('status'), 'in:'))
-                @php($statusValues = explode(',', substr(request('status'), 3)))
-            @endif
-            <div class="mb-3">
-                <label class="form-label">Status</label>
-                @foreach(['submitted','under_review','accepted','rejected','cancelled'] as $s)
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="{{ $s }}" id="status-{{ $s }}" @if(in_array($s,$statusValues)) checked @endif>
-                        <label class="form-check-label" for="status-{{ $s }}">{{ ucwords(str_replace('_',' ',$s)) }}</label>
-                    </div>
-                @endforeach
-                <input type="hidden" name="status" id="status-hidden">
+        <form method="get" id="application-filter-form" class="d-flex flex-column gap-3">
+            <div>
+                <label for="filter-student-name" class="form-label">Student Name</label>
+                <input type="text" name="student_name" id="filter-student-name" class="form-control" value="{{ request('student_name') }}">
             </div>
-            @php($submittedRange = request('submitted_at'))
-            @php($submittedStart = $submittedEnd = '')
-            @if($submittedRange && str_starts_with($submittedRange, 'range:'))
-                @php([$submittedStart, $submittedEnd] = array_pad(explode(',', substr($submittedRange, 6)), 2, ''))
-            @endif
-            <div class="mb-3">
-                <label class="form-label">Submitted At</label>
-                <div class="d-flex gap-2">
-                    <input type="date" class="form-control" id="submitted_at_start" value="{{ $submittedStart }}">
-                    <input type="date" class="form-control" id="submitted_at_end" value="{{ $submittedEnd }}">
+            <div>
+                <label for="filter-institution-name" class="form-label">Institution Name</label>
+                <input type="text" name="institution_name" id="filter-institution-name" class="form-control" value="{{ request('institution_name') }}">
+            </div>
+            <div>
+                <label for="filter-period" class="form-label">Period</label>
+                <select name="period_id" id="filter-period" class="form-select tom-select" data-tom-allow-empty="true">
+                    <option value="">Select period</option>
+                    @foreach($periods as $period)
+                        <option value="{{ $period['id'] }}" @selected((string)request('period_id') === (string)$period['id'])>{{ $period['label'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="filter-status" class="form-label">Status Application</label>
+                <select name="status" id="filter-status" class="form-select">
+                    <option value="">Any</option>
+                    @foreach($statuses as $status)
+                        <option value="{{ $status }}" @selected(request('status') === $status)>{{ ucwords(str_replace('_', ' ', $status)) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="form-label d-block">Student Access</label>
+                @php($studentAccess = request('student_access', 'any'))
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="student_access" id="student-access-any" value="any" @checked($studentAccess === 'any')>
+                    <label class="form-check-label" for="student-access-any">Any</label>
                 </div>
-                <input type="hidden" name="submitted_at" id="submitted_at_range">
-            </div>
-            @php($createdRange = request('created_at'))
-            @php($createdStart = $createdEnd = '')
-            @if($createdRange && str_starts_with($createdRange, 'range:'))
-                @php([$createdStart, $createdEnd] = array_pad(explode(',', substr($createdRange, 6)), 2, ''))
-            @endif
-            <div class="mb-3">
-                <label class="form-label">Created At</label>
-                <div class="d-flex gap-2">
-                    <input type="date" class="form-control" id="created_at_start" value="{{ $createdStart }}">
-                    <input type="date" class="form-control" id="created_at_end" value="{{ $createdEnd }}">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="student_access" id="student-access-true" value="true" @checked($studentAccess === 'true')>
+                    <label class="form-check-label" for="student-access-true">True</label>
                 </div>
-                <input type="hidden" name="created_at" id="created_at_range">
-            </div>
-            @php($updatedRange = request('updated_at'))
-            @php($updatedStart = $updatedEnd = '')
-            @if($updatedRange && str_starts_with($updatedRange, 'range:'))
-                @php([$updatedStart, $updatedEnd] = array_pad(explode(',', substr($updatedRange, 6)), 2, ''))
-            @endif
-            <div class="mb-3">
-                <label class="form-label">Updated At</label>
-                <div class="d-flex gap-2">
-                    <input type="date" class="form-control" id="updated_at_start" value="{{ $updatedStart }}">
-                    <input type="date" class="form-control" id="updated_at_end" value="{{ $updatedEnd }}">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="student_access" id="student-access-false" value="false" @checked($studentAccess === 'false')>
+                    <label class="form-check-label" for="student-access-false">False</label>
                 </div>
-                <input type="hidden" name="updated_at" id="updated_at_range">
             </div>
+            <div>
+                <label for="filter-submitted" class="form-label">Submitted At</label>
+                <input type="date" name="submitted_at" id="filter-submitted" class="form-control" value="{{ request('submitted_at') }}">
+            </div>
+            <div>
+                <label class="form-label d-block">Have Notes?</label>
+                @php($hasNotes = request('has_notes', 'any'))
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="has_notes" id="has-notes-any" value="any" @checked($hasNotes === 'any')>
+                    <label class="form-check-label" for="has-notes-any">Any</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="has_notes" id="has-notes-true" value="true" @checked($hasNotes === 'true')>
+                    <label class="form-check-label" for="has-notes-true">True</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="has_notes" id="has-notes-false" value="false" @checked($hasNotes === 'false')>
+                    <label class="form-check-label" for="has-notes-false">False</label>
+                </div>
+            </div>
+            @if(request('q'))
+                <input type="hidden" name="q" value="{{ request('q') }}">
+            @endif
             <div class="d-flex gap-2">
-                <button type="button" class="btn btn-secondary" id="application-filter-reset">Reset</button>
-                <button type="submit" class="btn btn-primary">Apply</button>
+                <button type="button" class="btn btn-secondary flex-fill" id="application-filter-reset">Reset</button>
+                <button type="submit" class="btn btn-primary flex-fill">Apply</button>
             </div>
         </form>
     </div>
 </div>
 
-@php($retain = Arr::only(request()->query(), ['q','sort']))
-
+@push('scripts')
 <script>
-document.getElementById('application-filter-form').addEventListener('submit', function(){
-    var statusChecked = Array.from(document.querySelectorAll('input[id^="status-"]:checked')).map(cb => cb.value);
-    var sh = document.getElementById('status-hidden');
-    if(statusChecked.length){
-        sh.value = 'in:' + statusChecked.join(',');
-    }else{
-        sh.disabled = true;
+(() => {
+    const searchForm = document.getElementById('application-search-form');
+    const searchInput = document.getElementById('application-search-input');
+    let timer;
+
+    function submitSearch() {
+        const formData = new FormData(searchForm);
+        const params = new URLSearchParams();
+        for (const [key, value] of formData.entries()) {
+            if (key === 'q' && value.trim() === '') {
+                continue;
+            }
+            params.append(key, value);
+        }
+        params.delete('page');
+        const query = params.toString();
+        window.location = searchForm.getAttribute('action') + (query ? '?' + query : '');
     }
 
-    var ss = document.getElementById('submitted_at_start').value;
-    var se = document.getElementById('submitted_at_end').value;
-    var sr = document.getElementById('submitted_at_range');
-    if(ss || se){
-        sr.value = 'range:' + ss + ',' + se;
-    }else{
-        sr.disabled = true;
-    }
-
-    var cs = document.getElementById('created_at_start').value;
-    var ce = document.getElementById('created_at_end').value;
-    var cr = document.getElementById('created_at_range');
-    if(cs || ce){
-        cr.value = 'range:' + cs + ',' + ce;
-    }else{
-        cr.disabled = true;
-    }
-
-    var us = document.getElementById('updated_at_start').value;
-    var ue = document.getElementById('updated_at_end').value;
-    var ur = document.getElementById('updated_at_range');
-    if(us || ue){
-        ur.value = 'range:' + us + ',' + ue;
-    }else{
-        ur.disabled = true;
-    }
-});
-
-document.getElementById('application-filter-reset').addEventListener('click', function(){
-    window.location = window.location.pathname + '{{ $retain ? '?' . http_build_query($retain) : '' }}';
-});
-
-var asForm = document.getElementById('application-search-form');
-if(asForm){
-    var asInput = document.getElementById('application-search-input');
-    var asBtn = document.getElementById('application-search-btn');
-    var asSpinner = document.getElementById('application-search-spinner');
-    var debounceTimer;
-    asInput.addEventListener('input', function(){
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(function(){
-            asForm.submit();
-        }, 300);
+    searchInput.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(submitSearch, 300);
     });
-    asForm.addEventListener('submit', function(){
-        asBtn.disabled = true;
-        if(asSpinner) asSpinner.classList.remove('d-none');
+
+    searchForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        submitSearch();
     });
-    var asClear = document.getElementById('application-search-clear');
-    if(asClear){
-        asClear.addEventListener('click', function(){
-            var params = new URLSearchParams(window.location.search);
-            params.delete('q');
-            params.delete('page');
-            window.location = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-        });
-    }
-}
+
+    const filterForm = document.getElementById('application-filter-form');
+    const resetButton = document.getElementById('application-filter-reset');
+
+    filterForm.addEventListener('submit', () => {
+        const studentAccessAny = document.getElementById('student-access-any');
+        if (studentAccessAny.checked) {
+            studentAccessAny.value = '';
+        } else {
+            studentAccessAny.value = 'any';
+        }
+
+        const hasNotesAny = document.getElementById('has-notes-any');
+        if (hasNotesAny.checked) {
+            hasNotesAny.value = '';
+        } else {
+            hasNotesAny.value = 'any';
+        }
+    });
+
+    resetButton.addEventListener('click', () => {
+        window.location = '{{ url('/applications') }}';
+    });
+})();
 </script>
+@endpush
 @endsection

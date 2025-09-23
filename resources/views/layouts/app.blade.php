@@ -19,7 +19,7 @@
             <a href="/developers" class="list-group-item list-group-item-action">Developers</a>
             @endif
             <a href="/institutions" class="list-group-item list-group-item-action">Institutions</a>
-            <a href="/application" class="list-group-item list-group-item-action">Applications</a>
+            <a href="/applications" class="list-group-item list-group-item-action">Applications</a>
             <a href="/internship" class="list-group-item list-group-item-action">Internships</a>
             <a href="/monitoring" class="list-group-item list-group-item-action">Monitorings</a>
             @if(in_array(session('role'), ['admin','developer']))

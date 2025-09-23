@@ -87,22 +87,48 @@ return new class extends Migration
             CREATE OR REPLACE VIEW application_details_view AS
             SELECT a.id,
                    a.student_id,
-                   u.name AS student_name,
+                   sd.user_id                  AS student_user_id,
+                   sd.name                     AS student_name,
+                   sd.email                    AS student_email,
+                   sd.phone                    AS student_phone,
+                   sd.student_number,
+                   sd.national_sn,
+                   sd.major                    AS student_major,
+                   sd.class                    AS student_class,
+                   sd.batch                    AS student_batch,
+                   sd.notes                    AS student_notes,
+                   sd.photo                    AS student_photo,
                    a.institution_id,
-                   i.name AS institution_name,
+                   idv.name                    AS institution_name,
+                   idv.address                 AS institution_address,
+                   idv.city                    AS institution_city,
+                   idv.province                AS institution_province,
+                   idv.website                 AS institution_website,
+                   idv.industry                AS institution_industry,
+                   idv.notes                   AS institution_notes,
+                   idv.photo                   AS institution_photo,
+                   idv.contact_name            AS institution_contact_name,
+                   idv.contact_email           AS institution_contact_email,
+                   idv.contact_phone           AS institution_contact_phone,
+                   idv.contact_position        AS institution_contact_position,
+                   idv.contact_primary         AS institution_contact_primary,
+                   idv.quota                   AS institution_quota,
+                   idv.used                    AS institution_quota_used,
+                   idv.period_year             AS institution_quota_period_year,
+                   idv.period_term             AS institution_quota_period_term,
                    a.period_id,
-                   p.year AS period_year,
-                   p.term AS period_term,
+                   p.year                      AS period_year,
+                   p.term                      AS period_term,
                    a.status,
+                   a.student_access,
                    a.submitted_at,
+                   a.notes                     AS application_notes,
                    a.created_at,
-                   a.updated_at,
-                   a.notes
+                   a.updated_at
             FROM app.applications a
-            JOIN app.students s ON s.id = a.student_id
-            JOIN core.users u ON u.id = s.user_id
-            JOIN app.institutions i ON i.id = a.institution_id
-            JOIN app.periods p ON p.id = a.period_id;
+            JOIN student_details_view sd       ON sd.id = a.student_id
+            JOIN institution_details_view idv  ON idv.id = a.institution_id
+            JOIN app.periods p                 ON p.id = a.period_id;
         SQL);
 
         DB::statement(<<<'SQL'

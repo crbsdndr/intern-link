@@ -21,12 +21,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth.session')->group(function () {
     Route::view('/', 'dashboard');
 
-    Route::prefix('application')->group(function () {
+    Route::prefix('applications')->group(function () {
         Route::get('/', [ApplicationController::class, 'index']);
-        Route::get('/add', [ApplicationController::class, 'create']);
+        Route::get('/create', [ApplicationController::class, 'create']);
         Route::post('/', [ApplicationController::class, 'store']);
-        Route::get('{id}/see', [ApplicationController::class, 'show']);
-        Route::get('{id}/edit', [ApplicationController::class, 'edit']);
+        Route::get('{id}/read', [ApplicationController::class, 'show']);
+        Route::get('{id}/update', [ApplicationController::class, 'edit']);
         Route::put('{id}', [ApplicationController::class, 'update']);
         Route::delete('{id}', [ApplicationController::class, 'destroy']);
     });

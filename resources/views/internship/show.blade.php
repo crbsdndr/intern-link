@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-body">
         <ul class="list-unstyled mb-0">
-            <li class="mb-2"><strong>Student:</strong> <a href="/application/{{ $internship->application_id }}/see">{{ $internship->student_name }}</a></li>
+            <li class="mb-2"><strong>Student:</strong> <a href="/applications/{{ $internship->application_id }}/read">{{ $internship->student_name }}</a></li>
             <li class="mb-2"><strong>Institution:</strong> {{ $internship->institution_name }}</li>
             <li class="mb-2"><strong>Start Date:</strong> {{ $internship->start_date ?? '—' }}</li>
             <li class="mb-2"><strong>End Date:</strong> {{ $internship->end_date ?? '—' }}</li>

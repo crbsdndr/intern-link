@@ -19,7 +19,7 @@
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Log Date</label>
+        <label class="form-label">Tanggal</label>
         <input type="date" name="log_date" class="form-control" value="{{ old('log_date', optional($log)->log_date ? \Illuminate\Support\Carbon::parse($log->log_date)->format('Y-m-d') : '') }}">
     </div>
 
@@ -34,7 +34,7 @@
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Type</label>
+        <label class="form-label">Tipe</label>
         <select name="type" class="form-select tom-select">
             @foreach($types as $type)
                 <option value="{{ $type }}" {{ old('type', optional($log)->log_type ?? optional($log)->type) == $type ? 'selected' : '' }}>{{ $type }}</option>
@@ -43,15 +43,20 @@
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Title</label>
+        <label class="form-label">Skor</label>
+        <input type="number" name="score" class="form-control" value="{{ old('score', optional($log)->score) }}" min="0" max="100">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Judul</label>
         <input type="text" name="title" class="form-control" value="{{ old('title', optional($log)->title) }}" maxlength="150">
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Content</label>
+        <label class="form-label">Isi Laporan</label>
         <textarea name="content" class="form-control" rows="5" required>{{ old('content', optional($log)->content) }}</textarea>
     </div>
 
-    <a href="/monitoring" class="btn btn-secondary">Cancel</a>
+    <a href="/monitoring" class="btn btn-secondary">Back</a>
     <button type="submit" class="btn btn-primary">Save</button>
 </form>

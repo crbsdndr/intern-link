@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Create Internship')
+@section('title', 'Add Internship')
 
 @section('content')
-<h1>Create Internship</h1>
+<h1>Add Internship</h1>
 @include('internship.form', [
-    'action' => url('/internship'),
+    'action' => '/internship',
     'method' => 'POST',
     'internship' => null,
     'applications' => $applications,

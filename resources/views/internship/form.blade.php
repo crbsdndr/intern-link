@@ -7,17 +7,17 @@
     @include('components.form-errors')
 
     <div class="mb-3">
-        <label class="form-label">Applications</label>
+        <label class="form-label">Application</label>
         <div id="application-rows">
             <div class="d-flex mb-2 app-row">
-                <select class="form-select tom-select first-application"></select>
+                <select class="form-select tom-select first-application" data-placeholder="Select application"></select>
                 <button type="button" class="btn btn-danger ms-2 remove-row d-none">-</button>
             </div>
         </div>
         <button type="button" class="btn btn-secondary mt-2" id="add-application">+</button>
         <div class="form-check mt-2">
             <input type="checkbox" class="form-check-input" id="take-all">
-            <label class="form-check-label" for="take-all">Select all from this institution</label>
+            <label class="form-check-label" for="take-all">Apply this to all company IDs that match the selected Application (This will not affect existing ones)</label>
         </div>
     </div>
 
@@ -32,15 +32,16 @@
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Status</label>
+        <label class="form-label">Status Application</label>
         <select name="status" class="form-select">
             @foreach($statuses as $status)
-                <option value="{{ $status }}" {{ old('status', optional($internship)->status) == $status ? 'selected' : '' }}>{{ $status }}</option>
+                @php($statusLabel = ucwords(str_replace('_', ' ', $status)))
+                <option value="{{ $status }}" {{ old('status', optional($internship)->status) == $status ? 'selected' : '' }}>{{ $statusLabel }}</option>
             @endforeach
         </select>
     </div>
 
-    <a href="/internship" class="btn btn-secondary">Back</a>
+    <a href="{{ $cancelUrl ?? url('/internships') }}" class="btn btn-secondary">Cancel</a>
     <button type="submit" class="btn btn-primary">Save</button>
 </form>
 
@@ -134,6 +135,7 @@
         const sel = document.createElement('select');
         sel.name = 'application_ids[]';
         sel.className = 'form-select tom-select';
+        sel.setAttribute('data-placeholder', 'Additional Application');
         sel.addEventListener('change', () => { refreshOptions(); });
         row.appendChild(sel);
         const btn = document.createElement('button');

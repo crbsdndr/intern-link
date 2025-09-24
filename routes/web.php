@@ -31,12 +31,12 @@ Route::middleware('auth.session')->group(function () {
         Route::delete('{id}', [ApplicationController::class, 'destroy']);
     });
 
-    Route::prefix('internship')->group(function () {
+    Route::prefix('internships')->group(function () {
         Route::get('/', [InternshipController::class, 'index']);
-        Route::get('/add', [InternshipController::class, 'create']);
+        Route::get('/create', [InternshipController::class, 'create']);
         Route::post('/', [InternshipController::class, 'store']);
-        Route::get('{id}/see', [InternshipController::class, 'show']);
-        Route::get('{id}/edit', [InternshipController::class, 'edit']);
+        Route::get('{id}/read', [InternshipController::class, 'show']);
+        Route::get('{id}/update', [InternshipController::class, 'edit']);
         Route::put('{id}', [InternshipController::class, 'update']);
         Route::delete('{id}', [InternshipController::class, 'destroy']);
     });

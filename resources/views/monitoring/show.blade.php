@@ -8,7 +8,7 @@
 <div class="card mb-3">
     <div class="card-body">
         <ul class="list-unstyled mb-0">
-            <li class="mb-2"><strong>Internship:</strong> <a href="/internship/{{ $log->internship_id }}/see">{{ $log->student_name }} – {{ $log->institution_name }}</a></li>
+            <li class="mb-2"><strong>Internship:</strong> <a href="/internships/{{ $log->internship_id }}/read">{{ $log->student_name }} – {{ $log->institution_name }}</a></li>
             <li class="mb-2"><strong>Date:</strong> {{ $log->log_date }}</li>
             <li class="mb-2"><strong>Supervisor:</strong> {{ $log->supervisor_name ?? '—' }}</li>
             <li class="mb-2"><strong>Type:</strong> {{ $log->log_type }}</li>

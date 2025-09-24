@@ -15,16 +15,17 @@
             <a href="/" class="list-group-item list-group-item-action">Dashboard</a>
             <a href="/students" class="list-group-item list-group-item-action">Students</a>
             <a href="/supervisors" class="list-group-item list-group-item-action">Supervisors</a>
+            @if(in_array(session('role'), ['admin','developer']))
+                <a href="/admins" class="list-group-item list-group-item-action">Admins</a>
+            @endif
             @if(session('role') === 'developer')
-            <a href="/developers" class="list-group-item list-group-item-action">Developers</a>
+                <a href="/developers" class="list-group-item list-group-item-action">Developers</a>
             @endif
             <a href="/institutions" class="list-group-item list-group-item-action">Institutions</a>
             <a href="/applications" class="list-group-item list-group-item-action">Applications</a>
-            <a href="/internship" class="list-group-item list-group-item-action">Internships</a>
+            <a href="/internships" class="list-group-item list-group-item-action">Internships</a>
             <a href="/monitoring" class="list-group-item list-group-item-action">Monitorings</a>
-            @if(in_array(session('role'), ['admin','developer']))
-            <a href="/admins" class="list-group-item list-group-item-action">Admins</a>
-            @endif
+     
     </div>
 </nav>
     <main class="p-4 flex-fill">

@@ -1,18 +1,19 @@
 @extends('layouts.app')
 
-@php use Illuminate\Support\Str; use Illuminate\Support\Arr; @endphp
+@php use Illuminate\Support\Arr; @endphp
 
-@section('title', 'Monitoring Logs')
+@section('title', 'Internships')
 
 @section('content')
 @php($role = session('role'))
 @php($isStudent = $role === 'student')
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="mb-0">Monitoring Logs</h1>
-    <div class="d-flex align-items-center gap-2">
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h1 class="mb-0">Internships</h1>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
         <form method="get" action="{{ url()->current() }}" id="monitoring-search-form" class="position-relative">
-            <div class="input-group" style="min-width: 260px;">
-                <input type="search" name="q" id="monitoring-search-input" class="form-control" placeholder="Search monitoring logs" value="{{ request('q') }}" autocomplete="off">
+            <div class="input-group" style="min-width: 280px;">
+                <input type="search" name="q" id="monitoring-search-input" class="form-control" placeholder="Search monitorings" value="{{ request('q') }}" autocomplete="off">
                 <button class="btn btn-outline-secondary" type="submit" id="monitoring-search-submit">Search</button>
             </div>
             @foreach(request()->except(['q','page']) as $param => $value)
@@ -26,9 +27,9 @@
             @endif
         </button>
         @if($isStudent)
-            <button class="btn btn-primary" disabled>Create Monitoring Log</button>
+            <button class="btn btn-primary" disabled>Create Monitoring</button>
         @else
-            <a href="/monitoring/add" class="btn btn-primary">Create Monitoring Log</a>
+            <a href="/monitorings/create" class="btn btn-primary">Create Monitoring</a>
         @endif
     </div>
 </div>
@@ -48,35 +49,27 @@
 <div class="table-responsive">
     <table class="table table-bordered align-middle mb-3">
         <thead>
-            <tr>
-                <th scope="col">No</th>
-                <th scope="col">Date</th>
-                <th scope="col">Student</th>
-                <th scope="col">Institution</th>
-                <th scope="col">Supervisor</th>
-                <th scope="col">Type</th>
+            <tr class="text-nowrap">
                 <th scope="col">Title</th>
+                <th scope="col">Log Date</th>
+                <th scope="col">Type</th>
                 <th scope="col" class="text-nowrap">Actions</th>
             </tr>
         </thead>
         <tbody>
         @forelse($logs as $log)
             <tr>
-                <td>{{ $logs->total() - ($logs->currentPage() - 1) * $logs->perPage() - $loop->index }}</td>
+                <td>{{ $log->title ?? '—' }}</td>
                 <td>{{ $log->log_date }}</td>
-                <td>{{ $log->student_name }}</td>
-                <td>{{ $log->institution_name }}</td>
-                <td>{{ $log->supervisor_name ?? '—' }}</td>
-                <td>{{ $log->log_type }}</td>
-                <td>{{ $log->title ?? Str::limit($log->content, 20) }}</td>
+                <td>{{ ucwords(str_replace('_', ' ', $log->log_type)) }}</td>
                 <td class="text-nowrap">
-                    <a href="/monitoring/{{ $log->id }}/see" class="btn btn-sm btn-secondary">Read</a>
+                    <a href="/monitorings/{{ $log->monitoring_log_id }}/read" class="btn btn-sm btn-secondary">Read</a>
                     @if($isStudent)
                         <button class="btn btn-sm btn-warning" disabled>Update</button>
                         <button class="btn btn-sm btn-danger" disabled>Delete</button>
                     @else
-                        <a href="/monitoring/{{ $log->id }}/edit" class="btn btn-sm btn-warning">Update</a>
-                        <form action="/monitoring/{{ $log->id }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this log?');">
+                        <a href="/monitorings/{{ $log->monitoring_log_id }}/update" class="btn btn-sm btn-warning">Update</a>
+                        <form action="/monitorings/{{ $log->monitoring_log_id }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this monitoring?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-danger">Delete</button>
@@ -86,14 +79,14 @@
             </tr>
         @empty
             <tr>
-                <td colspan="8" class="text-center">No monitoring logs found.</td>
+                <td colspan="4" class="text-center">No monitoring logs found.</td>
             </tr>
         @endforelse
         </tbody>
     </table>
 </div>
 
-<p class="text-muted mb-1">Total Monitoring Logs: {{ $logs->total() }}</p>
+<p class="text-muted mb-1">Total Monitorings: {{ $logs->total() }}</p>
 <p class="text-muted">Page {{ $logs->currentPage() }} out of {{ $logs->lastPage() }}</p>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -110,130 +103,112 @@
     @endif
 </div>
 
-@php($resetBase = request('q') ? url()->current() . '?q=' . urlencode(request('q')) : url()->current())
+@php($resetUrl = request('q') ? url()->current() . '?q=' . urlencode(request('q')) : url()->current())
 <div class="offcanvas offcanvas-end" tabindex="-1" id="monitoringFilter" aria-labelledby="monitoringFilterLabel">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="monitoringFilterLabel">Filter Monitoring Logs</h5>
+        <h5 class="offcanvas-title" id="monitoringFilterLabel">Filter Monitorings</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
         <form method="get" id="monitoring-filter-form" class="d-flex flex-column gap-3">
-            @if(request('q'))
-                <input type="hidden" name="q" value="{{ request('q') }}">
-            @endif
-            @if(request('sort'))
-                <input type="hidden" name="sort" value="{{ request('sort') }}">
-            @endif
-            @php($logRange = request('log_date'))
-            @php($logStart = $logEnd = '')
-            @if($logRange && str_starts_with($logRange, 'range:'))
-                @php([$logStart, $logEnd] = array_pad(explode(',', substr($logRange, 6)), 2, ''))
-            @endif
+            <div>
+                <label class="form-label" for="filter-title">Title</label>
+                <input type="text" name="title" id="filter-title" class="form-control" value="{{ $selections['title'] }}">
+            </div>
+            <div>
+                <label class="form-label" for="filter-student">Student Name</label>
+                <select name="student_id" id="filter-student" class="form-select tom-select" data-tom-allow-empty="true">
+                    <option value="">Select student</option>
+                    @foreach($students as $student)
+                        <option value="{{ $student['id'] }}" @selected((string)($selections['student_id'] ?? '') === (string)$student['id'])>{{ $student['label'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="form-label" for="filter-institution">Institution Name</label>
+                <select name="institution_id" id="filter-institution" class="form-select tom-select" data-tom-allow-empty="true">
+                    <option value="">Select institution</option>
+                    @foreach($institutions as $institution)
+                        <option value="{{ $institution['id'] }}" @selected((string)($selections['institution_id'] ?? '') === (string)$institution['id'])>{{ $institution['label'] }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div>
                 <label class="form-label">Log Date</label>
                 <div class="d-flex gap-2">
-                    <input type="date" class="form-control" id="log_date_start" value="{{ $logStart }}">
-                    <input type="date" class="form-control" id="log_date_end" value="{{ $logEnd }}">
+                    <input type="date" name="log_date_from" class="form-control" value="{{ $selections['log_date_from'] }}">
+                    <input type="date" name="log_date_to" class="form-control" value="{{ $selections['log_date_to'] }}">
                 </div>
-                <input type="hidden" name="log_date" id="log_date_range">
             </div>
-            @php($createdRange = request('created_at'))
-            @php($createdStart = $createdEnd = '')
-            @if($createdRange && str_starts_with($createdRange, 'range:'))
-                @php([$createdStart, $createdEnd] = array_pad(explode(',', substr($createdRange, 6)), 2, ''))
-            @endif
             <div>
-                <label class="form-label">Created At</label>
-                <div class="d-flex gap-2">
-                    <input type="date" class="form-control" id="created_at_start" value="{{ $createdStart }}">
-                    <input type="date" class="form-control" id="created_at_end" value="{{ $createdEnd }}">
+                <span class="form-label d-block">Have Content?</span>
+                @php($hasContent = $selections['has_content'] ?? 'any')
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="has_content" id="has-content-true" value="true" @checked($hasContent === 'true')>
+                    <label class="form-check-label" for="has-content-true">True</label>
                 </div>
-                <input type="hidden" name="created_at" id="created_at_range">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="has_content" id="has-content-false" value="false" @checked($hasContent === 'false')>
+                    <label class="form-check-label" for="has-content-false">False</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="has_content" id="has-content-any" value="any" @checked(!in_array($hasContent, ['true','false'], true))>
+                    <label class="form-check-label" for="has-content-any">Any</label>
+                </div>
             </div>
-            @php($updatedRange = request('updated_at'))
-            @php($updatedStart = $updatedEnd = '')
-            @if($updatedRange && str_starts_with($updatedRange, 'range:'))
-                @php([$updatedStart, $updatedEnd] = array_pad(explode(',', substr($updatedRange, 6)), 2, ''))
-            @endif
             <div>
-                <label class="form-label">Updated At</label>
-                <div class="d-flex gap-2">
-                    <input type="date" class="form-control" id="updated_at_start" value="{{ $updatedStart }}">
-                    <input type="date" class="form-control" id="updated_at_end" value="{{ $updatedEnd }}">
-                </div>
-                <input type="hidden" name="updated_at" id="updated_at_range">
+                <label class="form-label" for="filter-type">Type</label>
+                <select name="type" id="filter-type" class="form-select">
+                    <option value="">Select type</option>
+                    @foreach($types as $type)
+                        <option value="{{ $type }}" @selected(($selections['type'] ?? '') === $type)>{{ $type }}</option>
+                    @endforeach
+                </select>
             </div>
             <div class="d-flex gap-2">
-                <button type="button" class="btn btn-secondary flex-fill" id="monitoring-filter-reset" data-reset-url="{{ $resetBase }}">Reset</button>
+                <button type="button" class="btn btn-secondary flex-fill" id="monitoring-filter-reset" data-reset-url="{{ $resetUrl }}">Reset</button>
                 <button type="submit" class="btn btn-primary flex-fill">Apply</button>
             </div>
         </form>
     </div>
 </div>
-
-<script>
-const monitoringSearchForm = document.getElementById('monitoring-search-form');
-const monitoringSearchInput = document.getElementById('monitoring-search-input');
-let monitoringSearchTimer;
-
-function submitMonitoringSearch() {
-    const formData = new FormData(monitoringSearchForm);
-    const params = new URLSearchParams();
-    for (const [key, value] of formData.entries()) {
-        if (key === 'q' && value.trim() === '') {
-            continue;
-        }
-        params.append(key, value);
-    }
-    params.delete('page');
-    const query = params.toString();
-    window.location = monitoringSearchForm.getAttribute('action') + (query ? '?' + query : '');
-}
-
-monitoringSearchInput.addEventListener('input', () => {
-    clearTimeout(monitoringSearchTimer);
-    monitoringSearchTimer = setTimeout(submitMonitoringSearch, 300);
-});
-
-monitoringSearchForm.addEventListener('submit', event => {
-    event.preventDefault();
-    submitMonitoringSearch();
-});
-
-const monitoringFilterForm = document.getElementById('monitoring-filter-form');
-const monitoringFilterReset = document.getElementById('monitoring-filter-reset');
-
-monitoringFilterForm.addEventListener('submit', () => {
-    const logStart = document.getElementById('log_date_start').value;
-    const logEnd = document.getElementById('log_date_end').value;
-    const logHidden = document.getElementById('log_date_range');
-    if (logStart || logEnd) {
-        logHidden.value = 'range:' + logStart + ',' + logEnd;
-    } else {
-        logHidden.disabled = true;
-    }
-
-    const createdStart = document.getElementById('created_at_start').value;
-    const createdEnd = document.getElementById('created_at_end').value;
-    const createdHidden = document.getElementById('created_at_range');
-    if (createdStart || createdEnd) {
-        createdHidden.value = 'range:' + createdStart + ',' + createdEnd;
-    } else {
-        createdHidden.disabled = true;
-    }
-
-    const updatedStart = document.getElementById('updated_at_start').value;
-    const updatedEnd = document.getElementById('updated_at_end').value;
-    const updatedHidden = document.getElementById('updated_at_range');
-    if (updatedStart || updatedEnd) {
-        updatedHidden.value = 'range:' + updatedStart + ',' + updatedEnd;
-    } else {
-        updatedHidden.disabled = true;
-    }
-});
-
-monitoringFilterReset.addEventListener('click', () => {
-    window.location = monitoringFilterReset.dataset.resetUrl;
-});
-</script>
 @endsection
+
+@push('scripts')
+<script>
+(() => {
+    const searchForm = document.getElementById('monitoring-search-form');
+    const searchInput = document.getElementById('monitoring-search-input');
+    let searchTimer;
+
+    function submitSearch() {
+        const formData = new FormData(searchForm);
+        const params = new URLSearchParams();
+        for (const [key, value] of formData.entries()) {
+            if (key === 'q' && value.trim() === '') {
+                continue;
+            }
+            params.append(key, value);
+        }
+        params.delete('page');
+        const query = params.toString();
+        window.location = searchForm.getAttribute('action') + (query ? '?' + query : '');
+    }
+
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(submitSearch, 300);
+    });
+
+    searchForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        submitSearch();
+    });
+
+    const filterReset = document.getElementById('monitoring-filter-reset');
+    filterReset.addEventListener('click', () => {
+        window.location = filterReset.dataset.resetUrl;
+    });
+})();
+</script>
+@endpush

@@ -164,16 +164,19 @@ return new class extends Migration
               ml.content,
               ml.supervisor_id,
               it.id                    AS internship_id,
-              u.name                   AS student_name,
+              it.student_id,
+              inst.id                  AS institution_id,
+              sd.name                  AS student_name,
               inst.name                AS institution_name,
               usv.name                 AS supervisor_name,
               p.year                   AS period_year,
               p.term                   AS period_term,
-              it.status                AS internship_status
+              it.status                AS internship_status,
+              ml.created_at,
+              ml.updated_at
             FROM app.monitoring_logs ml
             JOIN app.internships it       ON it.id = ml.internship_id
-            JOIN app.students s           ON s.id = it.student_id
-            JOIN core.users u              ON u.id = s.user_id
+            JOIN student_details_view sd   ON sd.id = it.student_id
             JOIN app.institutions inst    ON inst.id = it.institution_id
             JOIN app.periods p            ON p.id = it.period_id
             LEFT JOIN app.supervisors sv  ON sv.id = ml.supervisor_id
@@ -182,6 +185,31 @@ return new class extends Migration
 
         DB::statement(<<<'SQL'
             CREATE OR REPLACE VIEW v_monitoring_log_detail AS
+            WITH primary_contact AS (
+                SELECT DISTINCT ON (institution_id) id, institution_id, name, email, phone, position, is_primary
+                FROM app.institution_contacts
+                ORDER BY institution_id, is_primary DESC, id
+            ),
+            latest_quota AS (
+                SELECT DISTINCT ON (institution_id) iq.institution_id, iq.quota, iq.used, p.year, p.term
+                FROM app.institution_quotas iq
+                JOIN app.periods p ON p.id = iq.period_id
+                ORDER BY iq.institution_id, p.year DESC, p.term DESC, iq.id DESC
+            ),
+            application_data AS (
+                SELECT a.id,
+                       a.student_id,
+                       a.institution_id,
+                       a.period_id,
+                       a.status,
+                       a.student_access,
+                       a.submitted_at,
+                       a.notes,
+                       p.year AS period_year,
+                       p.term AS period_term
+                FROM app.applications a
+                LEFT JOIN app.periods p ON p.id = a.period_id
+            )
             SELECT
               ml.id            AS monitoring_log_id,
               ml.log_date,
@@ -191,21 +219,53 @@ return new class extends Migration
               ml.supervisor_id,
               it.id            AS internship_id,
               it.status        AS internship_status,
-              it.start_date,
-              it.end_date,
-              u.name           AS student_name,
+              it.start_date    AS internship_start_date,
+              it.end_date      AS internship_end_date,
+              p.year           AS internship_period_year,
+              p.term           AS internship_period_term,
+              sd.id            AS student_id,
+              sd.name          AS student_name,
+              sd.email         AS student_email,
+              sd.phone         AS student_phone,
+              sd.student_number,
+              sd.national_sn,
+              sd.major         AS student_major,
+              sd.class         AS student_class,
+              sd.batch         AS student_batch,
+              sd.notes         AS student_notes,
+              sd.photo         AS student_photo,
+              inst.id          AS institution_id,
               inst.name        AS institution_name,
-              p.year           AS period_year,
-              p.term           AS period_term,
-              usv.name         AS supervisor_name
+              inst.address     AS institution_address,
+              inst.city        AS institution_city,
+              inst.province    AS institution_province,
+              inst.website     AS institution_website,
+              inst.industry    AS institution_industry,
+              inst.notes       AS institution_notes,
+              inst.photo       AS institution_photo,
+              pc.name          AS institution_contact_name,
+              pc.email         AS institution_contact_email,
+              pc.phone         AS institution_contact_phone,
+              pc.position      AS institution_contact_position,
+              pc.is_primary    AS institution_contact_primary,
+              lq.quota         AS institution_quota,
+              lq.used          AS institution_quota_used,
+              lq.year          AS institution_quota_period_year,
+              lq.term          AS institution_quota_period_term,
+              app.period_year  AS application_period_year,
+              app.period_term  AS application_period_term,
+              app.status       AS application_status,
+              app.student_access AS application_student_access,
+              app.submitted_at AS application_submitted_at,
+              app.notes        AS application_notes
             FROM app.monitoring_logs ml
             JOIN app.internships it       ON it.id = ml.internship_id
-            JOIN app.students s           ON s.id = it.student_id
-            JOIN core.users u              ON u.id = s.user_id
+            JOIN student_details_view sd   ON sd.id = it.student_id
             JOIN app.institutions inst    ON inst.id = it.institution_id
-            JOIN app.periods p            ON p.id = it.period_id
-            LEFT JOIN app.supervisors sv  ON sv.id = ml.supervisor_id
-            LEFT JOIN core.users usv       ON usv.id = sv.user_id;
+            LEFT JOIN primary_contact pc  ON pc.institution_id = inst.id
+            LEFT JOIN latest_quota lq     ON lq.institution_id = inst.id
+            LEFT JOIN app.periods p       ON p.id = it.period_id
+            LEFT JOIN application_data app ON app.id = it.application_id;
         SQL);
 
         DB::statement(<<<'SQL'

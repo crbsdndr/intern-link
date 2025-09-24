@@ -41,12 +41,12 @@ Route::middleware('auth.session')->group(function () {
         Route::delete('{id}', [InternshipController::class, 'destroy']);
     });
 
-    Route::prefix('monitoring')->group(function () {
+    Route::prefix('monitorings')->group(function () {
         Route::get('/', [MonitoringLogController::class, 'index']);
-        Route::get('/add', [MonitoringLogController::class, 'create']);
+        Route::get('/create', [MonitoringLogController::class, 'create']);
         Route::post('/', [MonitoringLogController::class, 'store']);
-        Route::get('{id}/see', [MonitoringLogController::class, 'show']);
-        Route::get('{id}/edit', [MonitoringLogController::class, 'edit']);
+        Route::get('{id}/read', [MonitoringLogController::class, 'show']);
+        Route::get('{id}/update', [MonitoringLogController::class, 'edit']);
         Route::put('{id}', [MonitoringLogController::class, 'update']);
         Route::delete('{id}', [MonitoringLogController::class, 'destroy']);
     });

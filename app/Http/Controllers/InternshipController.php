@@ -270,8 +270,15 @@ class InternshipController extends Controller
                     ->from('internships')
                     ->whereColumn('internships.application_id', 'application_details_view.id');
             })
-            ->orderBy('id')
-            ->get();
+            ->orderBy('student_name')
+            ->orderBy('institution_name')
+            ->get()
+            ->map(fn($app) => [
+                'id' => (int) $app->id,
+                'label' => $app->student_name . ' - ' . $app->institution_name,
+                'institution_id' => (int) $app->institution_id,
+            ])
+            ->values();
         $statuses = $this->statusOptions();
         return view('internship.create', compact('applications', 'statuses'));
     }
@@ -284,7 +291,7 @@ class InternshipController extends Controller
         $statuses = $this->statusOptions();
         $data = $request->validate([
             'application_ids' => 'required|array|min:1',
-            'application_ids.*' => 'integer|distinct',
+            'application_ids.*' => 'integer|distinct|exists:applications,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'status' => 'required|in:' . implode(',', $statuses),
@@ -365,12 +372,19 @@ class InternshipController extends Controller
         }
         $internship = DB::table('internship_details_view')->where('id', $id)->first();
         abort_if(!$internship, 404);
-        $applications = DB::table('application_details_view')
-            ->select('id', 'student_name', 'institution_name', 'institution_id')
-            ->where('status', 'accepted')
+        $applications = DB::table('internship_details_view')
+            ->select('application_id as id', 'student_name', 'institution_name', 'institution_id')
             ->where('institution_id', $internship->institution_id)
-            ->orderBy('id')
-            ->get();
+            ->orderBy('student_name')
+            ->orderBy('institution_name')
+            ->get()
+            ->unique('id')
+            ->map(fn($app) => [
+                'id' => (int) $app->id,
+                'label' => $app->student_name . ' - ' . $app->institution_name,
+                'institution_id' => (int) $app->institution_id,
+            ])
+            ->values();
         $statuses = $this->statusOptions();
         return view('internship.edit', compact('internship', 'applications', 'statuses'));
     }
@@ -384,7 +398,7 @@ class InternshipController extends Controller
         $statuses = $this->statusOptions();
         $data = $request->validate([
             'application_ids' => 'required|array|min:1',
-            'application_ids.*' => 'integer|distinct',
+            'application_ids.*' => 'integer|distinct|exists:applications,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'status' => 'required|in:' . implode(',', $statuses),

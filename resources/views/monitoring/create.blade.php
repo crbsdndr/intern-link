@@ -1,16 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Create Monitoring Log')
+@section('title', 'Create Monitoring')
 
 @section('content')
-<h1>Create Monitoring Log</h1>
+<h1 class="mb-4">Create Monitoring</h1>
 @include('monitoring.form', [
-    'action' => url('/monitoring'),
+    'action' => url('/monitorings'),
     'method' => 'POST',
     'log' => null,
     'internships' => $internships,
-    'supervisors' => $supervisors,
     'types' => $types,
-    'readonly' => false,
 ])
 @endsection

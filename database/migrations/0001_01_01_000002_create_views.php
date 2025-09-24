@@ -191,7 +191,7 @@ return new class extends Migration
                 ORDER BY institution_id, is_primary DESC, id
             ),
             latest_quota AS (
-                SELECT DISTINCT ON (institution_id) iq.institution_id, iq.quota, iq.used, p.year, p.term
+                SELECT DISTINCT ON (institution_id) iq.institution_id, iq.quota, iq.used, NULL::text AS notes, p.year, p.term
                 FROM app.institution_quotas iq
                 JOIN app.periods p ON p.id = iq.period_id
                 ORDER BY iq.institution_id, p.year DESC, p.term DESC, iq.id DESC
@@ -252,6 +252,7 @@ return new class extends Migration
               lq.used          AS institution_quota_used,
               lq.year          AS institution_quota_period_year,
               lq.term          AS institution_quota_period_term,
+              lq.notes         AS institution_quota_notes,
               app.period_year  AS application_period_year,
               app.period_term  AS application_period_term,
               app.status       AS application_status,

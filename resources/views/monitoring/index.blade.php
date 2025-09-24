@@ -9,7 +9,7 @@
 @php($isStudent = $role === 'student')
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <h1 class="mb-0">Internships</h1>
+    <h1 class="mb-0">Monitorings</h1>
     <div class="d-flex align-items-center gap-2 flex-wrap">
         <form method="get" action="{{ url()->current() }}" id="monitoring-search-form" class="position-relative">
             <div class="input-group" style="min-width: 280px;">

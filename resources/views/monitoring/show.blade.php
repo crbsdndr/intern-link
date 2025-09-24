@@ -4,6 +4,8 @@
 
 @section('content')
 @php($role = session('role'))
+@php($studentPhoto = data_get($log, 'student_photo'))
+@php($institutionPhoto = data_get($log, 'institution_photo'))
 @php($formatBoolean = function ($value) {
     if ($value === null) {
         return '—';
@@ -20,8 +22,8 @@
             <div class="card-body">
                 <div class="row g-3 align-items-start">
                     <div class="col-sm-4">
-                        @if($log->student_photo)
-                            <img src="{{ $log->student_photo }}" alt="{{ $log->student_name }}" class="img-fluid rounded border">
+                        @if($studentPhoto)
+                            <img src="{{ $studentPhoto }}" alt="{{ $log->student_name }}" class="img-fluid rounded border">
                         @else
                             <div class="border rounded d-flex align-items-center justify-content-center bg-light" style="aspect-ratio: 3 / 4;">
                                 <span class="text-muted">No Photo</span>
@@ -66,8 +68,8 @@
             <div class="card-body">
                 <div class="row g-3 align-items-start">
                     <div class="col-sm-4">
-                        @if($log->institution_photo)
-                            <img src="{{ $log->institution_photo }}" alt="{{ $log->institution_name }}" class="img-fluid rounded border">
+                        @if($institutionPhoto)
+                            <img src="{{ $institutionPhoto }}" alt="{{ $log->institution_name }}" class="img-fluid rounded border">
                         @else
                             <div class="border rounded d-flex align-items-center justify-content-center bg-light" style="aspect-ratio: 16 / 9;">
                                 <span class="text-muted">No Photo</span>
@@ -120,6 +122,8 @@
                             <dd class="col-sm-7">{{ $log->institution_quota_period_year ?? '—' }}</dd>
                             <dt class="col-sm-5">Institution Quota Period Term</dt>
                             <dd class="col-sm-7">{{ $log->institution_quota_period_term ?? '—' }}</dd>
+                            <dt class="col-sm-5">Institution Quota Notes</dt>
+                            <dd class="col-sm-7">{{ $log->institution_quota_notes ?? '—' }}</dd>
                         </dl>
                     </div>
                 </div>
@@ -183,11 +187,21 @@
     <div class="card-header fw-semibold">Monitoring Log</div>
     <div class="card-body d-flex flex-column gap-2">
         <div><span class="fw-semibold">Title:</span> {{ $log->title ?? '—' }}</div>
-        <div><span class="fw-semibold">Log Date:</span> {{ $log->log_date }}</div>
-        <div><span class="fw-semibold">Type:</span> {{ ucwords(str_replace('_', ' ', $log->log_type)) }}</div>
+        <div><span class="fw-semibold">Log Date:</span> {{ $log->log_date ?? '—' }}</div>
+        <div><span class="fw-semibold">Type:</span>
+            @if($log->log_type)
+                {{ ucwords(str_replace('_', ' ', $log->log_type)) }}
+            @else
+                —
+            @endif
+        </div>
         <div>
             <span class="fw-semibold">Content:</span>
-            <pre class="mt-2 mb-0" style="white-space: pre-wrap;">{{ $log->content }}</pre>
+            @if($log->content)
+                <pre class="mt-2 mb-0" style="white-space: pre-wrap;">{{ $log->content }}</pre>
+            @else
+                <div class="mt-2 text-muted">—</div>
+            @endif
         </div>
     </div>
 </div>

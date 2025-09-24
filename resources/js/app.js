@@ -12,6 +12,7 @@ window.initTomSelect = () => {
             create,
             persist: false,
             allowEmptyOption,
+            placeholder: el.dataset.placeholder || el.getAttribute('placeholder') || '',
         });
     });
 };

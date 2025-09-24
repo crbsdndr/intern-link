@@ -25,7 +25,6 @@
             <a href="/applications" class="list-group-item list-group-item-action">Applications</a>
             <a href="/internships" class="list-group-item list-group-item-action">Internships</a>
             <a href="/monitorings" class="list-group-item list-group-item-action">Monitorings</a>
-     
     </div>
 </nav>
     <main class="p-4 flex-fill">

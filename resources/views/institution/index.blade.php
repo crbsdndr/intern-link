@@ -247,8 +247,6 @@
 
 <script>
 const institutionSearchForm = document.getElementById('institution-search-form');
-const institutionSearchInput = document.getElementById('institution-search-input');
-let institutionSearchTimer;
 
 function submitInstitutionSearch() {
     const formData = new FormData(institutionSearchForm);
@@ -263,11 +261,6 @@ function submitInstitutionSearch() {
     const query = params.toString();
     window.location = institutionSearchForm.getAttribute('action') + (query ? '?' + query : '');
 }
-
-institutionSearchInput.addEventListener('input', () => {
-    clearTimeout(institutionSearchTimer);
-    institutionSearchTimer = setTimeout(submitInstitutionSearch, 300);
-});
 
 institutionSearchForm.addEventListener('submit', event => {
     event.preventDefault();

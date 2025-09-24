@@ -212,8 +212,6 @@
 
 <script>
 const studentSearchForm = document.getElementById('student-search-form');
-const studentSearchInput = document.getElementById('student-search-input');
-let studentSearchTimer;
 
 function submitStudentSearch() {
     const formData = new FormData(studentSearchForm);
@@ -228,11 +226,6 @@ function submitStudentSearch() {
     const query = params.toString();
     window.location = studentSearchForm.getAttribute('action') + (query ? '?' + query : '');
 }
-
-studentSearchInput.addEventListener('input', () => {
-    clearTimeout(studentSearchTimer);
-    studentSearchTimer = setTimeout(submitStudentSearch, 300);
-});
 
 studentSearchForm.addEventListener('submit', event => {
     event.preventDefault();

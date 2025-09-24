@@ -184,8 +184,6 @@
 <script>
 (() => {
     const searchForm = document.getElementById('application-search-form');
-    const searchInput = document.getElementById('application-search-input');
-    let timer;
 
     function submitSearch() {
         const formData = new FormData(searchForm);
@@ -200,11 +198,6 @@
         const query = params.toString();
         window.location = searchForm.getAttribute('action') + (query ? '?' + query : '');
     }
-
-    searchInput.addEventListener('input', () => {
-        clearTimeout(timer);
-        timer = setTimeout(submitSearch, 300);
-    });
 
     searchForm.addEventListener('submit', (event) => {
         event.preventDefault();

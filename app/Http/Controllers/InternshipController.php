@@ -170,14 +170,16 @@ class InternshipController extends Controller
             $yearCast = $driver === 'pgsql' ? 'period_year::text' : 'CAST(period_year AS CHAR)';
             $termCast = $driver === 'pgsql' ? 'period_term::text' : 'CAST(period_term AS CHAR)';
 
-            $query->where(function ($q) use ($term, $startCast, $endCast, $yearCast, $termCast) {
+            $statusExpr = $driver === 'pgsql' ? 'status::text' : 'status';
+
+            $query->where(function ($q) use ($term, $startCast, $endCast, $yearCast, $termCast, $statusExpr) {
                 $q->whereRaw('LOWER(student_name) LIKE ?', ["%{$term}%"])
                     ->orWhereRaw('LOWER(institution_name) LIKE ?', ["%{$term}%"])
                     ->orWhereRaw("LOWER($yearCast) LIKE ?", ["%{$term}%"])
                     ->orWhereRaw("LOWER($termCast) LIKE ?", ["%{$term}%"])
                     ->orWhereRaw("LOWER($startCast) LIKE ?", ["%{$term}%"])
                     ->orWhereRaw("LOWER($endCast) LIKE ?", ["%{$term}%"])
-                    ->orWhereRaw('LOWER(status) LIKE ?', ["%{$term}%"]);
+                    ->orWhereRaw("LOWER($statusExpr) LIKE ?", ["%{$term}%"]);
             });
         }
 

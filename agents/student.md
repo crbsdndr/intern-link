@@ -25,8 +25,8 @@ CRUD Student is used to perform operations on the **user** table with the **Stud
 
 3. **Search Input**  
    * Search records based on all columns displayed in the table (no 10-record limit).  
-   * Search runs automatically whenever the input changes.  
-   * The **Search** button is provided in case the automatic search does not work.
+   * Search executes only after the user submits the form via the **Search** button or pressing Enter.  
+   * Changing the input alone does not trigger a search.
 
 3. **Filter** (sidebar opens from the right after clicking the filter button):  
    * Title: **Filter Students**  

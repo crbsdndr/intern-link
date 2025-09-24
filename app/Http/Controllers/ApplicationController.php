@@ -112,12 +112,14 @@ class ApplicationController extends Controller
             }
             $studentAccessExpr = "CASE WHEN student_access THEN 'true' ELSE 'false' END";
 
-            $query->where(function ($q) use ($searchTerm, $yearExpr, $termExpr, $submittedExpr, $studentAccessExpr) {
+            $statusExpr = $driver === 'pgsql' ? 'status::text' : 'status';
+
+            $query->where(function ($q) use ($searchTerm, $yearExpr, $termExpr, $submittedExpr, $studentAccessExpr, $statusExpr) {
                 $q->whereRaw('LOWER(student_name) LIKE ?', ['%' . $searchTerm . '%'])
                     ->orWhereRaw('LOWER(institution_name) LIKE ?', ['%' . $searchTerm . '%'])
                     ->orWhereRaw("LOWER($yearExpr) LIKE ?", ['%' . $searchTerm . '%'])
                     ->orWhereRaw("LOWER($termExpr) LIKE ?", ['%' . $searchTerm . '%'])
-                    ->orWhereRaw('LOWER(status) LIKE ?', ['%' . $searchTerm . '%'])
+                    ->orWhereRaw("LOWER($statusExpr) LIKE ?", ['%' . $searchTerm . '%'])
                     ->orWhereRaw("LOWER($studentAccessExpr) LIKE ?", ['%' . $searchTerm . '%'])
                     ->orWhereRaw("LOWER($submittedExpr) LIKE ?", ['%' . $searchTerm . '%']);
             });

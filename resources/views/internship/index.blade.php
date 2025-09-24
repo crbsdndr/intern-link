@@ -183,8 +183,6 @@
 <script>
 (() => {
     const searchForm = document.getElementById('internship-search-form');
-    const searchInput = document.getElementById('internship-search-input');
-    let searchTimer;
 
     function submitSearch() {
         const formData = new FormData(searchForm);
@@ -199,11 +197,6 @@
         const query = params.toString();
         window.location = searchForm.getAttribute('action') + (query ? '?' + query : '');
     }
-
-    searchInput.addEventListener('input', () => {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(submitSearch, 300);
-    });
 
     searchForm.addEventListener('submit', (event) => {
         event.preventDefault();

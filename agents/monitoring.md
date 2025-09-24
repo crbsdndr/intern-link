@@ -19,8 +19,8 @@ The CRUD Monitoring is used to perform operations on the **monitoring_logs** tab
 
 2. **Search Input**  
    * Search across all displayed table columns (no 10-record limit).  
-   * Search runs automatically whenever the input changes.  
-   * A **Search** button is provided in case auto-search does not work.
+   * Search executes only after the user submits the form via the **Search** button or pressing Enter.  
+   * Changing the input alone does not trigger a search.
 
 3. **Button filter**
    * This button only appears when applying filters.

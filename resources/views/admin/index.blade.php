@@ -147,8 +147,6 @@
 
 <script>
 const adminSearchForm = document.getElementById('admin-search-form');
-const adminSearchInput = document.getElementById('admin-search-input');
-let adminSearchTimer;
 
 function submitAdminSearch() {
     const formData = new FormData(adminSearchForm);
@@ -163,11 +161,6 @@ function submitAdminSearch() {
     const query = params.toString();
     window.location = adminSearchForm.getAttribute('action') + (query ? '?' + query : '');
 }
-
-adminSearchInput.addEventListener('input', () => {
-    clearTimeout(adminSearchTimer);
-    adminSearchTimer = setTimeout(submitAdminSearch, 300);
-});
 
 adminSearchForm.addEventListener('submit', event => {
     event.preventDefault();

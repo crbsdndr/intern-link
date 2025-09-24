@@ -193,8 +193,6 @@
 
 <script>
 const supervisorSearchForm = document.getElementById('supervisor-search-form');
-const supervisorSearchInput = document.getElementById('supervisor-search-input');
-let supervisorSearchTimer;
 
 function submitSupervisorSearch() {
     const formData = new FormData(supervisorSearchForm);
@@ -209,11 +207,6 @@ function submitSupervisorSearch() {
     const query = params.toString();
     window.location = supervisorSearchForm.getAttribute('action') + (query ? '?' + query : '');
 }
-
-supervisorSearchInput.addEventListener('input', () => {
-    clearTimeout(supervisorSearchTimer);
-    supervisorSearchTimer = setTimeout(submitSupervisorSearch, 300);
-});
 
 supervisorSearchForm.addEventListener('submit', event => {
     event.preventDefault();

@@ -141,8 +141,6 @@
 
 <script>
 const developerSearchForm = document.getElementById('developer-search-form');
-const developerSearchInput = document.getElementById('developer-search-input');
-let developerSearchTimer;
 
 function submitDeveloperSearch() {
     const formData = new FormData(developerSearchForm);
@@ -157,11 +155,6 @@ function submitDeveloperSearch() {
     const query = params.toString();
     window.location = developerSearchForm.getAttribute('action') + (query ? '?' + query : '');
 }
-
-developerSearchInput.addEventListener('input', () => {
-    clearTimeout(developerSearchTimer);
-    developerSearchTimer = setTimeout(submitDeveloperSearch, 300);
-});
 
 developerSearchForm.addEventListener('submit', event => {
     event.preventDefault();

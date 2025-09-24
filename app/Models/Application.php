@@ -14,13 +14,14 @@ class Application extends Model
         'institution_id',
         'period_id',
         'status',
-        'student_access',
         'submitted_at',
+        'decision_at',
+        'rejection_reason',
         'notes',
     ];
 
     protected $casts = [
-        'student_access' => 'boolean',
         'submitted_at' => 'datetime',
+        'decision_at' => 'datetime',
     ];
 }

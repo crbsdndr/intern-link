@@ -55,7 +55,7 @@ return new class extends Migration
                 ORDER BY institution_id, is_primary DESC, id
             ),
             latest_quota AS (
-                SELECT DISTINCT ON (institution_id) iq.id, iq.institution_id, iq.quota, iq.used, p.year, p.term
+                SELECT DISTINCT ON (institution_id) iq.id, iq.institution_id, iq.quota, iq.used, iq.notes, p.year, p.term
                 FROM app.institution_quotas iq
                 JOIN app.periods p ON p.id = iq.period_id
                 ORDER BY iq.institution_id, p.year DESC, p.term DESC, iq.id DESC
@@ -77,7 +77,8 @@ return new class extends Migration
                    lq.year AS period_year,
                    lq.term AS period_term,
                    lq.quota,
-                   lq.used
+                   lq.used,
+                   lq.notes AS quota_notes
             FROM app.institutions i
             LEFT JOIN primary_contact pc ON pc.institution_id = i.id
             LEFT JOIN latest_quota lq ON lq.institution_id = i.id;
@@ -87,48 +88,22 @@ return new class extends Migration
             CREATE OR REPLACE VIEW application_details_view AS
             SELECT a.id,
                    a.student_id,
-                   sd.user_id                  AS student_user_id,
-                   sd.name                     AS student_name,
-                   sd.email                    AS student_email,
-                   sd.phone                    AS student_phone,
-                   sd.student_number,
-                   sd.national_sn,
-                   sd.major                    AS student_major,
-                   sd.class                    AS student_class,
-                   sd.batch                    AS student_batch,
-                   sd.notes                    AS student_notes,
-                   sd.photo                    AS student_photo,
+                   u.name AS student_name,
                    a.institution_id,
-                   idv.name                    AS institution_name,
-                   idv.address                 AS institution_address,
-                   idv.city                    AS institution_city,
-                   idv.province                AS institution_province,
-                   idv.website                 AS institution_website,
-                   idv.industry                AS institution_industry,
-                   idv.notes                   AS institution_notes,
-                   idv.photo                   AS institution_photo,
-                   idv.contact_name            AS institution_contact_name,
-                   idv.contact_email           AS institution_contact_email,
-                   idv.contact_phone           AS institution_contact_phone,
-                   idv.contact_position        AS institution_contact_position,
-                   idv.contact_primary         AS institution_contact_primary,
-                   idv.quota                   AS institution_quota,
-                   idv.used                    AS institution_quota_used,
-                   idv.period_year             AS institution_quota_period_year,
-                   idv.period_term             AS institution_quota_period_term,
+                   i.name AS institution_name,
                    a.period_id,
-                   p.year                      AS period_year,
-                   p.term                      AS period_term,
+                   p.year AS period_year,
+                   p.term AS period_term,
                    a.status,
-                   a.student_access,
                    a.submitted_at,
-                   a.notes                     AS application_notes,
                    a.created_at,
-                   a.updated_at
+                   a.updated_at,
+                   a.notes
             FROM app.applications a
-            JOIN student_details_view sd       ON sd.id = a.student_id
-            JOIN institution_details_view idv  ON idv.id = a.institution_id
-            JOIN app.periods p                 ON p.id = a.period_id;
+            JOIN app.students s ON s.id = a.student_id
+            JOIN core.users u ON u.id = s.user_id
+            JOIN app.institutions i ON i.id = a.institution_id
+            JOIN app.periods p ON p.id = a.period_id;
         SQL);
 
         DB::statement(<<<'SQL'
@@ -160,6 +135,7 @@ return new class extends Migration
               ml.id                    AS monitoring_log_id,
               ml.log_date,
               ml.type                  AS log_type,
+              ml.score,
               COALESCE(ml.title, NULL) AS title,
               ml.content,
               ml.supervisor_id,
@@ -186,6 +162,7 @@ return new class extends Migration
               ml.id            AS monitoring_log_id,
               ml.log_date,
               ml.type          AS log_type,
+              ml.score,
               ml.title,
               ml.content,
               ml.supervisor_id,

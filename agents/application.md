@@ -57,10 +57,7 @@ The CRUD Application is used to perform operations on the **application** table.
 ## Create – `/applications/create/`
 1. Page title: **Create Application**  
 2. Inputs:  
-   * Student Name (Dropdown, Tom Select)
-   * "+" (Button) to add a new Student Name
-   * Additional Student Name (Dropdown, Tom Select, appears after pressing +)
-   * Apply to all students who do not yet have the application (Checkbox)
+   * Student Name (Dropdown, Tom Select)  
    * Institution Name (Dropdown, Tom Select)  
    * Period (Dropdown) (Tom Select) (format: "{year}: {term}")
    * Status Application (Dropdown, no Tom Select)
@@ -73,7 +70,6 @@ The CRUD Application is used to perform operations on the **application** table.
 3. Notes:  
    * Student Name input shows the name, not the ID. Database still stores the ID.  
    * Period shows the year and term, not the ID, Database still stores the ID.
-   * Additional Student Name dropdown, make sure that the selected name does not appear again in the dropdown menu.
    * Institution Name works the same way.
 
 4. **Cancel** button navigates back.  
@@ -126,13 +122,13 @@ Application details displayed as:
    * Student Name (Dropdown, Tom Select – disabled, default from database)
    * "+" (Button) to add a new Student Name
    * Additional Student Name (Dropdown, Tom Select, appears after pressing +)
-   * Apply to all applications with the same institution (Checkbox)
    * Institution Name (Dropdown, Tom Select)
    * Period (Dropdown) (Tom Select) (format: "{year}: {term}")
    * Status Application (Dropdown, no Tom Select)
    * Student Access (Radio: True / False / Any) (Display the input only if the role is not a student)
    * Submitted At (Date)
    * Notes (Textarea)
+   * Apply to all applications with the same institution (Checkbox)
    * Cancel (Button)
    * Save (Button)
 

@@ -17,6 +17,7 @@ class MonitoringLogSeeder extends Seeder
                 'internship_id' => $i,
                 'supervisor_id' => $i,
                 'log_date' => Carbon::now()->toDateString(),
+                'score' => $faker->numberBetween(70, 100),
                 'title' => 'Weekly Report ' . $i,
                 'content' => $faker->sentence,
                 'type' => 'weekly',

@@ -48,12 +48,18 @@
             </select>
         </div>
 
-        <div>
+        @php($selectedInstitution = old('institution_id', $application->institution_id))
+        <div id="period-section" class="{{ $selectedInstitution ? '' : 'd-none' }}">
             <label for="period-id" class="form-label">Period</label>
-            <select name="period_id" id="period-id" class="form-select tom-select" data-tom-allow-empty="true">
-                @foreach($periods as $period)
-                    <option value="{{ $period['id'] }}" @selected((string)old('period_id', $application->period_id) === (string)$period['id'])>{{ $period['label'] }}</option>
-                @endforeach
+            <select
+                name="period_id"
+                id="period-id"
+                class="form-select tom-select"
+                data-tom-allow-empty="true"
+                data-selected="{{ old('period_id', $application->period_id) }}"
+                data-placeholder="Select period"
+            >
+                <option value="">Select period</option>
             </select>
         </div>
 
@@ -111,6 +117,7 @@
         'id' => $student->student_id,
         'name' => $student->student_name,
     ]));
+    const institutionPeriods = @json($institutionPeriods);
     const addBtn = document.getElementById('add-student-btn');
     const container = document.getElementById('additional-students');
     const applyAll = document.getElementById('apply-all');
@@ -229,6 +236,83 @@
     });
 
     populateAllSelects();
+
+    const institutionSelect = document.getElementById('institution-id');
+    const periodSection = document.getElementById('period-section');
+    const periodSelect = document.getElementById('period-id');
+    const initialPeriodId = periodSelect ? (periodSelect.dataset.selected || '') : '';
+
+    function rebuildPeriodOptions(options, selectedValue) {
+        if (!periodSelect) {
+            return;
+        }
+
+        const normalizedSelected = options.some((item) => String(item.id) === String(selectedValue))
+            ? String(selectedValue)
+            : '';
+
+        if (periodSelect.tomselect) {
+            periodSelect.tomselect.destroy();
+        }
+
+        periodSelect.innerHTML = '';
+
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = 'Select period';
+        periodSelect.appendChild(placeholder);
+
+        options.forEach((item) => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = item.label;
+            periodSelect.appendChild(option);
+        });
+
+        if (normalizedSelected) {
+            periodSelect.value = normalizedSelected;
+        }
+
+        window.initTomSelect && window.initTomSelect();
+
+        if (periodSelect.tomselect) {
+            if (normalizedSelected) {
+                periodSelect.tomselect.setValue(normalizedSelected, true);
+            } else {
+                periodSelect.tomselect.clear(true);
+            }
+        }
+
+        periodSelect.dataset.selected = normalizedSelected;
+    }
+
+    function updatePeriodSection(useInitial = false) {
+        if (!institutionSelect || !periodSection || !periodSelect) {
+            return;
+        }
+
+        const institutionId = institutionSelect.value;
+        if (!institutionId) {
+            periodSection.classList.add('d-none');
+            rebuildPeriodOptions([], '');
+            return;
+        }
+
+        const options = institutionPeriods[String(institutionId)] || [];
+        periodSection.classList.remove('d-none');
+        rebuildPeriodOptions(options, useInitial ? initialPeriodId : '');
+    }
+
+    if (institutionSelect && periodSection && periodSelect) {
+        updatePeriodSection(true);
+        institutionSelect.addEventListener('change', () => {
+            periodSelect.dataset.selected = '';
+            updatePeriodSection(false);
+        });
+        periodSelect.addEventListener('change', () => {
+            periodSelect.dataset.selected = periodSelect.value || '';
+        });
+    }
 })();
 </script>
 @endpush

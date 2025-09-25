@@ -3,19 +3,22 @@
 @section('title', 'Student Details')
 
 @section('content')
-<h1>Student Details</h1>
-<div class="row g-4 align-items-start mt-2">
-    <div class="col-md-4 col-lg-3">
-        @if($student->photo)
-            <img src="{{ $student->photo }}" alt="{{ $student->name }}" class="img-fluid rounded border">
-        @else
-            <div class="border rounded d-flex align-items-center justify-content-center bg-light" style="aspect-ratio: 3 / 4;">
-                <span class="text-muted">No Photo</span>
-            </div>
-        @endif
-    </div>
-    <div class="col-md-8 col-lg-9">
-        <dl class="row mb-0">
+<div class="page-header">
+    <h1>Student Details</h1>
+</div>
+<div class="section-card">
+    <div class="row g-4 align-items-start">
+        <div class="col-md-4 col-lg-3">
+            @if($student->photo)
+                <img src="{{ $student->photo }}" alt="{{ $student->name }}" class="img-fluid rounded-4 border border-light-subtle w-100" style="object-fit: cover; aspect-ratio: 3 / 4;">
+            @else
+                <div class="border border-light-subtle rounded-4 d-flex align-items-center justify-content-center bg-light-subtle" style="aspect-ratio: 3 / 4;">
+                    <span class="text-muted">No Photo</span>
+                </div>
+            @endif
+        </div>
+        <div class="col-md-8 col-lg-9">
+            <dl class="row mb-0">
             <dt class="col-sm-4">Name</dt>
             <dd class="col-sm-8">{{ $student->name }}</dd>
 
@@ -52,6 +55,7 @@
             <dt class="col-sm-4">Notes</dt>
             <dd class="col-sm-8">{{ $student->notes ?? '—' }}</dd>
         </dl>
+        </div>
     </div>
 </div>
 <div class="mt-4 d-flex flex-wrap gap-2">

@@ -38,6 +38,39 @@ class ApplicationController extends Controller
             ->all();
     }
 
+    private function periodsByInstitution(array $institutionIds): array
+    {
+        if (empty($institutionIds)) {
+            return [];
+        }
+
+        return DB::table('institution_quotas as iq')
+            ->join('periods as p', 'p.id', '=', 'iq.period_id')
+            ->whereIn('iq.institution_id', $institutionIds)
+            ->orderByDesc('p.year')
+            ->orderByDesc('p.term')
+            ->get([
+                'iq.institution_id',
+                'p.id as period_id',
+                'p.year',
+                'p.term',
+            ])
+            ->groupBy('institution_id')
+            ->map(function ($rows) {
+                return $rows
+                    ->unique('period_id')
+                    ->map(function ($row) {
+                        return [
+                            'id' => (int) $row->period_id,
+                            'label' => $row->year . ': ' . $row->term,
+                        ];
+                    })
+                    ->values()
+                    ->all();
+            })
+            ->all();
+    }
+
     public function index(Request $request)
     {
         $role = session('role');
@@ -178,11 +211,16 @@ class ApplicationController extends Controller
             ->orderBy('name')
             ->get();
 
+        $institutionPeriods = $this->periodsByInstitution(
+            $institutions->pluck('id')->map(fn ($id) => (int) $id)->all()
+        );
+
         return view('application.create', [
             'students' => $students,
             'studentsWithoutApplication' => $studentsWithoutApplication,
             'institutions' => $institutions,
             'periods' => $this->periodOptions(),
+            'institutionPeriods' => $institutionPeriods,
             'statuses' => $this->statusOptions(),
             'canSetStudentAccess' => $role !== 'student',
             'isStudent' => $role === 'student',
@@ -349,12 +387,17 @@ class ApplicationController extends Controller
             ->orderBy('name')
             ->get();
 
+        $institutionPeriods = $this->periodsByInstitution(
+            $institutions->pluck('id')->map(fn ($id) => (int) $id)->all()
+        );
+
         return view('application.edit', [
             'application' => $application,
             'students' => $students,
             'allStudentsForInstitution' => $studentsForInstitution,
             'institutions' => $institutions,
             'periods' => $this->periodOptions(),
+            'institutionPeriods' => $institutionPeriods,
             'statuses' => $this->statusOptions(),
             'canSetStudentAccess' => $role !== 'student',
             'isStudent' => $role === 'student',

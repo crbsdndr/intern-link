@@ -277,6 +277,8 @@ class InternshipController extends Controller
             ->get()
             ->map(fn($app) => [
                 'id' => (int) $app->id,
+                'student_name' => $app->student_name,
+                'institution_name' => $app->institution_name,
                 'label' => $app->student_name . ' - ' . $app->institution_name,
                 'institution_id' => (int) $app->institution_id,
             ])
@@ -383,6 +385,8 @@ class InternshipController extends Controller
             ->unique('id')
             ->map(fn($app) => [
                 'id' => (int) $app->id,
+                'student_name' => $app->student_name,
+                'institution_name' => $app->institution_name,
                 'label' => $app->student_name . ' - ' . $app->institution_name,
                 'institution_id' => (int) $app->institution_id,
             ])

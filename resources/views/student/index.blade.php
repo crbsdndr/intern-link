@@ -8,10 +8,10 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="mb-0">Students</h1>
     <div class="d-flex align-items-center gap-2">
-        <form method="get" action="{{ url()->current() }}" id="student-search-form" class="position-relative">
-            <div class="input-group" style="min-width: 260px;">
+        <form method="get" action="{{ url()->current() }}" id="student-search-form" class="search-form">
+            <div class="input-group">
                 <input type="search" name="q" id="student-search-input" class="form-control" placeholder="Search students" value="{{ request('q') }}" autocomplete="off">
-                <button class="btn btn-outline-secondary" type="submit" id="student-search-submit">Search</button>
+                <button class="btn btn-primary" type="submit" id="student-search-submit">Search</button>
             </div>
             @foreach(request()->except(['q','page']) as $param => $value)
                 <input type="hidden" name="{{ $param }}" value="{{ $value }}">
@@ -36,7 +36,7 @@
         @foreach($filters as $param => $label)
             @php($query = request()->except([$param, 'page']))
             @php($queryString = http_build_query(array_filter($query, fn($value) => $value !== null && $value !== '')))
-            <a href="{{ url()->current() . ($queryString ? '?' . $queryString : '') }}" class="btn btn-sm btn-outline-secondary">
+            <a href="{{ url()->current() . ($queryString ? '?' . $queryString : '') }}" class="btn btn-sm btn-outline-primary">
                 {{ $label }}
             </a>
         @endforeach
@@ -44,7 +44,7 @@
 @endif
 
 <div class="table-responsive">
-    <table class="table table-bordered align-middle mb-3">
+    <table class="table table-hover align-middle">
         <thead>
             <tr>
                 <th scope="col">No</th>
@@ -72,7 +72,7 @@
                 <td>{{ $student->class }}</td>
                 <td>{{ $student->batch }}</td>
                 <td class="text-nowrap text-center">
-                    <a href="/students/{{ $student->id }}/read" class="btn btn-sm btn-secondary">Read</a>
+                    <a href="/students/{{ $student->id }}/read" class="btn btn-sm btn-outline-secondary">Read</a>
                     <a href="/students/{{ $student->id }}/update" class="btn btn-sm btn-warning">Update</a>
                     <form action="/students/{{ $student->id }}" method="POST" class="d-inline">
                         @csrf
@@ -203,7 +203,7 @@
                 </div>
             </div>
             <div class="d-flex gap-2">
-                <button type="button" class="btn btn-secondary flex-fill" id="student-filter-reset" data-reset-url="{{ $resetBase }}">Reset</button>
+                <button type="button" class="btn btn-outline-secondary flex-fill" id="student-filter-reset" data-reset-url="{{ $resetBase }}">Reset</button>
                 <button type="submit" class="btn btn-primary flex-fill">Apply</button>
             </div>
         </form>

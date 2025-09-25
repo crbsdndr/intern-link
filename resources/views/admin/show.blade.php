@@ -3,23 +3,29 @@
 @section('title', 'Admin Details')
 
 @section('content')
-<h1>Admin Details</h1>
-<div class="card">
-    <div class="card-body">
-        <ul class="list-unstyled mb-0">
-            <li class="mb-2"><strong>Name:</strong> {{ $admin->name }}</li>
-            <li class="mb-2"><strong>Email:</strong> {{ $admin->email }}</li>
-            <li class="mb-2"><strong>Phone:</strong> {{ $admin->phone ?? '—' }}</li>
-            <li>
-                <strong>Email Verified At:</strong>
-                @if($admin->email_verified_at)
-                    {{ $admin->email_verified_at }}
-                @else
-                    <span class="fw-semibold">False</span>
-                @endif
-            </li>
-        </ul>
-    </div>
+<div class="page-header">
+    <h1>Admin Details</h1>
 </div>
-<a href="/admins" class="btn btn-secondary mt-3">Back</a>
+<div class="section-card">
+    <dl class="row mb-0">
+        <dt class="col-sm-4">Name</dt>
+        <dd class="col-sm-8">{{ $admin->name }}</dd>
+
+        <dt class="col-sm-4">Email</dt>
+        <dd class="col-sm-8">{{ $admin->email }}</dd>
+
+        <dt class="col-sm-4">Phone</dt>
+        <dd class="col-sm-8">{{ $admin->phone ?? '—' }}</dd>
+
+        <dt class="col-sm-4">Email Verified At</dt>
+        <dd class="col-sm-8">
+            @if($admin->email_verified_at)
+                {{ $admin->email_verified_at }}
+            @else
+                <span class="fw-semibold">False</span>
+            @endif
+        </dd>
+    </dl>
+</div>
+<a href="/admins" class="btn btn-secondary">Back</a>
 @endsection

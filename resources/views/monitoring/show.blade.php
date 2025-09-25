@@ -13,7 +13,9 @@
     $normalized = strtolower((string) $value);
     return in_array($normalized, ['1', 'true', 't', 'yes'], true) ? 'True' : 'False';
 })
-<h1 class="mb-4">Monitoring Details</h1>
+<div class="page-header">
+    <h1>Monitoring Details</h1>
+</div>
 
 <div class="row g-4 mb-4">
     <div class="col-lg-6">
@@ -23,9 +25,9 @@
                 <div class="row g-3 align-items-start">
                     <div class="col-sm-4">
                         @if($studentPhoto)
-                            <img src="{{ $studentPhoto }}" alt="{{ $log->student_name }}" class="img-fluid rounded border">
+                            <img src="{{ $studentPhoto }}" alt="{{ $log->student_name }}" class="img-fluid rounded-4 border border-light-subtle w-100" style="object-fit: cover; aspect-ratio: 3 / 4;">
                         @else
-                            <div class="border rounded d-flex align-items-center justify-content-center bg-light" style="aspect-ratio: 3 / 4;">
+                            <div class="border border-light-subtle rounded-4 d-flex align-items-center justify-content-center bg-light-subtle" style="aspect-ratio: 3 / 4;">
                                 <span class="text-muted">No Photo</span>
                             </div>
                         @endif
@@ -69,9 +71,9 @@
                 <div class="row g-3 align-items-start">
                     <div class="col-sm-4">
                         @if($institutionPhoto)
-                            <img src="{{ $institutionPhoto }}" alt="{{ $log->institution_name }}" class="img-fluid rounded border">
+                            <img src="{{ $institutionPhoto }}" alt="{{ $log->institution_name }}" class="img-fluid rounded-4 border border-light-subtle w-100" style="object-fit: cover; aspect-ratio: 16 / 9;">
                         @else
-                            <div class="border rounded d-flex align-items-center justify-content-center bg-light" style="aspect-ratio: 16 / 9;">
+                            <div class="border border-light-subtle rounded-4 d-flex align-items-center justify-content-center bg-light-subtle" style="aspect-ratio: 16 / 9;">
                                 <span class="text-muted">No Photo</span>
                             </div>
                         @endif

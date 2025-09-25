@@ -3,21 +3,23 @@
 @section('title', 'Institution Details')
 
 @section('content')
-<h1>Institution Details</h1>
-<div class="row g-4">
-    <div class="col-md-4 col-lg-3">
-        <div class="border rounded p-3 text-center">
-            <h2 class="h6">Photo</h2>
+<div class="page-header">
+    <h1>Institution Details</h1>
+</div>
+<div class="section-card">
+    <div class="row g-4 align-items-start">
+        <div class="col-md-4 col-lg-3">
             @if($institution->photo)
-                <img src="{{ $institution->photo }}" alt="{{ $institution->name }}" class="img-fluid mb-2">
+                <img src="{{ $institution->photo }}" alt="{{ $institution->name }}" class="img-fluid rounded-4 border border-light-subtle w-100 mb-3" style="object-fit: cover; aspect-ratio: 4 / 3;">
                 <p class="small text-break mb-0"><a href="{{ $institution->photo }}" target="_blank" rel="noopener">{{ $institution->photo }}</a></p>
             @else
-                <p class="mb-0">—</p>
+                <div class="border border-light-subtle rounded-4 d-flex align-items-center justify-content-center bg-light-subtle" style="aspect-ratio: 4 / 3;">
+                    <span class="text-muted">No Photo</span>
+                </div>
             @endif
         </div>
-    </div>
-    <div class="col-md-8 col-lg-9">
-        <dl class="row">
+        <div class="col-md-8 col-lg-9">
+        <dl class="row mb-0">
             <dt class="col-sm-4">Name</dt>
             <dd class="col-sm-8">{{ $institution->name }}</dd>
 
@@ -78,7 +80,9 @@
             <dt class="col-sm-4">Used</dt>
             <dd class="col-sm-8">{{ $institution->used ?? '—' }}</dd>
         </dl>
+        </dl>
+        </div>
     </div>
 </div>
-<a href="/institutions" class="btn btn-secondary mt-3">Back</a>
+<a href="/institutions" class="btn btn-secondary">Back</a>
 @endsection

@@ -7,10 +7,10 @@
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <h1 class="mb-0">Applications</h1>
     <div class="d-flex align-items-center gap-2">
-        <form method="get" action="{{ url()->current() }}" id="application-search-form" class="position-relative">
-            <div class="input-group" style="min-width: 280px;">
+        <form method="get" action="{{ url()->current() }}" id="application-search-form" class="search-form">
+            <div class="input-group">
                 <input type="search" name="q" id="application-search-input" class="form-control" placeholder="Search applications" value="{{ request('q') }}" autocomplete="off">
-                <button class="btn btn-outline-secondary" type="submit" id="application-search-submit">Search</button>
+                <button class="btn btn-primary" type="submit" id="application-search-submit">Search</button>
             </div>
             @foreach(request()->except(['q','page']) as $param => $value)
                 <input type="hidden" name="{{ $param }}" value="{{ $value }}">
@@ -31,7 +31,7 @@
         @foreach($filters as $param => $label)
             @php($query = collect(request()->query())->except([$param, 'page'])->filter(fn($value) => $value !== null && $value !== '')->toArray())
             @php($queryString = http_build_query($query))
-            <a href="{{ url()->current() . ($queryString ? '?' . $queryString : '') }}" class="btn btn-sm btn-outline-secondary">
+            <a href="{{ url()->current() . ($queryString ? '?' . $queryString : '') }}" class="btn btn-sm btn-outline-primary">
                 {{ $label }}
             </a>
         @endforeach
@@ -39,7 +39,7 @@
 @endif
 
 <div class="table-responsive">
-    <table class="table table-bordered align-middle mb-3">
+    <table class="table table-hover align-middle">
         <thead>
             <tr class="text-nowrap">
                 <th scope="col">No</th>
@@ -65,7 +65,7 @@
                 <td>{{ $application->student_access ? 'True' : 'False' }}</td>
                 <td>{{ \Illuminate\Support\Carbon::parse($application->submitted_at)->format('Y-m-d') }}</td>
                 <td class="text-nowrap">
-                    <a href="/applications/{{ $application->id }}/read" class="btn btn-sm btn-secondary">Read</a>
+                    <a href="/applications/{{ $application->id }}/read" class="btn btn-sm btn-outline-secondary">Read</a>
                     <a href="/applications/{{ $application->id }}/update" class="btn btn-sm btn-warning">Update</a>
                     <form action="/applications/{{ $application->id }}" method="POST" class="d-inline">
                         @csrf
@@ -173,7 +173,7 @@
                 <input type="hidden" name="q" value="{{ request('q') }}">
             @endif
             <div class="d-flex gap-2">
-                <button type="button" class="btn btn-secondary flex-fill" id="application-filter-reset">Reset</button>
+                <button type="button" class="btn btn-outline-secondary flex-fill" id="application-filter-reset">Reset</button>
                 <button type="submit" class="btn btn-primary flex-fill">Apply</button>
             </div>
         </form>

@@ -3,7 +3,9 @@
 @section('title', 'Application Details')
 
 @section('content')
-<h1 class="mb-4">Application Details</h1>
+<div class="page-header">
+    <h1>Application Details</h1>
+</div>
 
 <div class="row g-4 mb-4">
     <div class="col-lg-6">
@@ -34,6 +36,7 @@
             </div>
         </div>
     </div>
+
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-header fw-semibold">Institution Information</div>

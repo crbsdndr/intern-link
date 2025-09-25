@@ -5,7 +5,9 @@
 @section('content')
 @php($isStudent = session('role') === 'student')
 
-<h1 class="mb-4">Internship Details</h1>
+<div class="page-header">
+    <h1>Internship Details</h1>
+</div>
 
 <div class="row g-4 mb-4">
     <div class="col-lg-6">

@@ -23,18 +23,21 @@
         $settingsUrl = route('developers.edit', ['id' => $userId]);
     }
 @endphp
-<header class="navbar navbar-light bg-light border-bottom px-3 d-flex align-items-center">
-    <button class="btn btn-outline-secondary me-3" id="sidebarToggle" aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="true">
-        <i class="bi bi-list"></i>
-    </button>
+<header class="app-header navbar px-3">
+    <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-icon" id="sidebarToggle" type="button" aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="false">
+            <i class="bi bi-list"></i>
+        </button>
+        <span class="fw-semibold fs-5">Internish</span>
+    </div>
     <div class="dropdown ms-auto">
-        <button class="btn btn-light dropdown-toggle d-flex align-items-center" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="btn dropdown-toggle d-flex align-items-center" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             @if($photo)
-                <img src="{{ $photo }}" alt="Profile photo" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+                <img src="{{ $photo }}" alt="Profile photo" class="rounded-circle" style="width:36px;height:36px;object-fit:cover;">
             @else
-                <i class="bi bi-person-circle fs-4 me-2"></i>
+                <span class="sidebar-icon" aria-hidden="true"><i class="bi bi-person"></i></span>
             @endif
-            <span>{{ $name }}</span>
+            <span class="fw-semibold">{{ $name }}</span>
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
             @if($settingsUrl)

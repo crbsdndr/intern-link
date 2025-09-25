@@ -21,7 +21,7 @@
 <form method="POST" action="{{ route('login') }}" class="auth-form">
     @csrf
     <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
+        <label for="email" class="form-label bg-amber-950">Email</label>
         <input type="email" id="email" name="email" class="form-control" value="{{ old('email') }}" required autofocus>
     </div>
     <div class="mb-3">

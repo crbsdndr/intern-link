@@ -62,7 +62,7 @@ The CRUD Application is used to perform operations on the **application** table.
    * Additional Student Name (Dropdown, Tom Select, appears after pressing +)
    * Apply to all students who do not yet have the application (Checkbox)
    * Institution Name (Dropdown, Tom Select)  
-   * Period (Dropdown) (Tom Select) (format: "{year}: {term}")
+   * Period (Dropdown) (Tom Select) (format: "{year}: {term}" – show only after Institution is chosen and list periods linked to that institution)
    * Status Application (Dropdown, no Tom Select)
    * Student Access (Radio: True / False / Any) (Display the input only if the role is not a student)
    * Submitted At (Date)
@@ -75,6 +75,7 @@ The CRUD Application is used to perform operations on the **application** table.
    * Period shows the year and term, not the ID, Database still stores the ID.
    * Additional Student Name dropdown, make sure that the selected name does not appear again in the dropdown menu.
    * Institution Name works the same way.
+   * Period dropdown remains hidden until Institution is selected and must only list periods that belong to the chosen institution (based on linked quotas).
 
 4. **Cancel** button navigates back.  
 5. **Save** button stores the new data.  
@@ -128,7 +129,7 @@ Application details displayed as:
    * Additional Student Name (Dropdown, Tom Select, appears after pressing +)
    * Apply to all applications with the same institution (Checkbox)
    * Institution Name (Dropdown, Tom Select)
-   * Period (Dropdown) (Tom Select) (format: "{year}: {term}")
+   * Period (Dropdown) (Tom Select) (format: "{year}: {term}" – show only after Institution is chosen and list periods linked to that institution)
    * Status Application (Dropdown, no Tom Select)
    * Student Access (Radio: True / False / Any) (Display the input only if the role is not a student)
    * Submitted At (Date)
@@ -144,6 +145,7 @@ Application details displayed as:
    * Do not display Student Names already selected in other inputs.
    * If all Student Names from the institution are already selected → the + button becomes disabled.
    * Period shows the year and term, not the ID, Database still stores the ID.
+   * Period dropdown stays hidden until an institution is selected and must only list periods available for that institution.
 
 4. **Cancel** button navigates back.  
 5. **Save** button stores changes.  

@@ -1,7 +1,7 @@
 @extends('layouts.auth')
 
 @section('title', 'Login')
-@section('subtitle', 'Access your Internish workspace to guide internships with confidence.')
+@section('subtitle', 'Access your InternLink workspace to guide internships with confidence.')
 
 @section('content')
 @if (session('status'))
@@ -29,7 +29,7 @@
         <input type="password" id="password" name="password" class="form-control" required>
     </div>
     <div class="text-end mb-3">
-        <a class="link-secondary" href="{{ route('signup') }}">New to Internish? Create an account</a>
+        <a class="link-secondary" href="{{ route('signup') }}">New to InternLink? Create an account</a>
     </div>
     <button type="submit" class="btn btn-primary w-100">Login</button>
 </form>

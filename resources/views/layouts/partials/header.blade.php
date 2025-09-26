@@ -28,7 +28,7 @@
         <button class="btn btn-icon" id="sidebarToggle" type="button" aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="false">
             <i class="bi bi-list"></i>
         </button>
-        <span class="fw-semibold fs-5">Internish</span>
+        <span class="fw-semibold fs-5">InternLink</span>
     </div>
     <div class="dropdown ms-auto">
         <button class="btn dropdown-toggle d-flex align-items-center" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">

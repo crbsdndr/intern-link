@@ -1,7 +1,7 @@
 @extends('layouts.auth')
 
 @section('title', 'Register')
-@section('subtitle', 'Set up your Internish access in two quick steps.')
+@section('subtitle', 'Set up your InternLink access in two quick steps.')
 
 @section('content')
 @if ($errors->any())

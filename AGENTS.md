@@ -4,9 +4,9 @@ This document serves as the basic key for Agents to understand what I, as the us
 
 I repeat: **“This document is not an instruction manual, but a reference for relevance. Instructions are only given through prompts.”**
 
-**Internish** is an application designed to help teachers manage their students’ internship activities in industry. It is intended for schools that require internships as part of the graduation requirements.
+**InternLink** is an application designed to help teachers manage their students’ internship activities in industry. It is intended for schools that require internships as part of the graduation requirements.
 
-The Internish application fully relies on AI Agents. You have full control, but:
+The InternLink application fully relies on AI Agents. You have full control, but:
 
 * Do not add anything that is not requested in the prompt or in specific AGENTS files.
 * Do not be overly “initiative” beyond the given instructions.

@@ -13,7 +13,7 @@ abstract class TestCase extends BaseTestCase
         config([
             'session.driver' => 'array',
             'database.default' => env('DB_CONNECTION', 'pgsql'),
-            'database.connections.pgsql.database' => env('DB_DATABASE', 'internish_test'),
+            'database.connections.pgsql.database' => env('DB_DATABASE', 'internlink_test'),
             'database.connections.pgsql.username' => env('DB_USERNAME', 'postgres'),
             'database.connections.pgsql.password' => env('DB_PASSWORD', ''),
         ]);

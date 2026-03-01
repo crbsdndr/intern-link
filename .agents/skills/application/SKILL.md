@@ -1,4 +1,10 @@
-# agents/application.md
+---
+name: application
+description: Internlink application module reference. Use when changing application lifecycle, student access rules, quotas, period binding, validation, routes, or print flows.
+---
+
+# Application Skill Reference
+
 
 Applications connect students to institutions and periods. The controller is `App\Http\Controllers\ApplicationController`; it relies heavily on the `application_details_view` read model and the staff assignment map from `major_staff_assignments`.
 

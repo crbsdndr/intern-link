@@ -1,4 +1,10 @@
-# agents/student.md
+---
+name: student
+description: Internlink student module reference. Use when changing student CRUD, self-access limits, uniqueness validation, profile fields, or realm-scoped behavior.
+---
+
+# Student Skill Reference
+
 
 Students live across `core.users` (account data) and `app.students` (profile data). Controller: `App\Http\Controllers\StudentController`.
 

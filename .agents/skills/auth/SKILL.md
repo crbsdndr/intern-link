@@ -1,4 +1,10 @@
-# agents/auth.md
+---
+name: auth
+description: Internlink authentication reference. Use when changing signup, login, logout, session hydration, realm routing, or authentication validation/security behavior.
+---
+
+# Auth Skill Reference
+
 
 Auth agents cover Register, Login, and Logout. Routes are global (no school prefix) but the flows seed the realm session keys that other controllers expect.
 
@@ -48,4 +54,4 @@ Auth agents cover Register, Login, and Logout. Routes are global (no school pref
 - Phone inputs are validated as `numeric` during registration but stored as strings; reuse the same trimming when editing profiles.
 - Supervisor numbers use a regex guard (`^[A-Za-z0-9_-]+$`, max 64 chars).
 - Student batch must pass `date_format:Y`.
-- Read `agents/security.md` before altering these flows: CSRF tokens, password hashing, and session regeneration are mandatory.
+- Read `references/security.md` before altering these flows: CSRF tokens, password hashing, and session regeneration are mandatory.

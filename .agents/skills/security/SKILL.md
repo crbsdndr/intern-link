@@ -1,4 +1,10 @@
-# agents/security.md
+---
+name: security
+description: Internlink security baseline reference. Use when changing authentication, request validation, middleware protection, query safety, headers, and data protection controls.
+---
+
+# Security Skill Reference
+
 
 ## Weakness Handling Instructions
 

@@ -1,4 +1,10 @@
-# agents/staff.md
+---
+name: staff
+description: Internlink major staff assignment reference. Use when changing major-contact mapping CRUD, uniqueness constraints, and school-level authorization.
+---
+
+# Staff Skill Reference
+
 
 Major Staff Contacts map a school major to a supervisor who acts as the primary contact for that track. Controller: `App\Http\Controllers\MajorStaffAssignmentController`.
 
@@ -47,4 +53,4 @@ Major Staff Contacts map a school major to a supervisor who acts as the primary 
 - Table: `app.major_staff_assignments` (FKs to `school_majors` and `supervisors`).
 - View: `major_staff_details_view` joins supervisor contact details for listing.
 - Trigger `trg_major_staff_assignments_updated_at` maintains timestamps.
-- Downstream dependencies: `agents/application.md` and `agents/monitoring.md` enforce the presence of a staff contact before creating records.
+- Downstream dependencies: `references/application.md` and `references/monitoring.md` enforce the presence of a staff contact before creating records.

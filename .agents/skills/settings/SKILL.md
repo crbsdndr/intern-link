@@ -1,4 +1,10 @@
-# agents/settings.md
+---
+name: settings
+description: Internlink settings module reference. Use when changing profile/security pages, environment major management, role-based access, and update validation.
+---
+
+# Settings Skill Reference
+
 
 Realm settings provide self-service for profile updates, password changes, and (for privileged roles) major/department maintenance. Controller: `App\Http\Controllers\SettingController`.
 
@@ -55,4 +61,4 @@ Realm settings provide self-service for profile updates, password changes, and (
 ## Implementation Notes
 - All forms reuse the `schoolRoute()` helper to stay realm-scoped.
 - Profile and security pages rely on `resolveUser()` which reads `session('user_id')`; ensure auth middleware keeps the session hydrated.
-- Major data powers multiple modules (students, supervisors, institutions, applications, monitoring). Keep this documentation plus `agents/staff.md` updated when the schema changes.
+- Major data powers multiple modules (students, supervisors, institutions, applications, monitoring). Keep this documentation plus `references/staff.md` updated when the schema changes.

@@ -1,4 +1,10 @@
-# agents/admin.md
+---
+name: admin
+description: Internlink admin module reference. Use when changing admin CRUD flows, role access limits, validation, routes, or persistence behavior.
+---
+
+# Admin Skill Reference
+
 
 CRUD Admin manages `core.users` rows with `role = 'admin'` inside a school realm. The controller is `App\Http\Controllers\AdminUserController` and relies on the `schoolRoute()` helper for navigation.
 

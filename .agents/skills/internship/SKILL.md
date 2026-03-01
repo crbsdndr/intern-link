@@ -1,4 +1,10 @@
-# agents/internship.md
+---
+name: internship
+description: Internlink internship module reference. Use when changing internship creation/update rules, accepted-application linkage, status validation, and authorization.
+---
+
+# Internship Skill Reference
+
 
 Internships are derived from accepted applications. The controller (`App\Http\Controllers\InternshipController`) validates that every internship maps back to an application, student, institution, and period in the same school.
 

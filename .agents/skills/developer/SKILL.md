@@ -1,4 +1,10 @@
-# agents/developer.md
+---
+name: developer
+description: Internlink developer account reference. Use when changing developer self-service routes, validation, authorization, or account deletion/session behavior.
+---
+
+# Developer Skill Reference
+
 
 Developers are global users (`role = 'developer'`). The controller (`App\Http\Controllers\DeveloperController`) only exposes self-service endpoints—no one can create additional developers from the UI.
 

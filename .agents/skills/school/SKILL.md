@@ -1,4 +1,10 @@
-# agents/school.md
+---
+name: school
+description: Internlink school module reference. Use when changing global school CRUD, realm code behavior, validation, and developer-only access rules.
+---
+
+# School Skill Reference
+
 
 Schools are managed globally by developers. Records live in `app.schools` and expose the realm code used throughout the application. Controller: `App\Http\Controllers\SchoolController`.
 

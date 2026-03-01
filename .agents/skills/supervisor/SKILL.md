@@ -1,4 +1,10 @@
-# agents/supervisor.md
+---
+name: supervisor
+description: Internlink supervisor module reference. Use when changing supervisor CRUD, self-access limits, department validation, or role-based permissions.
+---
+
+# Supervisor Skill Reference
+
 
 Supervisors are counsellors/teachers who oversee internships. Account data resides in `core.users`, profile data in `app.supervisors`. Controller: `App\Http\Controllers\SupervisorController`.
 

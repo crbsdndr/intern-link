@@ -1,4 +1,10 @@
-# agents/monitoring.md
+---
+name: monitoring
+description: Internlink monitoring log reference. Use when changing monitoring CRUD, cloning behavior, filters, validation, and role restrictions.
+---
+
+# Monitoring Skill Reference
+
 
 Monitoring logs capture internship progress notes. Controller: `App\Http\Controllers\MonitoringLogController`, using the views `v_monitoring_log_summary` and `v_monitoring_log_detail`.
 

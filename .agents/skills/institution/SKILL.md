@@ -1,4 +1,10 @@
-# agents/institution.md
+---
+name: institution
+description: Internlink institution module reference. Use when changing institution CRUD, contacts, quotas, period handling, validation, and role-based access.
+---
+
+# Institution Skill Reference
+
 
 Institutions represent partner companies plus their contact and quota metadata. The module spans three tables: `app.institutions`, `app.institution_contacts`, and `app.institution_quotas`. Controller: `App\Http\Controllers\InstitutionController`.
 
